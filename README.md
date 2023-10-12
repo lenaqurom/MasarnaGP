@@ -1,6 +1,26 @@
-# masarna
+# Masarna
 
-A new Flutter project.
+Collaborative Travel Planning Platform.
+
+Welcome to my awesome project! This README provides information about the project.
+
+![Project Logo](images/logoName.png)
+
+Welcome Page:
+
+![Image Alt Text](images/welcome.png)
+
+Login Page:
+
+![Image Alt Text](images/login.png)
+
+Sign Up Page:
+
+![Image Alt Text](images/signup.png)
+
+Rsest Password:
+
+![Image Alt Text](images/forgot.png)
 
 ## Getting Started
 
