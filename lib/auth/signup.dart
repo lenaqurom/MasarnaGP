@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import 'api/api_service.dart'; // Import the API service
+import '../api/loginandsignup.dart'; // Import the API service
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -19,7 +19,7 @@ class _SignupState extends State<Signup> {
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.118.1:3000/api');
+  final apiService = ApiService('http://192.168.1.17:3000/api');
 
   @override
   void dispose() {
