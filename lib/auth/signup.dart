@@ -37,7 +37,7 @@ Future<void> signUp() async {
   if (_formKey.currentState!.validate()) {
     try {
       final response = await post(
-        Uri.parse('http://192.168.118.1:3000/api/signup'), // Replace with your backend URL
+        Uri.parse('http://192.168.1.17:3000/api/signup'), // Replace with your backend URL
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

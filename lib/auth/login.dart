@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import '../api/loginandsignup.dart'; // Import the API service
+//import 'package:http/http.dart' as http;
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -10,6 +15,66 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   bool currentPageIsLogin = true;
   bool _isPasswordVisible = false;
+  final TextEditingController _usernameOrEmailController =
+      TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final apiService = ApiService('http://192.168.1.17:3000/api');
+
+  @override
+  void dispose() {
+    _usernameOrEmailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> logIn() async {
+    final email = _usernameOrEmailController.text;
+    //final username = _usernameController.text;
+    final password = _passwordController.text;
+
+    try {
+      final response = await post(
+        Uri.parse(
+            'http://192.168.1.17:3000/api/login'), // Replace with your backend URL
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode({
+          //if (email.isNotEmpty)
+          'email': email,
+          //if (email.isEmpty)
+          //'username': _usernameOrEmailController.text,
+          'password': password,
+        }),
+      );
+      print("Response status code: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        // Successful registration
+        // You can navigate to a different screen or show a success message
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Login successful'),
+        ));
+      } else if (response.statusCode == 401) {
+        // Registration failed due to validation errors
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Login failed: Incorrect data'),
+        ));
+      } else {
+        // Registration failed for other reasons
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Login failed. Please try again later.'),
+        ));
+      }
+    } catch (error) {
+      // Handle API request error
+      // Show an error message or perform error handling
+      print("Error: $error");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('An error occurred. Please try again later.'),
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +96,7 @@ class _LoginState extends State<Login> {
         toolbarOpacity: 1,
         actions: [],
       ),
-      body: SingleChildScrollView( 
+      body: SingleChildScrollView(
         child: Stack(
           children: [
             // Background Image
@@ -72,8 +137,8 @@ class _LoginState extends State<Login> {
                                   "Login",
                                   style: TextStyle(
                                     color: currentPageIsLogin
-                                        ? Color.fromARGB(255, 184, 13, 152) 
-                                        : Color.fromARGB(255, 39, 26, 99), 
+                                        ? Color.fromARGB(255, 184, 13, 152)
+                                        : Color.fromARGB(255, 39, 26, 99),
                                     fontSize: 25,
                                   ),
                                 ),
@@ -93,7 +158,7 @@ class _LoginState extends State<Login> {
                                   "Sign Up",
                                   style: TextStyle(
                                     color: currentPageIsLogin
-                                        ? Color.fromARGB(255, 39, 26, 99) 
+                                        ? Color.fromARGB(255, 39, 26, 99)
                                         : Color.fromARGB(255, 184, 13, 152),
                                     fontSize: 25,
                                   ),
@@ -113,7 +178,7 @@ class _LoginState extends State<Login> {
                   height: 344,
                   decoration: BoxDecoration(
                     color: Color.fromARGB(213, 226, 224, 243),
-                    borderRadius: BorderRadius.only( 
+                    borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(40),
                       topRight: Radius.circular(40),
                     ),
@@ -128,13 +193,15 @@ class _LoginState extends State<Login> {
                         Container(
                           height: 50,
                           child: TextFormField(
+                            controller: _usernameOrEmailController,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
                               filled: true,
                               fillColor: Color.fromARGB(128, 255, 255, 255),
                               labelText: 'Username or Email',
                               labelStyle: TextStyle(
-                                color: Color.fromARGB(255, 39, 26, 99), 
+                                color: Color.fromARGB(255, 39, 26, 99),
                                 fontSize: 16,
                               ),
                               prefixIcon: Icon(
@@ -155,7 +222,7 @@ class _LoginState extends State<Login> {
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 39, 26, 99), 
+                                  color: Color.fromARGB(255, 39, 26, 99),
                                   width: 2,
                                 ),
                                 borderRadius: BorderRadius.circular(40),
@@ -165,16 +232,18 @@ class _LoginState extends State<Login> {
                         ),
                         SizedBox(height: 25),
                         Container(
-                          height: 50, 
+                          height: 50,
                           child: TextFormField(
+                            controller: _passwordController,
                             obscureText: !_isPasswordVisible,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
                               filled: true,
                               fillColor: Color.fromARGB(128, 255, 255, 255),
                               labelText: 'Password',
                               labelStyle: TextStyle(
-                                color: Color.fromARGB(255, 39, 26, 99), 
+                                color: Color.fromARGB(255, 39, 26, 99),
                                 fontSize: 16,
                               ),
                               prefixIcon: Icon(
@@ -183,7 +252,9 @@ class _LoginState extends State<Login> {
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                  _isPasswordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   color: Color.fromARGB(255, 39, 26, 99),
                                 ),
                                 onPressed: () {
@@ -236,10 +307,11 @@ class _LoginState extends State<Login> {
                           height: 20,
                         ),
                         Container(
-                          height: 50, 
+                          height: 50,
                           child: ElevatedButton(
                             onPressed: () {
-
+                              logIn();
+                              print(_passwordController);
                             },
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
