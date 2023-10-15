@@ -40,10 +40,8 @@ class _LoginState extends State<Login> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode({
-          //if (email.isNotEmpty)
-          'email': email,
-          //if (email.isEmpty)
-          //'username': _usernameOrEmailController.text,
+          if (email.isNotEmpty) 'email': email,
+          if (email.isEmpty) 'username': _usernameOrEmailController.text,
           'password': password,
         }),
       );
