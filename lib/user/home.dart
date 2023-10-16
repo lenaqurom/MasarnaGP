@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:dropdown_search/dropdown_search.dart';
+import 'package:masarna/trip/planning.dart';
 
 void main() {
   runApp(Home());
@@ -31,53 +31,45 @@ class _InstagramBottomNavState extends State<InstagramBottomNav> {
     TravelTab(),
   ];
 
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white, 
-        title: Text(
-          'Masarna',
-          style: TextStyle(
-            color: Color.fromARGB(
-                255, 39, 26, 99), 
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-            fontFamily: 'DancingScript',
-          ),
-        ),
-        elevation: 0, 
-        actions: [
-          IconButton(
-            icon: Icon(
-              FontAwesomeIcons.search,
-              color: Color.fromARGB(255, 39, 26, 99), 
-            ),
-            onPressed: () {
-              showSearch(context: context, delegate: DataSearch());
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              FontAwesomeIcons.facebookMessenger,
-              color: Color.fromARGB(255, 39, 26, 99), 
-            ),
-            onPressed: () {
-
-            },
-          ),
-        ],
+appBar: AppBar(
+  backgroundColor: Colors.white,
+  title: Row(
+    children: [
+      Image.asset(
+        'images/logo.png',
+        width: 30, // Adjust the width as needed
+        height: 30, // Adjust the height as needed
       ),
+      SizedBox(width: 10), // Add some spacing between the image and title
+    ],
+  ),
+  elevation: 0,
+  actions: [
+    IconButton(
+      icon: Icon(
+        FontAwesomeIcons.search,
+        color: Color.fromARGB(255, 39, 26, 99),
+      ),
+      onPressed: () {
+        showSearch(context: context, delegate: DataSearch());
+      },
+    ),
+    IconButton(
+      icon: Icon(
+        FontAwesomeIcons.facebookMessenger,
+        color: Color.fromARGB(255, 39, 26, 99),
+      ),
+      onPressed: () {},
+    ),
+  ],
+),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: onTabTapped,
         fixedColor:
             Color.fromARGB(255, 39, 26, 99), 
         items: [
@@ -92,6 +84,7 @@ class _InstagramBottomNavState extends State<InstagramBottomNav> {
             icon: Icon(
               Icons.edit_document,
               color: Color.fromARGB(255, 39, 26, 99), 
+              
             ),
             label: 'Planning',
           ),
@@ -111,6 +104,19 @@ class _InstagramBottomNavState extends State<InstagramBottomNav> {
           ),
 
         ],
+        onTap: (index) {
+          if (index == 1) {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Planning()));
+          }else if(index==0){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => Home()));
+          } 
+          else {
+            setState(() {
+              _currentIndex = index;
+            });
+          }
+        },
+
       ),
     );
   }
@@ -147,7 +153,7 @@ class TravelTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Text('Travel Page'),
+      child: Text('Travel Page'), 
     );
   }
 }
