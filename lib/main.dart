@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:masarna/trip/tripplan.dart';
 import 'package:masarna/welcome.dart';
 import 'package:masarna/auth/login.dart';
 import 'package:masarna/auth/signup.dart';
 import 'package:masarna/auth/forgot.dart';
 import 'package:masarna/user/home.dart';
-import 'package:masarna/trip/tripplan.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:masarna/trip/planning.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:jiffy/jiffy.dart';
 
@@ -42,7 +42,8 @@ class MyApp extends StatelessWidget {
         "signup": (context) => Signup(),
         "forgot": (context) => ForgotPassword(),
         "home": (context) => Home(),
-        "tripplan": (context)=> TripPlan(),
+        "planning": (context) => Planning(),
+        "tripplan": (context) => TripPlan(),
       },
     );
   }
