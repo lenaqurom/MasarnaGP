@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const FriendsList = require('../models/friendslist');
 
 // Route for user signup
+
+
 router.post('/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -33,8 +36,14 @@ router.post('/signup', async (req, res) => {
     });
     await newUser.save();
 
+    const usersfl = new FriendsList({
+      userName: username,
+      friendName: '',
+    });
+    await usersfl.save();
+
     // Respond with a success message or user information
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
+    res.status(201).json({ message: 'User registered successfully', user: newUser, list: usersfl });
   } catch (error) {
     // Handle any errors, such as database errors
     res.status(500).json({ error: 'Server error' });
