@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/tripplan.dart';
 import 'package:masarna/welcome.dart';
 import 'package:masarna/auth/login.dart';
@@ -8,9 +9,14 @@ import 'package:masarna/user/home.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:jiffy/jiffy.dart';
-
+import 'package:provider/provider.dart';
 void main() {
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => globalState(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

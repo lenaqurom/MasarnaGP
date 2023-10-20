@@ -18,11 +18,7 @@ mongoose.connect('mongodb+srv://danalena:123@cluster0.hxhvhfi.mongodb.net/', {
 
 });
 
-app.use(session({
-  secret: '123', 
-  resave: false,
-  saveUninitialized: false,
-}));
+
 
 // Routes
 app.use('/api', signupRoutes);
