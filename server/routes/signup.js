@@ -24,7 +24,13 @@ router.post('/signup', async (req, res) => {
     }
 
     // Create a new user in the database
-    const newUser = new User({ username, email, password });
+    const newUser = new User({
+      username,
+      email,
+      password,
+      name: '', // Set to an empty string by default
+      profilepicture: '', // Set to an empty string by default
+    });
     await newUser.save();
 
     // Respond with a success message or user information

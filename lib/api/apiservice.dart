@@ -20,4 +20,20 @@ class ApiService {
     );
     return response;
   }
+
+  Future<http.Response> getProfile(Map<String, dynamic> data) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/profilepage'),
+      
+    );
+    return response;
+  }
+
+  Future<http.Response> updateProfile(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/profilepage'),
+      body: data,
+    );
+    return response;
+  }
 }

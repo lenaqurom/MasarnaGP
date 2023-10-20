@@ -27,8 +27,13 @@ router.post('/login', async (req, res) => {
 
     // Respond with a success message or user information
     res.status(200).json({ message: 'Login successful', user });
+    if (!username) {
+      req.session.user = { token: email };
+    } else {
+      req.session.user = { token: password };
+    }
   } catch (error) {
-    // Handle any errors, such as database errors
+    // database errors
     res.status(500).json({ error: 'Server error' });
   }
 });

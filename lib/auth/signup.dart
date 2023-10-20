@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import '../api/loginandsignup.dart'; // Import the API service
+import '../api/apiservice.dart'; // Import the API service
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
