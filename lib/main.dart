@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => globalState(),
+      create: (context) => GlobalState(),
       child: MyApp(),
     ),
   );
