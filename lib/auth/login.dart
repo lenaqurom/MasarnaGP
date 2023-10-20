@@ -1,5 +1,6 @@
 import 'dart:convert';
-
+import 'package:masarna/globalstate.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../api/apiservice.dart'; // Import the API service
@@ -19,7 +20,7 @@ class _LoginState extends State<Login> {
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final apiService = ApiService('http://192.168.1.17:3000/api');
-
+  
   @override
   void dispose() {
     _usernameOrEmailController.dispose();
@@ -27,11 +28,11 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 
-  Future<void> logIn() async {
+  Future<void> logIn(BuildContext context) async {
     final email = _usernameOrEmailController.text;
     //final username = _usernameController.text;
     final password = _passwordController.text;
-
+    final globalState = Provider.of<GlobalState>(context, listen: false);
     try {
       final response = await post(
         Uri.parse(
@@ -48,6 +49,12 @@ class _LoginState extends State<Login> {
       print("Response status code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
+        if (email.isNotEmpty) {
+          globalState.addToState(email: email);
+        }
+        if (email.isEmpty) {
+          globalState.addToState(username: _usernameOrEmailController.text);
+        }
         // Successful registration
         // You can navigate to a different screen or show a success message
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -308,7 +315,7 @@ class _LoginState extends State<Login> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () {
-                              logIn();
+                              logIn(context);
                               print(_passwordController);
                             },
                             style: ElevatedButton.styleFrom(

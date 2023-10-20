@@ -12,11 +12,10 @@ router.get('/profilepage', async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-
-    // Return with profile data
-    res.render('profile', { user });
+    res.status(200).json({ user });
   } catch (error) {
     // db error
+    console.error(error); // Log the error to the console for debugging
     res.status(500).json({ error: 'Server error' });
   }
 });
