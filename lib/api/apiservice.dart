@@ -36,4 +36,12 @@ class ApiService {
     );
     return response;
   }
+  Future<http.Response> getFriendsList(Map<String, dynamic> data) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/friendslist'),
+      
+    );
+    return response;
+  }
+
 }
