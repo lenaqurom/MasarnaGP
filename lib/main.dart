@@ -10,6 +10,8 @@ import 'package:masarna/trip/planning.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
+import 'package:masarna/user/singlechat.dart';
+import 'package:masarna/user/chatlist.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -25,7 +27,7 @@ class MyApp extends StatelessWidget {
     // TODO: implement build
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Welcome(),
+      home: ChatList(),
       theme: ThemeData(
           primaryColor: Colors.red,
           hintColor: Color.fromARGB(255, 255, 255, 255), // Background color
@@ -50,6 +52,8 @@ class MyApp extends StatelessWidget {
         "home": (context) => Home(),
         "planning": (context) => Planning(),
         "tripplan": (context) => TripPlan(),
+        "chatlist": (context) => ChatList(),
+        "singlechat": (context) => SingleChat(),
       },
     );
   }
