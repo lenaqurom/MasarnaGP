@@ -42,10 +42,17 @@ dependencies:
   animated_text_kit: ^4.2.1  
   animated_button: ^0.2.0
   cupertino_icons: ^1.0.2
+
+  firebase_core: ^2.22.0
+  cloud_firestore: ^4.13.1
+  firebase_storage: ^11.5.1
+  firebase_messaging: ^14.7.4
+  firebase_auth: ^4.14.0
   rive: ^0.11.4
   flutter_svg: ^1.1.6
   flutter_vector_icons: ^2.0.0
   simple_animations: ^4.0.1
+
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"
