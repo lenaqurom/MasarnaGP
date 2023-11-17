@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "182043396230",
+    "project_id": "again-e36a0",
+    "storage_bucket": "again-e36a0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:182043396230:android:1e4ea677f3b31fa92ae907",
+        "android_client_info": {
+          "package_name": "com.example.masarna"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyARSWvnj5TuLpg5692QTBU04OQdqT3n6W8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,7 @@
 import 'dart:convert';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../api/apiservice.dart'; // Import the API service
@@ -20,7 +21,11 @@ class _SignupState extends State<Signup> {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
   final apiService = ApiService('http://192.168.1.17:3000/api');
-
+  @override
+  void initState() {
+    super.initState();
+    Firebase.initializeApp();
+  }
   @override
   void dispose() {
     _emailController.dispose();
@@ -74,6 +79,52 @@ Future<void> signUp() async {
     }
   }
 }
+Future<void> registerUser(
+      String username, String email, String password) async {
+    try {
+      // Check if the username contains the word 'admin'
+      if (username.toLowerCase().contains('admin')) {
+        print('Username cannot contain the word "admin".');
+        // Handle accordingly, e.g., show an error message to the user.
+        return;
+      }
+
+      // Check if the username is already in use
+      final existingUser = await FirebaseAuth.instance
+          .fetchSignInMethodsForEmail(email)
+          .then((providers) => providers.isNotEmpty);
+
+      if (existingUser) {
+        print('Email is already in use.');
+        // Handle accordingly, e.g., show an error message to the user.
+        return;
+      }
+
+      // Check if the email is already in use
+      final existingUsername = await FirebaseAuth.instance
+          .fetchSignInMethodsForEmail(email)
+          .then((providers) => providers.isNotEmpty);
+
+      if (existingUsername) {
+        print('Username is already in use.');
+        // Handle accordingly, e.g., show an error message to the user.
+        return;
+      }
+
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // After creating the user, update their display name with the username
+      await FirebaseAuth.instance.currentUser
+          ?.updateProfile(displayName: username);
+    } catch (e) {
+      print('Error during registration: $e');
+      // Handle registration failure, e.g., show an error message to the user.
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -362,7 +413,14 @@ Future<void> signUp() async {
       Container(
         height: 50,
         child: ElevatedButton(
-          onPressed: signUp, // Call the signUp method when the button is pressed
+          onPressed: () {
+                              registerUser(
+                                _usernameController.text.trim(),
+                                _emailController.text.trim(),
+                                _passwordController.text,
+                              );
+                              signUp(); 
+                            },  // Call the signUp method when the button is pressed
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),

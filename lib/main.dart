@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/tripplan.dart';
@@ -12,7 +14,12 @@ import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
 import 'package:masarna/user/singlechat.dart';
 import 'package:masarna/user/chatlist.dart';
-void main() {
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     ChangeNotifierProvider(
       create: (context) => GlobalState(),
@@ -27,7 +34,7 @@ class MyApp extends StatelessWidget {
     // TODO: implement build
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: ChatList(),
+      home: Welcome(),
       theme: ThemeData(
           primaryColor: Colors.red,
           hintColor: Color.fromARGB(255, 255, 255, 255), // Background color
