@@ -5,10 +5,9 @@ import 'package:masarna/navbar/animatedbar.dart';
 import 'package:masarna/navbar/rive_asset.dart';
 import 'package:masarna/navbar/rive_utils.dart';
 import 'package:masarna/trip/planning.dart';
+import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/makeprofile.dart';
 import 'package:rive/rive.dart';
-
-
 
 class Home extends StatefulWidget {
   @override
@@ -66,8 +65,10 @@ class _HomeState extends State<Home> {
               FontAwesomeIcons.facebookMessenger,
               color: Colors.white,
             ),
-            onPressed: () {},
+            onPressed: () {Navigator.of(context)
+            .pushNamed('/chatlist');},
           ),
+          
         ],
       ),
       bottomNavigationBar: SafeArea(
@@ -145,7 +146,6 @@ class _HomeState extends State<Home> {
     );
   }
 }
-
 
 class DataSearch extends SearchDelegate<String> {
   List<String> names = [
@@ -230,12 +230,10 @@ class DataSearch extends SearchDelegate<String> {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor:
-            Color.fromARGB(255, 255, 255, 255),
+        fillColor: Color.fromARGB(255, 255, 255, 255),
         hintStyle: TextStyle(
           color: Color.fromARGB(255, 0, 0, 0),
         ),
-        
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
             color: Color.fromARGB(255, 39, 26, 99).withOpacity(0.5),
@@ -248,8 +246,7 @@ class DataSearch extends SearchDelegate<String> {
           ),
           borderRadius: BorderRadius.circular(24.0),
         ),
-        contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.0),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
       ),
     );
   }

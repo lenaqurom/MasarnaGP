@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -79,51 +80,47 @@ Future<void> signUp() async {
     }
   }
 }
-Future<void> registerUser(
-      String username, String email, String password) async {
-    try {
-      // Check if the username contains the word 'admin'
-      if (username.toLowerCase().contains('admin')) {
-        print('Username cannot contain the word "admin".');
-        // Handle accordingly, e.g., show an error message to the user.
-        return;
-      }
-
-      // Check if the username is already in use
-      final existingUser = await FirebaseAuth.instance
-          .fetchSignInMethodsForEmail(email)
-          .then((providers) => providers.isNotEmpty);
-
-      if (existingUser) {
-        print('Email is already in use.');
-        // Handle accordingly, e.g., show an error message to the user.
-        return;
-      }
-
-      // Check if the email is already in use
-      final existingUsername = await FirebaseAuth.instance
-          .fetchSignInMethodsForEmail(email)
-          .then((providers) => providers.isNotEmpty);
-
-      if (existingUsername) {
-        print('Username is already in use.');
-        // Handle accordingly, e.g., show an error message to the user.
-        return;
-      }
-
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      // After creating the user, update their display name with the username
-      await FirebaseAuth.instance.currentUser
-          ?.updateProfile(displayName: username);
-    } catch (e) {
-      print('Error during registration: $e');
-      // Handle registration failure, e.g., show an error message to the user.
+Future<void> registerUser(String username, String email, String password) async {
+  try {
+    // Check if the username contains the word 'admin'
+    if (username.toLowerCase().contains('admin')) {
+      print('Username cannot contain the word "admin".');
+      // Handle accordingly, e.g., show an error message to the user.
+      return;
     }
+
+    // Check if the email is already in use
+    final existingUser = await FirebaseAuth.instance
+        .fetchSignInMethodsForEmail(email)
+        .then((providers) => providers.isNotEmpty);
+
+    if (existingUser) {
+      print('Email is already in use.');
+      // Handle accordingly, e.g., show an error message to the user.
+      return;
+    }
+
+    // Create user in Firebase Authentication
+    final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    // After creating the user, update their display name with the username
+    await userCredential.user?.updateProfile(displayName: username);
+
+    // Create user document in Firestore
+    await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
+      'userId': userCredential.user?.uid,
+      'username': username,
+      'email': email,
+    });
+   // Navigator.of(context).pushNamed("/login");
+  } catch (e) {
+    print('Error during registration: $e');
+    // Handle registration failure, e.g., show an error message to the user.
   }
+}
 
 
   @override
