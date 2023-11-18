@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/user/chatlist.dart';
+import 'package:masarna/user/home.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../api/apiservice.dart'; // Import the API service
 //import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -20,7 +25,13 @@ class _LoginState extends State<Login> {
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final apiService = ApiService('http://192.168.1.17:3000/api');
-  
+
+  @override
+  void initState() {
+    super.initState();
+    Firebase.initializeApp();
+  }
+
   @override
   void dispose() {
     _usernameOrEmailController.dispose();
@@ -78,6 +89,65 @@ class _LoginState extends State<Login> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
       ));
+    }
+  }
+
+  Future<void> loginUser() async {
+    String usernameOrEmail = _usernameOrEmailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    try {
+      // Check if the provided input is an email or username
+      bool isEmail = usernameOrEmail.contains('@');
+      AuthCredential credential;
+
+      if (isEmail) {
+        // Login with email
+        credential = EmailAuthProvider.credential(
+            email: usernameOrEmail, password: password);
+      } else {
+        // Login with username
+        String email = await getUsernameEmail(usernameOrEmail);
+        credential =
+            EmailAuthProvider.credential(email: email, password: password);
+      }
+
+      // Sign in with the credential
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      print("logged in");
+      // Navigate to the next screen after successful login
+      // Replace the 'HomeScreen' with the screen you want to navigate to after login
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatList()));
+    } catch (e) {
+      // Handle login errors (e.g., wrong password, user not found)
+      print("Error during login: $e");
+      // Display an error message to the user
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+            "Login failed. Please check your username/email and password."),
+      ));
+    }
+  }
+
+  Future<String> getUsernameEmail(String username) async {
+    try {
+      // Assuming you have a Firestore collection named 'users'
+      CollectionReference users =
+          FirebaseFirestore.instance.collection('users');
+
+      // Query for the document with the given username
+      QuerySnapshot querySnapshot =
+          await users.where('username', isEqualTo: username).get();
+
+      // If a user with the provided username exists, return their email
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.get('email').toString();
+      } else {
+        throw Exception("User not found with the provided username");
+      }
+    } catch (e) {
+      print("Error during getUsernameEmail: $e");
+      throw Exception("Error fetching user data");
     }
   }
 
@@ -317,6 +387,7 @@ class _LoginState extends State<Login> {
                             onPressed: () {
                               logIn(context);
                               print(_passwordController);
+                              loginUser();
                             },
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(

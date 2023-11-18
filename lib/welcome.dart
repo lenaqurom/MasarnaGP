@@ -47,7 +47,7 @@ class Welcome extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context)
-                          .pushNamed("login"); 
+                          .pushNamed("/login"); 
                     },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -89,7 +89,7 @@ class Welcome extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context)
-                          .pushNamed("signup"); 
+                          .pushNamed("/signup"); 
                     },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(

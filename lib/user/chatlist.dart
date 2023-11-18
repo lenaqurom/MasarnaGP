@@ -1,4 +1,5 @@
-import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:masarna/user/singlechat.dart';
 
@@ -11,6 +12,14 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> {
+  late User currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    currentUser = FirebaseAuth.instance.currentUser!;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,13 +46,17 @@ class _ChatListState extends State<ChatList> {
             style: TextStyle(
                 fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
           ),
-          //  Row(
-          //   children: [
           GestureDetector(
-            onTap: () {},
+            onTap: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushReplacementNamed('/login');
+              print(
+                  'logged out'); // Replace '/login' with your login page route
+            },
             child: Container(
-              margin:EdgeInsets.only(left:100.0, bottom:7.0),
-              padding: EdgeInsets.only(left:14, right: 14, top:14, bottom:14),
+              margin: EdgeInsets.only(left: 100.0, bottom: 7.0),
+              padding:
+                  EdgeInsets.only(left: 14, right: 14, top: 14, bottom: 14),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
                 color: Colors.black12,
@@ -58,30 +71,9 @@ class _ChatListState extends State<ChatList> {
           SizedBox(
             width: 15,
           ),
-          // Expanded(
-          //  child: Container(
-          //   height: 100,
-          //     child: ListView.builder(
-          //       physics: BouncingScrollPhysics(),
-          //       scrollDirection: Axis.horizontal,
-          //      shrinkWrap: true,
-
-          //       itemCount: 8,
-          //       itemBuilder: (context, index) {
-          //         return Avatar(
-          //           margin: EdgeInsets.only(right: 15),
-          //           image: 'images/logo4.png',
-          //         );
-          //       },
-
-          //     ),
-          //  ),
-          //),
         ],
       ),
-      // ],
     );
-    //);
   }
 
   Widget _body() {
@@ -94,36 +86,65 @@ class _ChatListState extends State<ChatList> {
               topLeft: Radius.circular(45), topRight: Radius.circular(45)),
           color: Colors.white,
         ),
-        child: ListView(
-          padding: EdgeInsets.only(top: 35),
-          physics: BouncingScrollPhysics(),
-          children: [
-            _chatCard(
-              avatar: 'images/logo4.png',
-              name: 'Dana',
-              chat: 'hello',
-              time: '08.10',
-            ),
-            _chatCard(
-              avatar: 'images/logo4.png',
-              name: 'Lina',
-              chat: 'hi',
-              time: '03.19',
-            ),
-          ],
+        child: FutureBuilder(
+          future: _getChatUsers(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError) {
+              return Center(child: Text("Error: ${snapshot.error}"));
+            }
+
+            List<QueryDocumentSnapshot> users =
+                snapshot.data as List<QueryDocumentSnapshot>;
+            return ListView(
+              padding: EdgeInsets.only(top: 35),
+              physics: BouncingScrollPhysics(),
+              children: users.map((user) {
+                return _chatCard(
+                  name: user['username'] ?? '',
+                  userId: user.id,
+                  // Add other fields based on your Firestore structure
+                );
+              }).toList(),
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _chatCard({String avatar = '', name = '', chat = '', time = '00.00'}) {
+  Future<List<QueryDocumentSnapshot>> _getChatUsers() async {
+    try {
+      // Assuming you have a Firestore collection named 'users'
+      QuerySnapshot querySnapshot =
+          await FirebaseFirestore.instance.collection('users').get();
+
+      // You can filter the users based on your logic
+      // For now, let's assume you want all users except the current user
+      List<QueryDocumentSnapshot> users = querySnapshot.docs
+          .where((user) => user.id != currentUser.uid)
+          .toList();
+
+      return users;
+    } catch (e) {
+      print("Error fetching chat users: $e");
+      throw Exception("Error fetching chat users");
+    }
+  }
+
+  Widget _chatCard(
+      {String name = '',
+      
+      required String userId}) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => SingleChat(),
-          ),
-        );
+        // Handle the tap event
+        // You can navigate to the chat screen or do other actions
+        Navigator.of(context)
+            .pushNamed('/singlechat', arguments: {'userId': userId});
       },
       child: Card(
         margin: EdgeInsets.symmetric(vertical: 20),
@@ -131,9 +152,10 @@ class _ChatListState extends State<ChatList> {
         child: Row(
           children: [
             Avatar(
+              imagePath: 'images/logo4.png',
               margin: EdgeInsets.only(right: 20),
               size: 60,
-              image: avatar,
+              // Add user image URL or other relevant information
             ),
             Expanded(
               child: Column(
@@ -147,24 +169,13 @@ class _ChatListState extends State<ChatList> {
                         style: TextStyle(
                             fontSize: 17, fontWeight: FontWeight.bold),
                       ),
-                      Text(
-                        '$time',
-                        style: TextStyle(
-                            color: Colors.grey, fontWeight: FontWeight.bold),
-                      ),
+                      
                     ],
                   ),
                   SizedBox(
                     height: 10,
                   ),
-                  Text(
-                    '$chat',
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  
                 ],
               ),
             )
@@ -177,9 +188,11 @@ class _ChatListState extends State<ChatList> {
 
 class Avatar extends StatelessWidget {
   final double size;
-  final image;
+  final String? imagePath;
   final EdgeInsets margin;
-  Avatar({this.image, this.size = 50, this.margin = const EdgeInsets.all(0)});
+
+  Avatar({this.imagePath, this.size = 50, this.margin = const EdgeInsets.all(0)});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -189,9 +202,12 @@ class Avatar extends StatelessWidget {
         height: size,
         decoration: new BoxDecoration(
           shape: BoxShape.circle,
-          image: new DecorationImage(
-            image: AssetImage(image),
-          ),
+          image: imagePath != null
+              ? new DecorationImage(
+                  image: AssetImage(imagePath!),
+                  fit: BoxFit.cover,
+                )
+              : null,
         ),
       ),
     );

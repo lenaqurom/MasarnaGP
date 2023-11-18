@@ -5,7 +5,6 @@ import 'package:masarna/navbar/rive_utils.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/home.dart';
 import 'package:masarna/user/makeprofile.dart';
-import 'package:masarna/user/profile.dart';
 import 'package:rive/rive.dart';
 
 class BottomNavBar extends StatefulWidget {
