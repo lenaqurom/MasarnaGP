@@ -1,7 +1,12 @@
 const express = require('express');
-const app = express();
+
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const path = require('path');
+const app = express();
+
+// Serve the 'uploads' directory as a static resource
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const loginRoutes = require('./routes/login');
 const signupRoutes = require('./routes/signup');
