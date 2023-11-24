@@ -8,9 +8,10 @@ class GlobalState extends ChangeNotifier {
   String get username => _username;
   int get id => _id;
   String get email => _email;
-  void addToState({String? username, String? email}) {
+  void addToState({String? username, String? email, int?id}) {
     _username = username ?? '';
     _email = email ?? '';
+    _id = id ?? 0;
     notifyListeners();
   }
 }

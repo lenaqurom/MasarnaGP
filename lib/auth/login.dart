@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/home.dart';
 import 'package:masarna/user/profile_page.dart';
@@ -74,16 +75,20 @@ class _LoginState extends State<Login> {
       print("Response status code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
+        Map<String, dynamic> userData = json.decode(response.body)["user"];
+        
         if (email.isNotEmpty) {
           globalState.addToState(email: email);
+          globalState.addToState(id: userData["_id"]);
         }
         if (email.isEmpty) {
           globalState.addToState(username: username);
+          globalState.addToState(id: userData["_id"]);
         }
         print(
             "Request body: email=$email, username=$username, password=$password");
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+            context, MaterialPageRoute(builder: (context) => Planning()));
 
         // Successful registration
         // You can navigate to a different screen or show a success message

@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:masarna/globalstate.dart';
-import 'package:masarna/trip/tripplan.dart';
+//import 'package:masarna/trip/tripplan.dart';
 import 'package:masarna/welcome.dart';
 import 'package:masarna/auth/login.dart';
 import 'package:masarna/auth/signup.dart';
@@ -16,6 +16,8 @@ import 'package:masarna/user/singlechat.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/profile_page.dart';
 import 'package:masarna/user/edit_profile.dart';
+import 'package:masarna/trip/homesection.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -35,7 +37,7 @@ class MyApp extends StatelessWidget {
     // TODO: implement build
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-     // home: Welcome(),
+      // home: Welcome(),
       theme: ThemeData(
           primaryColor: Colors.red,
           hintColor: Color.fromARGB(255, 255, 255, 255), // Background color
@@ -53,9 +55,8 @@ class MyApp extends StatelessWidget {
             //color: Colors.white
           ))),
 
-        home: Welcome(),
+      home: Login(),
       onGenerateRoute: (settings) {
-        
         if (settings.name == '/singlechat') {
           // Extract the userId from the arguments
           final Map<String, dynamic>? arguments =
@@ -75,9 +76,10 @@ class MyApp extends StatelessWidget {
             );
           }
         }
-        
+
         return MaterialPageRoute(
-          builder: (context) => Welcome(), // Placeholder, replace with your actual routes
+          builder: (context) =>
+              Welcome(), // Placeholder, replace with your actual routes
         );
       },
       routes: {
@@ -87,13 +89,13 @@ class MyApp extends StatelessWidget {
         "/forgot": (context) => ForgotPassword(),
         "/home": (context) => Home(),
         "/planning": (context) => Planning(),
-        "/tripplan": (context) => TripPlan(),
+        // "/tripplan": (context) => TripPlan(),
         "/chatlist": (context) => ChatList(),
         "/profilescreen": (context) => ProfileScreen(),
         "/editprofile": (context) => EditProfile(),
-       // "/singlechat": (context) => SingleChat(),
+        // "/singlechat": (context) => SingleChat(),
+        "/homesections": (context) => HomeSectionsPage(),
       },
     );
   }
-} 
-
+}

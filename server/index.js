@@ -12,6 +12,7 @@ const loginRoutes = require('./routes/login');
 const signupRoutes = require('./routes/signup');
 const profilepageRoutes = require('./routes/profilepage');
 const friendslistRoutes = require('./routes/friendslist');
+const planRoutes = require('./routes/plan');
 app.use(bodyParser.json());
 
 // MongoDB Atlas connection
@@ -30,6 +31,7 @@ app.use('/api', signupRoutes);
 app.use('/api', loginRoutes);
 app.use('/api', profilepageRoutes);
 app.use('/api', friendslistRoutes);
+app.use('/api', planRoutes);
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

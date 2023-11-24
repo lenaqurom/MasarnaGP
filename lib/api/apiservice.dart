@@ -44,4 +44,36 @@ class ApiService {
     return response;
   }
 
+  Future<http.Response> addPlan(Map<String, dynamic> data) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/plan'),
+      body: data,
+    );
+    return response;
+  }
+
+   Future<http.Response> editPlan(Map<String, dynamic> data) async {
+    final response = await http.put(
+      Uri.parse('$baseUrl/plan/:planid'),
+      body: data,
+    );
+    return response;
+  }
+
+  Future<http.Response> deletePlan(Map<String, dynamic> data) async {
+    final response = await http.delete(
+      Uri.parse('$baseUrl/plan/:planid'),
+     
+    );
+    return response;
+  }
+
+  Future<http.Response> viewPlans(Map<String, dynamic> data) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/plans/:userid'),
+    );
+    return response;
+  }
+
+
 }
