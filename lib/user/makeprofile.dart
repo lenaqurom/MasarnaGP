@@ -513,7 +513,7 @@ class _AdvertisingScreenState extends State<AdvertisingScreen> {
                 SizedBox(height: 60),
                 AnimatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, 'profilepage');
+                    Navigator.pushNamed(context, '/profilescreen');
                   },
                 ),
                 SizedBox(height: 50,),

@@ -21,9 +21,9 @@ class ApiService {
     return response;
   }
 
-  Future<http.Response> getProfile(Map<String, dynamic> data) async {
+  Future<http.Response> getProfile(String email, String username) async {
     final response = await http.get(
-      Uri.parse('$baseUrl/profilepage'),
+      Uri.parse('$baseUrl/profilepage?email=$email&username=$username'),
       
     );
     return response;

@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); 
+const path = require('path');
+
 
 // Route for the user's profile page
 router.get('/profilepage', async (req, res) => {
@@ -21,8 +25,8 @@ router.get('/profilepage', async (req, res) => {
 });
 
 // Route to update user's profile information
-router.post('/profilepage', async (req, res) => {
-  const { email, username, name, profilepicture } = req.body;
+router.post('/profilepage', upload.single('profilepicture'), async (req, res) => {
+  const { email, username, name } = req.body;
 
   try {
     // Update user information in the database
@@ -33,12 +37,17 @@ router.post('/profilepage', async (req, res) => {
     }
 
     user.name = name;
-    user.profilepicture = profilepicture;
+
+    if (req.file) {
+      const imagePath = req.file.path.replace(/\\/g, '/');
+  user.profilepicture = path.join('uploads', path.basename(imagePath));
+    }
 
     await user.save();
 
     res.status(200).json({ message: 'Profile updated successfully' });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });

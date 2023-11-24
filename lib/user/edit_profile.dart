@@ -1,5 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
+import 'package:masarna/globalstate.dart';
+import 'package:provider/provider.dart';
+import '../api/apiservice.dart'; // Import the API service
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -18,6 +22,53 @@ class EditProfile extends StatefulWidget {
 class _EditProfileState extends State<EditProfile> {
   File? selectedImage;
   RiveAsset selectedBottomNav = bottomNavs.elementAt(3);
+  final _name = TextEditingController();
+  final apiService = ApiService('http://192.168.1.15:3000/api');
+
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> updateProfile() async {
+    
+    final name = _name.text;
+    String username = Provider.of<GlobalState>(context, listen: false).username;
+    String email = Provider.of<GlobalState>(context, listen: false).email;
+
+    try {
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://192.168.1.15:3000/api/profilepage'),
+      );
+
+      request.fields['name'] = name;
+      request.fields['email'] = email;
+      request.fields['username'] = username;
+
+      if (selectedImage != null) {
+        var file = await http.MultipartFile.fromPath(
+          'profilepicture',
+          selectedImage!.path,
+        );
+        request.files.add(file);
+        
+      }
+
+      // Print the request body for debugging
+      print('Request Body: ${request.fields}');
+
+      var response = await request.send();
+
+      // Print the response for debugging
+      print('Response: ${response.statusCode}');
+      print('Response Body: ${await response.stream.bytesToString()}');
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('An error occurred. Please try again later.'),
+      ));
+    }
+  }
 
   Future _pickImageFromGallery() async {
     final pickedFile =
@@ -41,14 +92,15 @@ class _EditProfileState extends State<EditProfile> {
       btnCancelOnPress: () {},
       btnOkText: 'Go Back',
       btnOkOnPress: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => ProfileScreen()));
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => ProfileScreen()));
       },
     )..show();
   }
 
   @override
   Widget build(BuildContext context) {
+    
     double width = MediaQuery.of(context).size.width;
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -58,15 +110,15 @@ class _EditProfileState extends State<EditProfile> {
         elevation: 0,
         title: Row(
           children: [
-          IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Color.fromARGB(255, 39, 26, 99),
-          ),
-          onPressed: () {
-            showBackConfirmationDialog(context);
-          },
-        ),
+            IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios,
+                color: Color.fromARGB(255, 39, 26, 99),
+              ),
+              onPressed: () {
+                showBackConfirmationDialog(context);
+              },
+            ),
             Text(
               'Edit your Profile',
               style: TextStyle(
@@ -131,6 +183,7 @@ class _EditProfileState extends State<EditProfile> {
                                   width: 300,
                                   height: 45,
                                   child: TextField(
+                                    controller: _name,
                                     style: TextStyle(
                                         fontSize: 18, fontFamily: 'Dosis'),
                                     decoration: InputDecoration(
@@ -144,7 +197,8 @@ class _EditProfileState extends State<EditProfile> {
                                       ),
                                       focusedBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                            color: Color.fromARGB(255, 43, 16, 162),
+                                            color: Color.fromARGB(
+                                                255, 43, 16, 162),
                                             width: 2),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
@@ -180,7 +234,7 @@ class _EditProfileState extends State<EditProfile> {
                                         )
                                       : ClipOval(
                                           child: Image.asset(
-                                            "images/profile2.png",
+                                            "images/logo4.png",
                                             width: innerWidth * 0.37,
                                             height: innerWidth * 0.37,
                                             fit: BoxFit.cover,
@@ -202,7 +256,8 @@ class _EditProfileState extends State<EditProfile> {
                                         child: IconButton(
                                           icon: Icon(
                                             Icons.add_a_photo,
-                                            color: Color.fromARGB(255, 255, 255, 255),
+                                            color: Color.fromARGB(
+                                                255, 255, 255, 255),
                                             size: 20,
                                           ),
                                           onPressed: () {
@@ -225,7 +280,8 @@ class _EditProfileState extends State<EditProfile> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pushNamed("profilescreen");
+                    updateProfile();
+                    Navigator.pushReplacementNamed(context, "/profilescreen");
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -235,17 +291,17 @@ class _EditProfileState extends State<EditProfile> {
                     primary: Colors.transparent,
                   ),
                   child: Ink(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF004aad),
-                  Color(0xFFcb6ce6),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Color(0xFF004aad),
+                          Color(0xFFcb6ce6),
+                        ],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
                     child: Container(
                       alignment: Alignment.center,
                       child: Text(

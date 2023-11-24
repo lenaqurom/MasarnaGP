@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/home.dart';
+import 'package:masarna/user/profile_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -21,10 +22,11 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
   bool currentPageIsLogin = true;
   bool _isPasswordVisible = false;
+  bool yalafirebase = false;
   final TextEditingController _usernameOrEmailController =
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.1.17:3000/api');
+  final apiService = ApiService('http://192.168.1.15:3000/api');
 
   @override
   void initState() {
@@ -40,23 +42,35 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> logIn(BuildContext context) async {
-    final email = _usernameOrEmailController.text;
-    //final username = _usernameController.text;
+    final input = _usernameOrEmailController.text;
     final password = _passwordController.text;
+    String email = "";
+    String username = "";
     final globalState = Provider.of<GlobalState>(context, listen: false);
+
     try {
+      bool isEmail = input.contains('@');
+      if (isEmail) {
+        email = _usernameOrEmailController.text;
+      } else {
+        username = _usernameOrEmailController.text;
+      }
+
+      // print("Request body: email=$email, username=$username, password=$password");
+
       final response = await post(
-        Uri.parse(
-            'http://192.168.1.17:3000/api/login'), // Replace with your backend URL
+        Uri.parse('http://192.168.1.15:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode({
           if (email.isNotEmpty) 'email': email,
-          if (email.isEmpty) 'username': _usernameOrEmailController.text,
+          if (username.isNotEmpty) 'username': username,
           'password': password,
         }),
       );
+      print(
+          "=======================================================================");
       print("Response status code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
@@ -64,13 +78,19 @@ class _LoginState extends State<Login> {
           globalState.addToState(email: email);
         }
         if (email.isEmpty) {
-          globalState.addToState(username: _usernameOrEmailController.text);
+          globalState.addToState(username: username);
         }
+        print(
+            "Request body: email=$email, username=$username, password=$password");
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+
         // Successful registration
         // You can navigate to a different screen or show a success message
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login successful'),
         ));
+        yalafirebase = true;
       } else if (response.statusCode == 401) {
         // Registration failed due to validation errors
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -89,6 +109,7 @@ class _LoginState extends State<Login> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
       ));
+      print("PROBLEMMMMMMMMMMMMMMMMM");
     }
   }
 
@@ -117,7 +138,8 @@ class _LoginState extends State<Login> {
       print("logged in");
       // Navigate to the next screen after successful login
       // Replace the 'HomeScreen' with the screen you want to navigate to after login
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ChatList()));
+      // Navigator.pushReplacement(
+      //   context, MaterialPageRoute(builder: (context) => ProfileScreen()));
     } catch (e) {
       // Handle login errors (e.g., wrong password, user not found)
       print("Error during login: $e");
