@@ -325,7 +325,7 @@ Widget _buildExampleCard({
   required String location,
   required double rating,
   required VoidCallback onTap,
-  required String cardId, // Unique identifier for each card
+  required String cardId, 
 }) {
   bool isFavorite = favoritesMap[cardId] ?? false;
 
@@ -370,7 +370,6 @@ Widget _buildExampleCard({
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                         onTap: () {
-                          // Toggle favorite state
                           setState(() {
                             favoritesMap[cardId] = !isFavorite;
                           });
@@ -389,8 +388,8 @@ Widget _buildExampleCard({
                 left: 0.0,
                 child: Container(
                   padding: EdgeInsets.symmetric(
-                    horizontal: 20 * 1.5, // 30 padding
-                    vertical: 20 / 4, // 5 top and bottom
+                    horizontal: 20 * 1.5, 
+                    vertical: 20 / 4, 
                   ),
                   decoration: BoxDecoration(
                     color:  Color.fromARGB(255, 39, 26, 99),
@@ -483,8 +482,7 @@ Widget _buildExampleCard({
                       children: [
                         ElevatedButton.icon(
                           onPressed: (){
-    _showPollDialog(context); // Pass the context here
-
+                            _showPollDialog(context); 
                           },
                           icon: Icon(FlutterIcons.poll_mco),
                           label: Text('Poll'),
@@ -512,7 +510,7 @@ Widget _buildExampleCard({
   void _toggleExpanded() {
     setState(() {
       isExpanded = !isExpanded;
-      isFABVisible = !isFABVisible; // Toggle visibility based on expansion
+      isFABVisible = !isFABVisible; 
       if (isExpanded) {
         _animationController.forward();
       } else {
@@ -520,23 +518,19 @@ Widget _buildExampleCard({
       }
     });
 
-    // Delay updating the tab type until after the animation completes
     Future.delayed(
       Duration(milliseconds: isExpanded ? 300 : 0),
       () {
         if (isExpanded) {
-          // If expanded, get the tab type from the TabController
           updateTabType(_getTabType());
         }
       },
     );
 
-    // Delay updating the tab type until after the animation completes
     Future.delayed(
       Duration(milliseconds: isExpanded ? 300 : 0),
       () {
         if (isExpanded) {
-          // If expanded, get the tab type from the TabController
           updateTabType(_getTabType());
         }
       },
@@ -605,14 +599,12 @@ void _showPollDialog(BuildContext context) {
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                           ),
-
                 ),
                 ElevatedButton.icon(
                   onPressed: () async {
                     TimeOfDay? pickedTime = await showTimePicker(
                       context: context,
                       initialTime: _endTime ?? TimeOfDay.now(),
-                      
                     );
 
                     if (pickedTime != null && pickedTime != _endTime) {
