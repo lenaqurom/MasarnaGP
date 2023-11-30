@@ -10,9 +10,11 @@ import 'package:masarna/trip/stays/staycomment.dart';
 import 'package:masarna/trip/stays/staypoll.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 
-class HomeSectionsPage extends StatefulWidget {
+
+class SectionsPage extends StatefulWidget {
   final String planId;
-  HomeSectionsPage({required this.planId});
+  SectionsPage({required this.planId});
+
   @override
   _SectionsPageState createState() => _SectionsPageState();
 }
@@ -193,9 +195,7 @@ class _SectionsPageState extends State<SectionsPage>
               title: Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
+                    onPressed: () {},
                     icon: Icon(
                       Icons.arrow_back_ios_new,
                       color: Color.fromARGB(255, 39, 26, 99),
@@ -295,7 +295,9 @@ class _SectionsPageState extends State<SectionsPage>
                     bottom: 150.0,
                     right: 16.0,
                     child: FloatingActionButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        _navigateToCommentPage(context);
+                      },
                       child: Icon(FontAwesome.comment, size: 20),
                       backgroundColor: Color.fromARGB(255, 39, 26, 99),
                     ),
@@ -312,111 +314,6 @@ class _SectionsPageState extends State<SectionsPage>
                 progress: _animation,
               ),
               backgroundColor: Color.fromARGB(255, 39, 26, 99),
-            ),
-            endDrawer: Drawer(
-              child: Container(
-                color: const Color.fromARGB(255, 255, 255, 255),
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
-                    DrawerHeader(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                      ),
-                      child: Container(
-                        alignment: Alignment.centerRight,
-                        child: Center( child:
-                        Image.asset('images/logo6.png',  fit: BoxFit.fill),
-            ),
-                      ),
-                    ),
-                    ListTile(
-                      leading: Icon(AntDesign.adduser),
-                      title: Text('Add participants',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(AntDesign.team),
-                      title: Text('See members',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(AntDesign.calculator),
-                      title: Text('Calculate budget',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(FontAwesome.map_marker),
-                      title: Text('Map',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.photo_album),
-                      title: Text('Make memories',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(FontAwesome.send),
-                      title: Text('Chat room',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: ElevatedButton(
-            onPressed: () {
-              // Handle button press
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Color.fromARGB(255, 39, 26, 99), // Change the button color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0), // Adjust the border radius
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(AntDesign.check, color: Colors.white),
-                  SizedBox(width: 8.0),
-                  Text(
-                    'Finalize',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontFamily: 'Dosis',
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  
-                ],
-              ),
-            ),
-          ),
-        ),
-
-
-                  ],
-                ),
-              ),
             ),
           );
         },
@@ -626,6 +523,110 @@ Widget _buildExampleCard({
     });
   }
 
+  String _getTabType() {
+    switch (_selectedTabIndex) {
+      case 0:
+        return 'Flights';
+      case 1:
+        return 'Stays';
+      case 2:
+        return 'Eateries';
+      case 3:
+        return 'Activities';
+      default:
+        return 'Flights'; // Default to Flights if the index is unknown
+    }
+  }
+void _showPollDialog(BuildContext context) {
+  TimeOfDay? _startTime;
+  TimeOfDay? _endTime;
+
+  AwesomeDialog(
+    context: context,
+    animType: AnimType.SCALE,
+    dialogType: DialogType.NO_HEADER,
+    body: StatefulBuilder(
+      builder: (context, setState) {
+        return Column(
+          children: [
+            Text(
+              'Poll Option',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Do you want to add this suggestion as a voting option?',
+              style: TextStyle(fontSize: 18),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: _startTime ?? TimeOfDay.now(),
+                    );
+
+                    if (pickedTime != null && pickedTime != _startTime) {
+                      setState(() {
+                        _startTime = pickedTime;
+                      });
+                    }
+                  },
+                  icon: Icon(FlutterIcons.calendar_clock_mco),
+                  label: Text('Start Time'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Color.fromARGB(213, 226, 224, 243),
+                            onPrimary: Color.fromARGB(255, 39, 26, 99),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                          ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: _endTime ?? TimeOfDay.now(),
+                    );
+
+                    if (pickedTime != null && pickedTime != _endTime) {
+                      setState(() {
+                        _endTime = pickedTime;
+                      });
+                    }
+                  },
+                  icon: Icon(FlutterIcons.calendar_clock_mco),
+                  label: Text('End Time'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Color.fromARGB(213, 226, 224, 243),
+                            onPrimary: Color.fromARGB(255, 39, 26, 99),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                          ),
+                ),
+              ],
+            ),
+            if (_startTime != null && _endTime != null)
+              Text(
+                'Selected Time: ${_startTime!.format(context)} - ${_endTime!.format(context)}',
+                style: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+              ),
+          ],
+        );
+      },
+    ),
+    btnOkOnPress: () {},
+    btnCancelOnPress: () {},
+    btnCancelColor: Colors.grey,
+    btnOkColor: Color.fromARGB(255, 39, 26, 99),
+    btnOkText: 'Add'
+  )..show();
+}
 
   Widget _buildContentflights({required String title}) {
     tabType = 'Flights';
@@ -644,7 +645,7 @@ Widget _buildExampleCard({
           cardId: 'flight1',
           price: "50",
           description:
-              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
+              'Description for Example 1.',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -655,6 +656,10 @@ Widget _buildExampleCard({
         _buildExampleCard(
           title: 'Flight 2',
           description: 'Description for Example 2.',
+          location: "Antalya",
+          cardId: 'flight2',
+          rating: 4.9,
+          price: "50",
           onTap: () {
             // Handle tap for Example 2
           },
@@ -682,7 +687,7 @@ Widget _buildExampleCard({
           cardId: 'stay1',
           price: "50",
           description:
-              '',
+              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -692,6 +697,9 @@ Widget _buildExampleCard({
         ),
         _buildExampleCard(
           title: 'Stay 2',
+          location: "Antalya",
+          cardId: 'stay2',
+          price: "50",
           description: 'Description for Example 2.',
           onTap: () {
             // Handle tap for Example 2
@@ -722,7 +730,7 @@ Widget _buildExampleCard({
           price: "50",
           rating: 4.9,
           description:
-              '',
+              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -731,6 +739,10 @@ Widget _buildExampleCard({
         ),
         _buildExampleCard(
           title: 'Eatery 2',
+          location: "Antalya",
+          cardId: 'eat2',
+          price: "50",
+          rating: 4.9,
           description: 'Description for Example 2.',
           onTap: () {
             // Handle tap for Example 2
@@ -760,7 +772,7 @@ Widget _buildExampleCard({
           rating: 4.9,
           price: "50",
           description:
-              '',
+              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -769,6 +781,10 @@ Widget _buildExampleCard({
         ),
         _buildExampleCard(
           title: 'Activity 2',
+          location: "Antalya",
+          cardId: 'act2',
+          rating: 4.9,
+          price: "50",
           description: 'Description for Example 2.',
           onTap: () {
             // Handle tap for Example 2
