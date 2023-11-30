@@ -1,5 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:icons_flutter/icons_flutter.dart';
+
+class VotingOption {
+  String option;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
+  Set<String> votedUsers;
+  double price = 0;
+  String location = '';
+
+  VotingOption(
+      this.option, this.startTime, this.endTime, this.price, this.location)
+      : votedUsers = {}; 
+}
+
+List<VotingOption> votes = [];
 
 class ActivitiesVotingPage extends StatefulWidget {
   @override
@@ -7,45 +23,170 @@ class ActivitiesVotingPage extends StatefulWidget {
 }
 
 class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
-  // Store the options and their corresponding votes
-  Map<String, Set<String>> votes = {};
-
-  // Controller for the text field
   TextEditingController _textController = TextEditingController();
+  TextEditingController _priceController = TextEditingController();
+  TextEditingController _locationController = TextEditingController();
 
-  // Function to add an option
-  void addOption(String option) {
-    if (votes.length < 5) {
-      setState(() {
-        votes[option] = {};
-      });
-    } else {
-      // Optionally show an awesome dialog that the maximum number of options is reached
-      _showAwesomeDialog(
-        'Maximum Options Reached',
-        'You cannot add more than 5 options.',
-        DialogType.WARNING,
-      );
-    }
+  void addOptionWithTime(String option, TimeOfDay? startTime,
+      TimeOfDay? endTime, String price, String location) {
+    double parsedPrice = double.tryParse(price) ?? 0.0;
+
+    VotingOption votingOption =
+        VotingOption(option, startTime, endTime, parsedPrice, location);
+    setState(() {
+      votes.add(votingOption);
+    });
   }
 
-  // Function to vote for an option
+  void _showAddVotingDialog(BuildContext context) {
+    TimeOfDay? _startTime;
+    TimeOfDay? _endTime;
+
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.NO_HEADER,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Add Option',
+      body: StatefulBuilder(builder: (context, setState) {
+        return Column(
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextField(
+                controller: _textController,
+                decoration: InputDecoration(
+                  hintText: 'Enter Option',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                ),
+              ),
+            ),
+            SizedBox(height: 8),
+            Container(
+              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: TextField(
+                controller: _priceController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  hintText: 'Enter Price (Optional)',
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                ),
+              ),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: _startTime ?? TimeOfDay.now(),
+                    );
+
+                    if (pickedTime != null && pickedTime != _startTime) {
+                      setState(() {
+                        _startTime = pickedTime;
+                      });
+                    }
+                  },
+                  icon: Icon(FlutterIcons.calendar_clock_mco),
+                  label: Text('Start Time'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color.fromARGB(213, 226, 224, 243),
+                    onPrimary: Color.fromARGB(255, 39, 26, 99),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: _endTime ?? TimeOfDay.now(),
+                    );
+
+                    if (pickedTime != null && pickedTime != _endTime) {
+                      setState(() {
+                        _endTime = pickedTime;
+                      });
+                    }
+                  },
+                  icon: Icon(FlutterIcons.calendar_clock_mco),
+                  label: Text('End Time'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Color.fromARGB(213, 226, 224, 243),
+                    onPrimary: Color.fromARGB(255, 39, 26, 99),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+              ],
+            ),
+            if (_startTime != null && _endTime != null)
+              Text(
+                'Selected Time: ${_startTime?.format(context)} - ${_endTime?.format(context)}',
+                style: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+              ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                if (_startTime != null && _endTime != null) {
+                  addOptionWithTime(
+                    _textController.text,
+                    _startTime,
+                    _endTime,
+                    _priceController.text,
+                    _locationController.text,
+                  );
+                  _textController.clear();
+                  _priceController.clear();
+                  _locationController.clear();
+                  Navigator.of(context).pop();
+                } else {
+                  _showAwesomeDialog(
+                    'Invalid Time',
+                    'Please set both start and end times.',
+                    DialogType.WARNING,
+                  );
+                }
+              },
+              child: Text('Add'),
+              style: ElevatedButton.styleFrom(
+                primary: Color.fromARGB(255, 39, 26, 99),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+    )..show();
+  }
+
   void voteForOption(String option) {
-    if (!votes[option]!.contains("user")) {
-      setState(() {
-        votes[option]!.add("user");
-      });
-    } else {
-      // Optionally show an awesome dialog that the user has already voted for this option
-      _showAwesomeDialog(
-        'Already Voted',
-        'You have already voted for this option.',
-        DialogType.INFO,
-      );
-    }
+    VotingOption votedOption = votes.firstWhere((v) => v.option == option);
+
+    setState(() {
+      if (!votedOption.votedUsers.contains("user")) {
+        votedOption.votedUsers.add("user");
+      } else {
+        _showAwesomeDialog(
+          'Already Voted',
+          'You have already voted for this option.',
+          DialogType.success,
+        );
+      }
+    });
   }
 
-  // Function to show an awesome dialog
   void _showAwesomeDialog(String title, String content, DialogType dialogType) {
     AwesomeDialog(
       context: context,
@@ -61,14 +202,20 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
     )..show();
   }
 
-  // Function to get a colored line based on the number of votes
   Widget getVoteLine(int votesCount) {
-    double percentage = votesCount / (votes.values.map((set) => set.length).reduce((a, b) => a + b) ?? 1);
+    double percentage = votesCount /
+        (votes
+                .map((option) => option.votedUsers.length)
+                .reduce((a, b) => a + b) ??
+            1);
     return Container(
       height: 8,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color.fromARGB(255, 39, 26, 99), Color.fromARGB(213, 226, 224, 243)],
+          colors: [
+            Color.fromARGB(255, 39, 26, 99),
+            Color.fromARGB(213, 226, 224, 243),
+          ],
           stops: [percentage, percentage],
         ),
         borderRadius: BorderRadius.circular(5),
@@ -76,49 +223,132 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
     );
   }
 
-  // Function to show a dialog to edit an option
-void _showEditOptionDialog(String option) {
-  _textController.text = option; // Set the initial value to the current option
-  AwesomeDialog(
-    context: context,
-    dialogType: DialogType.NO_HEADER,
-    animType: AnimType.BOTTOMSLIDE,
-    title: 'Edit Option',
-    body: Column(
-      children: [
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: TextField(
-            controller: _textController,
-            decoration: InputDecoration(
-              hintText: 'Edit Option',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 10),
-            ),
-          ),
-        ),
-        SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () {
-            // Edit the option
-            editOption(option, _textController.text);
-            _textController.clear();
-            Navigator.of(context).pop();
-          },
-          child: Text('Save'),
-          style: ElevatedButton.styleFrom(
-            primary: Color.fromARGB(255, 39, 26, 99),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-          ),
-        ),
-      ],
-    ),
-  )..show();
-}
+  void _showEditOptionDialog(String option) {
+    _textController.text = option;
+    TimeOfDay? _startTime;
+    TimeOfDay? _endTime;
 
-  // Function to show a dialog to delete an option
+    VotingOption existingOption = votes.firstWhere((v) => v.option == option);
+
+    _priceController.text = existingOption.price.toString();
+
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.NO_HEADER,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Edit Option',
+      body: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: TextField(
+              controller: _textController,
+              decoration: InputDecoration(
+                hintText: 'Edit Option',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
+          Container(
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: TextField(
+              controller: _priceController,
+              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(
+                hintText: 'Enter Price (Optional)',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+              ),
+            ),
+          ),
+          SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: _startTime ?? TimeOfDay.now(),
+                  );
+
+                  if (pickedTime != null) {
+                    setState(() {
+                      _startTime = pickedTime;
+                    });
+                  }
+                },
+                icon: Icon(FlutterIcons.calendar_clock_mco),
+                label: Text('Start Time'),
+                style: ElevatedButton.styleFrom(
+                  primary: Color.fromARGB(213, 226, 224, 243),
+                  onPrimary: Color.fromARGB(255, 39, 26, 99),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: _endTime ?? TimeOfDay.now(),
+                  );
+
+                  if (pickedTime != null) {
+                    setState(() {
+                      _endTime = pickedTime;
+                    });
+                  }
+                },
+                icon: Icon(FlutterIcons.calendar_clock_mco),
+                label: Text('End Time'),
+                style: ElevatedButton.styleFrom(
+                  primary: Color.fromARGB(213, 226, 224, 243),
+                  onPrimary: Color.fromARGB(255, 39, 26, 99),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_startTime != null && _endTime != null)
+            Text(
+              'Selected Time: ${_startTime?.format(context)} - ${_endTime?.format(context)}',
+              style: TextStyle(fontFamily: 'Montserrat', fontSize: 16),
+            ),
+          SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              editOption(
+                option,
+                _textController.text,
+                _startTime,
+                _endTime,
+                _priceController.text,
+                _locationController.text,
+              );
+              _textController.clear();
+              _priceController.clear();
+              _locationController.clear();
+              Navigator.of(context).pop();
+            },
+            child: Text('Save'),
+            style: ElevatedButton.styleFrom(
+              primary: Color.fromARGB(255, 39, 26, 99),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ],
+      ),
+    )..show();
+  }
+
   void _showDeleteOptionDialog(String option) {
     AwesomeDialog(
       context: context,
@@ -129,26 +359,33 @@ void _showEditOptionDialog(String option) {
       btnCancelOnPress: () {},
       btnCancelText: 'Cancel',
       btnOkOnPress: () {
-        // Delete the option
         deleteOption(option);
       },
-      btnOkColor: Colors.red,
-      btnCancelColor: Colors.green,
+      btnOkColor: Color.fromARGB(255, 39, 26, 99),
+      btnCancelColor: Colors.grey,
       btnOkText: 'Delete',
     )..show();
   }
 
-  // Function to edit an option
-  void editOption(String oldOption, String newOption) {
+  void editOption(String oldOption, String newOption, TimeOfDay? newStartTime,
+      TimeOfDay? newEndTime, String newPrice, String newLocation) {
+    double? parsedPrice = double.tryParse(newPrice);
+    double oldPrice = votes.firstWhere((v) => v.option == oldOption).price;
+
     setState(() {
-      votes[newOption] = votes.remove(oldOption)!;
+      VotingOption editedOption =
+          votes.firstWhere((v) => v.option == oldOption);
+      editedOption.option = newOption;
+      editedOption.startTime = newStartTime ?? editedOption.startTime;
+      editedOption.endTime = newEndTime ?? editedOption.endTime;
+      editedOption.price = parsedPrice ?? oldPrice;
+      editedOption.location = newLocation;
     });
   }
 
-  // Function to delete an option
   void deleteOption(String option) {
     setState(() {
-      votes.remove(option);
+      votes.removeWhere((v) => v.option == option);
     });
   }
 
@@ -169,7 +406,7 @@ void _showEditOptionDialog(String option) {
           'Activities Voting',
           style: TextStyle(
             color: Color.fromARGB(255, 39, 26, 99),
-            fontFamily: 'Dosis',
+            fontFamily: 'Montserrat',
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
@@ -183,119 +420,115 @@ void _showEditOptionDialog(String option) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Display options
               Text(
                 'Voting Options:',
                 style: TextStyle(
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'PlayfairDisplay',
+                  fontFamily: 'Montserrat',
                   color: Color.fromARGB(255, 39, 26, 99),
                 ),
               ),
               SizedBox(height: 16),
-Column(
-  children: votes.keys.map((option) {
-    int votesCount = votes[option]!.length;
-    return Card(
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      margin: EdgeInsets.symmetric(vertical: 8),
-      child: ListTile(
-        title: Text(
-          option,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Votes: $votesCount',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            SizedBox(height: 8),
-            getVoteLine(votesCount),
-          ],
-        ),
-        onTap: () => voteForOption(option),
-        // Separate voting information and edit/delete icons
-        contentPadding: EdgeInsets.all(16),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(Icons.edit, size: 20,), // Adjust the icon size as needed
-              onPressed: () {
-                _showEditOptionDialog(option);
-              },
-            ),
-            SizedBox(width: 8), // Adjust the spacing between icons
-            IconButton(
-              icon: Icon(Icons.delete, size: 20,), // Adjust the icon size as needed
-              onPressed: () {
-                _showDeleteOptionDialog(option);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }).toList(),
-),
+              Column(
+                children: votes.map((option) {
+                  int votesCount = option.votedUsers.length;
+                  return Card(
+                    elevation: 5,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    child: Stack(
+                      children: [
+                        ListTile(
+                          title: Text(
+                            option.option,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                '${option.startTime?.format(context)} - ${option.endTime?.format(context)}',
+                                style:
+                                    TextStyle(fontSize: 14, color: Colors.grey),
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'Votes: $votesCount',
+                                style:
+                                    TextStyle(fontSize: 14, color: Colors.grey),
+                              ),
+                              SizedBox(height: 8),
+                              getVoteLine(votesCount),
+                            ],
+                          ),
+                          onTap: () => voteForOption(option.option),
+                          contentPadding: EdgeInsets.all(16),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.edit,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  _showEditOptionDialog(option.option);
+                                },
+                              ),
+                              SizedBox(width: 8),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.delete,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  _showDeleteOptionDialog(option.option);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          top: 0.0,
+                          right: 0.0,
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20 * 1.5,
+                              vertical: 20 / 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              borderRadius: BorderRadius.only(
+                                bottomLeft: Radius.circular(22),
+                                topRight: Radius.circular(22),
+                              ),
+                            ),
+                            child: Text(
+                              "\$${option.price}",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
               SizedBox(height: 16),
-              // Add Option button
               ElevatedButton(
                 onPressed: () {
-                  // Check if the maximum number of options is reached before allowing to add a new option
-                  if (votes.length < 5) {
-                    // Show a dialog to enter a new option
-                    AwesomeDialog(
-                      context: context,
-                      dialogType: DialogType.NO_HEADER,
-                      animType: AnimType.BOTTOMSLIDE,
-                      title: 'Add Option',
-                      body: Column(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                            child: TextField(
-                              controller: _textController,
-                              decoration: InputDecoration(
-                                hintText: 'Enter Option',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Add the option
-                              addOption(_textController.text);
-                              _textController.clear();
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('Add'),
-                            style: ElevatedButton.styleFrom(
-                              primary: Color.fromARGB(255, 39, 26, 99),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )..show();
-                  } else {
-                    // Optionally show an awesome dialog that the maximum number of options is reached
-                    _showAwesomeDialog(
-                      'Maximum Options Reached',
-                      'You cannot add more than 5 options.',
-                      DialogType.WARNING,
-                    );
-                  }
+                  _showAddVotingDialog(context);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -308,7 +541,11 @@ Column(
                     SizedBox(width: 8),
                     Text(
                       'Add Option',
-                      style: TextStyle(fontSize: 18, fontFamily: 'Dosis', fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Montserrat',
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
