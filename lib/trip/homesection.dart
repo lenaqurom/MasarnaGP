@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:masarna/trip/stays/staycomment.dart';
 
 class HomeSectionsPage extends StatefulWidget {
+  final String planId;
+  HomeSectionsPage({required this.planId});
   @override
   _HomeSectionsPageState createState() => _HomeSectionsPageState();
 }
@@ -38,7 +41,9 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
               title: Row(
                 children: [
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
                     icon: Icon(
                       Icons.arrow_back_ios_new,
                       color: Color.fromARGB(255, 39, 26, 99),
@@ -61,9 +66,16 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                           });
                         }
                       },
-                      style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 39, 26, 99),),
-                      items: ['Antalya', 'Bali', 'Paris', 'Italya','Antalya2', 'Bali2', 'Paris2', 'Italya2']
-                          .map((String location) {
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Color.fromARGB(255, 39, 26, 99),
+                      ),
+                      items: [
+                        'Antalya',
+                        'Bali',
+                        'Paris'
+                        
+                      ].map((String location) {
                         return DropdownMenuItem<String>(
                           value: location,
                           child: Text(
@@ -143,10 +155,15 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                     bottom: 150.0,
                     right: 16.0,
                     child: FloatingActionButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                       MaterialPageRoute(
+                         builder: (context) => StayCommentPage(),
+                        ),
+                       );
+                      },
                       child: Icon(FontAwesome.comment, size: 20),
                       backgroundColor: Color.fromARGB(255, 39, 26, 99),
-
                     ),
                   ),
                 ),
@@ -174,15 +191,20 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                       ),
                       child: Container(
                         alignment: Alignment.centerRight,
-                        child: Center( child:
-                        Image.asset('images/logo6.png',  fit: BoxFit.fill),
-            ),
+                        child: Center(
+                          child:
+                              Image.asset('images/logo6.png', fit: BoxFit.fill),
+                        ),
                       ),
                     ),
                     ListTile(
                       leading: Icon(AntDesign.adduser),
                       title: Text('Add participants',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              fontFamily: 'Dosis',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
                       onTap: () {
                         Navigator.pop(context);
                       },
@@ -190,7 +212,11 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                     ListTile(
                       leading: Icon(AntDesign.team),
                       title: Text('See members',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              fontFamily: 'Dosis',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
                       onTap: () {
                         Navigator.pop(context);
                       },
@@ -198,7 +224,11 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                     ListTile(
                       leading: Icon(AntDesign.calculator),
                       title: Text('Calculate budget',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              fontFamily: 'Dosis',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
                       onTap: () {
                         Navigator.pop(context);
                       },
@@ -206,7 +236,11 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                     ListTile(
                       leading: Icon(FontAwesome.map_marker),
                       title: Text('Map',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              fontFamily: 'Dosis',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
                       onTap: () {
                         Navigator.pop(context);
                       },
@@ -214,55 +248,63 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
                     ListTile(
                       leading: Icon(Icons.photo_album),
                       title: Text('Make memories',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              fontFamily: 'Dosis',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
                       onTap: () {
                         Navigator.pop(context);
                       },
                     ),
                     ListTile(
                       leading: Icon(FontAwesome.send),
-                      title: Text('Chat room',
-                          style: TextStyle(color: Color.fromARGB(255, 39, 26, 99), fontFamily: 'Dosis', fontSize: 18, fontWeight: FontWeight.w600)),
+                      title: Text('',
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 39, 26, 99),
+                              fontFamily: 'Dosis',
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600)),
                       onTap: () {
                         Navigator.pop(context);
                       },
                     ),
-        Container(
-          margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: ElevatedButton(
-            onPressed: () {
-              // Handle button press
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Color.fromARGB(255, 39, 26, 99), // Change the button color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0), // Adjust the border radius
-              ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(AntDesign.check, color: Colors.white),
-                  SizedBox(width: 8.0),
-                  Text(
-                    'Finalize',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontFamily: 'Dosis',
-                      fontWeight: FontWeight.w600,
+                    Container(
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle button press
+                        },
+                        style: ElevatedButton.styleFrom(
+                          primary: Color.fromARGB(
+                              255, 39, 26, 99), // Change the button color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                20.0), // Adjust the border radius
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(AntDesign.check, color: Colors.white),
+                              SizedBox(width: 8.0),
+                              Text(
+                                'Finalize',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontFamily: 'Dosis',
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  
-                ],
-              ),
-            ),
-          ),
-        ),
-
-
                   ],
                 ),
               ),
@@ -366,7 +408,6 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
     });
   }
 
-
   Widget _buildContentflights({required String title}) {
     return ListView(
       padding: EdgeInsets.all(16.0),
@@ -379,7 +420,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         _buildExampleCard(
           title: 'Flight 1',
           description:
-              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
+              'desc',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -388,7 +429,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         ),
         _buildExampleCard(
           title: 'Flight 2',
-          description: 'Description for Example 2.',
+          description: '',
           onTap: () {
             // Handle tap for Example 2
           },
@@ -412,7 +453,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         _buildExampleCard(
           title: 'Stay 1',
           description:
-              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
+              '',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -421,7 +462,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         ),
         _buildExampleCard(
           title: 'Stay 2',
-          description: 'Description for Example 2.',
+          description: '',
           onTap: () {
             // Handle tap for Example 2
           },
@@ -432,6 +473,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
       ],
     );
   }
+
   Widget _buildContenteateries({required String title}) {
     return ListView(
       padding: EdgeInsets.all(16.0),
@@ -444,7 +486,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         _buildExampleCard(
           title: 'Eatery 1',
           description:
-              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
+              '',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -453,7 +495,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         ),
         _buildExampleCard(
           title: 'Eatery 2',
-          description: 'Description for Example 2.',
+          description: '',
           onTap: () {
             // Handle tap for Example 2
           },
@@ -464,6 +506,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
       ],
     );
   }
+
   Widget _buildContentactivities({required String title}) {
     return ListView(
       padding: EdgeInsets.all(16.0),
@@ -476,7 +519,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         _buildExampleCard(
           title: 'Activity 1',
           description:
-              'Description for Example 1. This is a longer description to demonstrate text wrapping in a more realistic scenario.',
+              '',
           onTap: () {
             // Handle tap for Example 1
           },
@@ -485,7 +528,7 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
         ),
         _buildExampleCard(
           title: 'Activity 2',
-          description: 'Description for Example 2.',
+          description: '',
           onTap: () {
             // Handle tap for Example 2
           },
@@ -496,7 +539,4 @@ class _HomeSectionsPageState extends State<HomeSectionsPage>
       ],
     );
   }
-
-
 }
-

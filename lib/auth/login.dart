@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _usernameOrEmailController =
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.1.15:3000/api');
+  final apiService = ApiService('http://192.168.1.3:3000/api');
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _LoginState extends State<Login> {
       // print("Request body: email=$email, username=$username, password=$password");
 
       final response = await post(
-        Uri.parse('http://192.168.1.15:3000/api/login'),
+        Uri.parse('http://192.168.1.3:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -76,14 +76,14 @@ class _LoginState extends State<Login> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> userData = json.decode(response.body)["user"];
-        
+       String id = userData["_id"];
         if (email.isNotEmpty) {
-          globalState.addToState(email: email);
-          globalState.addToState(id: userData["_id"]);
+          globalState.addToState(email: email, id: id);
+         // globalState.addToState(id: id );
         }
         if (email.isEmpty) {
-          globalState.addToState(username: username);
-          globalState.addToState(id: userData["_id"]);
+          globalState.addToState(username: username, id: id);
+        //  globalState.addToState(id: id);
         }
         print(
             "Request body: email=$email, username=$username, password=$password");

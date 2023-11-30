@@ -14,30 +14,32 @@ class PlanSearchResults extends StatelessWidget {
       itemBuilder: (context, index) {
         final plan = searchResults[index];
         return InkWell(
-          onTap: () {
-        Navigator.of(context).pushNamed("path");
-          },
-          child: ListTile(
-            title: Text(plan.title),
-            subtitle: Text(plan.description),
-        ));
+            onTap: () {
+              Navigator.of(context).pushNamed("path");
+            },
+            child: ListTile(
+              title: Text(plan.title),
+              subtitle: Text(plan.description),
+            ));
       },
     );
   }
 }
 
-
 class Plan {
   String title;
   String description;
-  File? image;
+  String id; 
+  String? image;
 
   Plan({
     required this.title,
     required this.description,
+    required this.id,
     this.image,
   });
 }
+
 class PlanSearch extends SearchDelegate<String> {
   final List<Plan> plans;
 

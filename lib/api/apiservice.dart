@@ -52,7 +52,7 @@ class ApiService {
     return response;
   }
 
-   Future<http.Response> editPlan(Map<String, dynamic> data) async {
+   Future<http.Response> editPlan(Map<String, dynamic> data, String planid) async {
     final response = await http.put(
       Uri.parse('$baseUrl/plan/:planid'),
       body: data,
@@ -68,12 +68,13 @@ class ApiService {
     return response;
   }
 
-  Future<http.Response> viewPlans(Map<String, dynamic> data) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/plans/:userid'),
-    );
-    return response;
-  }
+  Future<http.Response> viewPlans(String userId) async {
+  final response = await http.get(
+    Uri.parse('$baseUrl/plans/$userId'), 
+  );
+  return response;
+}
+
 
 
 }

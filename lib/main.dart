@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:masarna/trip/stays/staycomment.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:masarna/globalstate.dart';
@@ -77,6 +78,26 @@ class MyApp extends StatelessWidget {
           }
         }
 
+        else if (settings.name == '/homesection') {
+          // Extract the planId from the arguments
+          final Map<String, dynamic>? arguments =
+              settings.arguments as Map<String, dynamic>?;
+
+          // Check if arguments contain planId
+          final planId = arguments?['planId'] as String?;
+          if (planId != null) {
+            return MaterialPageRoute(
+              builder: (context) => HomeSectionsPage(planId: planId),
+            );
+          } else {
+            // Handle error or navigate to a default screen
+            // For now, navigating to Welcome() as an example
+            return MaterialPageRoute(
+              builder: (context) => Welcome(),
+            );
+          }
+        }
+
         return MaterialPageRoute(
           builder: (context) =>
               Welcome(), // Placeholder, replace with your actual routes
@@ -93,8 +114,9 @@ class MyApp extends StatelessWidget {
         "/chatlist": (context) => ChatList(),
         "/profilescreen": (context) => ProfileScreen(),
         "/editprofile": (context) => EditProfile(),
+        "/staycomment": (context) => StayCommentPage(),
         // "/singlechat": (context) => SingleChat(),
-        "/homesections": (context) => HomeSectionsPage(),
+        //"/homesections": (context) => HomeSectionsPage(),
       },
     );
   }

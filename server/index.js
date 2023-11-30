@@ -12,7 +12,8 @@ const loginRoutes = require('./routes/login');
 const signupRoutes = require('./routes/signup');
 const profilepageRoutes = require('./routes/profilepage');
 const friendslistRoutes = require('./routes/friendslist');
-const planRoutes = require('./routes/plan');
+const oneplanRoutes = require('./routes/oneplan');
+const groupdayplansRoutes = require('./routes/groupdayplans');
 app.use(bodyParser.json());
 
 // MongoDB Atlas connection
@@ -31,7 +32,8 @@ app.use('/api', signupRoutes);
 app.use('/api', loginRoutes);
 app.use('/api', profilepageRoutes);
 app.use('/api', friendslistRoutes);
-app.use('/api', planRoutes);
+app.use('/api', oneplanRoutes);
+app.use('/api', groupdayplansRoutes);
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
