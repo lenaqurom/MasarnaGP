@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
           }
         }
 
-        else if (settings.name == '/homesection') {
+        else if (settings.name == '/section') {
           // Extract the planId from the arguments
           final Map<String, dynamic>? arguments =
               settings.arguments as Map<String, dynamic>?;
@@ -87,7 +87,7 @@ class MyApp extends StatelessWidget {
           final planId = arguments?['planId'] as String?;
           if (planId != null) {
             return MaterialPageRoute(
-              builder: (context) => HomeSectionsPage(planId: planId),
+              builder: (context) => SectionsPage(planId: planId),
             );
           } else {
             // Handle error or navigate to a default screen

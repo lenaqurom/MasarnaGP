@@ -84,6 +84,7 @@ class _SectionsPageState extends State<SectionsPage>
   }
 
   void _navigateToVotingPage(BuildContext context) {
+    
     print('Navigating to voting page for tab: $tabType');
 
     _toggleExpanded(); // Close the expanded view

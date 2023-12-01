@@ -71,11 +71,15 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
       return res.status(404).json({ error: 'Section not found' });
     }
 
+    // Parse starttime and endtime to Date objects
+    const parsedStartTime = new Date(`1970-01-01T${starttime}:00.000Z`);
+    const parsedEndTime = new Date(`1970-01-01T${endtime}:00.000Z`);
+
     // Add the poll option
     targetSection.poll.options.push({
       name: name,
-      starttime:starttime,
-      endtime: endtime,
+      starttime: parsedStartTime,
+      endtime: parsedEndTime,
       location: location, 
       price: price, 
       votes: 0,
@@ -89,6 +93,7 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 ///if we were to implement editing poll options 
 //router.put('/oneplan/:planId/section/:sectionName/poll-option/:optionId', async (req, res) => {
 //  try {
@@ -160,15 +165,17 @@ router.get('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/p
      const pollOptions = targetSection.poll.options.map((option) => {
       const id = option._id !== undefined ? option._id : null;
       const votes = option.votes !== undefined ? option.votes : 0;
-    
+      const startTime = option.starttime ? new Date(option.starttime).toISOString() : null;
+      const endTime = option.endtime ? new Date(option.endtime).toISOString() : null;
+
       return {
-        id: id,
+        id,
         name: option.name,
-        starttime: option.starttime,
-        endtime: option.endtime,
+        startTime,
+        endTime,
         location: option.location,
         price: option.price,
-        votes: votes,
+        votes,
       };
     });
 
@@ -272,9 +279,12 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     targetOption.votes += 1;
 
     await existingPlan.save();
-    const updatedPlan = await Plan.findById(planId);
 
-    res.status(200).json({ message: 'Vote recorded successfully', plan: updatedPlan });
+    res.status(200).json({
+      message: 'Vote recorded successfully',
+      votedOption: targetOption, // Include information about the voted option
+      
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -330,7 +340,7 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
   
       await existingPlan.save();
   
-      res.status(201).json({ message: 'Comment added successfully', plan: existingPlan });
+      res.status(201).json({ message: 'Comment added successfully', comments: targetSection.comments });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
@@ -390,7 +400,7 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     await existingPlan.save();
     const updatedPlan = await Plan.findById(planId);
 
-    res.status(201).json({ message: 'Comment reply added successfully', plan: updatedPlan });
+    res.status(201).json({ message: 'Comment reply added successfully', comments: targetSection.comments });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

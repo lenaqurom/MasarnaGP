@@ -478,7 +478,7 @@ void editPlan(int index) {
                     onTap: () {
                        Navigator.of(context).push(
                        MaterialPageRoute(
-                         builder: (context) => HomeSectionsPage(planId:plans[index].id),
+                         builder: (context) => SectionsPage(planId:plans[index].id),
                         ),
                        );
                       
