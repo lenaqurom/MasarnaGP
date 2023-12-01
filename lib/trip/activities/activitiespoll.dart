@@ -1,18 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:icons_flutter/icons_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class VotingOption {
+  String id;
   String option;
   TimeOfDay? startTime;
   TimeOfDay? endTime;
   Set<String> votedUsers;
   double price = 0;
   String location = '';
+  double numvotes = 0;
 
   VotingOption(
-      this.option, this.startTime, this.endTime, this.price, this.location)
-      : votedUsers = {}; 
+    this.id,
+    this.option,
+    this.startTime,
+    this.endTime,
+    this.price,
+    this.location,
+    this.numvotes, // Add this line
+  ) : votedUsers = {};
 }
 
 List<VotingOption> votes = [];
@@ -26,16 +37,191 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
   TextEditingController _textController = TextEditingController();
   TextEditingController _priceController = TextEditingController();
   TextEditingController _locationController = TextEditingController();
+  int totalVotes = 0;
 
-  void addOptionWithTime(String option, TimeOfDay? startTime,
-      TimeOfDay? endTime, String price, String location) {
+  @override
+  void initState() {
+    super.initState();
+    fetchOptions();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _priceController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  Future<void> fetchOptions() async {
+    final String apiUrl =
+        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-options'; // Update with your specific API endpoint
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final List<dynamic> optionsData =
+            jsonDecode(response.body)['pollOptions'];
+
+        print('Options Data: $optionsData'); // Print optionsData for debugging
+
+        setState(() {
+          votes = optionsData.map((optionData) {
+            return VotingOption(
+              optionData['id'],
+              optionData['name'],
+              _parseTimeOfDay(optionData['startTime']),
+              _parseTimeOfDay(optionData['endTime']),
+              optionData['price'] != null
+                  ? optionData['price'].toDouble()
+                  : 0.0,
+              optionData['location'],
+              optionData['votes'] != null
+    ? optionData['votes'].toDouble()
+    : 0.0,
+            );
+          }).toList();
+        
+            totalVotes = votes.map((option) => option.numvotes.toInt()).reduce((a, b) => a + b);
+  });
+
+      } else {
+        print('Error response: ${response.statusCode}');
+        print('Error body: ${response.body}');
+        _showAwesomeDialog(
+          'Error',
+          'Failed to fetch poll options. Please try again.',
+          DialogType.ERROR,
+        );
+      }
+    } catch (error) {
+      print('Exception during HTTP request: $error');
+      _showAwesomeDialog(
+        'Error',
+        'An unexpected error occurred. Please try again.',
+        DialogType.ERROR,
+      );
+    }
+  }
+
+
+TimeOfDay? _parseTimeOfDay(String? timeString) {
+  if (timeString == null) return null;
+
+  DateTime dateTime = DateTime.parse(timeString).toLocal();
+  return TimeOfDay.fromDateTime(dateTime);
+}
+
+
+  Future<void> voteForOption(String optionId) async {
+  final String apiUrl =
+      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-option/$optionId/vote';
+
+  try {
+    final response = await http.post(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      // Vote recorded successfully, you may want to update UI or handle success
+      print('Vote recorded successfully');
+
+      // Extract updated votes count for the specific option from the response
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      final int updatedVotes = responseData['votedOption']['votes'];
+
+      setState(() {
+        VotingOption votedOption = votes.firstWhere((v) => v.id == optionId);
+        votedOption.numvotes = updatedVotes.toDouble();
+        totalVotes = votes.map((option) => option.numvotes.toInt()).reduce((a, b) => a + b);
+
+      });
+    } else {
+      // Handle error, maybe show an error dialog or log the error
+      print('Error response: ${response.statusCode}');
+      print('Error body: ${response.body}');
+      // Add your error handling logic here
+    }
+  } catch (error) {
+    // Handle exception, maybe show an error dialog or log the error
+    print('Exception during HTTP request: $error');
+    // Add your error handling logic here
+  }
+}
+
+
+  Future<void> addOptionWithTime(
+      String id,
+      String option,
+      TimeOfDay? startTime,
+      TimeOfDay? endTime,
+      String price,
+      String location,
+      String numvotes) async {
     double parsedPrice = double.tryParse(price) ?? 0.0;
+    double parsedVotes = double.tryParse(numvotes) ?? 0.0;
+    VotingOption votingOption = VotingOption(
+        id, option, startTime, endTime, parsedPrice, location, parsedVotes);
 
-    VotingOption votingOption =
-        VotingOption(option, startTime, endTime, parsedPrice, location);
-    setState(() {
-      votes.add(votingOption);
-    });
+    // Format TimeOfDay to strings
+    String formatTimeOfDay(TimeOfDay timeOfDay) {
+      final now = DateTime.now();
+      final dateTime = DateTime(
+          now.year, now.month, now.day, timeOfDay.hour, timeOfDay.minute);
+      return DateFormat.Hm().format(dateTime);
+    }
+
+    String formattedStartTime =
+        startTime != null ? formatTimeOfDay(startTime) : '';
+    String formattedEndTime = endTime != null ? formatTimeOfDay(endTime) : '';
+
+    // API endpoint details
+    final String apiUrl =
+        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-option'; // Your full URL
+
+    // Your backend API expects a JSON body
+    final Map<String, dynamic> requestBody = {
+      'name': votingOption.option,
+      'starttime': formattedStartTime,
+      'endtime': formattedEndTime,
+      'location': votingOption.location,
+      'price': votingOption.price,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 201) {
+        // Successfully added poll option, you may want to update UI or handle success
+        setState(() {
+          votes.add(votingOption);
+        });
+        Navigator.of(context).pop();
+      } else {
+        // Handle error, maybe show an error dialog or log the error
+        print('Error response: ${response.statusCode}');
+        print('Error body: ${response.body}');
+
+        _showAwesomeDialog(
+          'Error',
+          'Failed to add poll option. Please try again.',
+          DialogType.ERROR,
+        );
+      }
+    } catch (error) {
+      print('Exception during HTTP request: $error');
+      // Handle exception, maybe show an error dialog or log the error
+      _showAwesomeDialog(
+        'Error',
+        'An unexpected error occurred. Please try again.',
+        DialogType.ERROR,
+      );
+    }
   }
 
   void _showAddVotingDialog(BuildContext context) {
@@ -139,11 +325,13 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
               onPressed: () {
                 if (_startTime != null && _endTime != null) {
                   addOptionWithTime(
+                    '',
                     _textController.text,
                     _startTime,
                     _endTime,
                     _priceController.text,
                     _locationController.text,
+                    '',
                   );
                   _textController.clear();
                   _priceController.clear();
@@ -171,21 +359,6 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
     )..show();
   }
 
-  void voteForOption(String option) {
-    VotingOption votedOption = votes.firstWhere((v) => v.option == option);
-
-    setState(() {
-      if (!votedOption.votedUsers.contains("user")) {
-        votedOption.votedUsers.add("user");
-      } else {
-        _showAwesomeDialog(
-          'Already Voted',
-          'You have already voted for this option.',
-          DialogType.success,
-        );
-      }
-    });
-  }
 
   void _showAwesomeDialog(String title, String content, DialogType dialogType) {
     AwesomeDialog(
@@ -201,27 +374,25 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
       buttonsTextStyle: TextStyle(color: Colors.white),
     )..show();
   }
+Widget getVoteLine(int numvotes) {
+  double percentage = totalVotes > 0 ? numvotes / totalVotes : 0.0;
 
-  Widget getVoteLine(int votesCount) {
-    double percentage = votesCount /
-        (votes
-                .map((option) => option.votedUsers.length)
-                .reduce((a, b) => a + b) ??
-            1);
-    return Container(
-      height: 8,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(255, 39, 26, 99),
-            Color.fromARGB(213, 226, 224, 243),
-          ],
-          stops: [percentage, percentage],
-        ),
-        borderRadius: BorderRadius.circular(5),
+  return Container(
+    height: 8,
+    width: MediaQuery.of(context).size.width,
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Color.fromARGB(255, 39, 26, 99),
+          Color.fromARGB(213, 226, 224, 243),
+        ],
+        stops: [percentage, percentage],
       ),
-    );
-  }
+      borderRadius: BorderRadius.circular(5),
+    ),
+  );
+}
+
 
   void _showEditOptionDialog(String option) {
     _textController.text = option;
@@ -349,23 +520,25 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
     )..show();
   }
 
-  void _showDeleteOptionDialog(String option) {
-    AwesomeDialog(
-      context: context,
-      dialogType: DialogType.WARNING,
-      animType: AnimType.BOTTOMSLIDE,
-      title: 'Delete Option',
-      desc: 'Are you sure you want to delete this option?',
-      btnCancelOnPress: () {},
-      btnCancelText: 'Cancel',
-      btnOkOnPress: () {
-        deleteOption(option);
-      },
-      btnOkColor: Color.fromARGB(255, 39, 26, 99),
-      btnCancelColor: Colors.grey,
-      btnOkText: 'Delete',
-    )..show();
-  }
+  void _showDeleteOptionDialog(String optionId) {
+  AwesomeDialog(
+    context: context,
+    dialogType: DialogType.WARNING,
+    animType: AnimType.BOTTOMSLIDE,
+    title: 'Delete Option',
+    desc: 'Are you sure you want to delete this option?',
+    btnCancelOnPress: () {},
+    btnCancelText: 'Cancel',
+    btnOkOnPress: () {
+      deleteOption(optionId);
+    },
+    btnOkColor: Color.fromARGB(255, 39, 26, 99),
+    btnCancelColor: Colors.grey,
+    btnOkText: 'Delete',
+  )..show();
+}
+
+
 
   void editOption(String oldOption, String newOption, TimeOfDay? newStartTime,
       TimeOfDay? newEndTime, String newPrice, String newLocation) {
@@ -383,11 +556,32 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
     });
   }
 
-  void deleteOption(String option) {
-    setState(() {
-      votes.removeWhere((v) => v.option == option);
-    });
+  Future<void> deleteOption(String optionId) async {
+  final String apiUrl =
+      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-option/$optionId';
+
+  try {
+    final response = await http.delete(Uri.parse(apiUrl));
+
+    if (response.statusCode == 200) {
+      // Poll option deleted successfully, you may want to update UI or handle success
+      print('Poll option deleted successfully');
+
+      setState(() {
+        votes.removeWhere((v) => v.id == optionId);
+      });
+    } else {
+      // Handle error, maybe show an error dialog or log the error
+      print('Error response: ${response.statusCode}');
+      print('Error body: ${response.body}');
+      // Add your error handling logic here
+    }
+  } catch (error) {
+    // Handle exception, maybe show an error dialog or log the error
+    print('Exception during HTTP request: $error');
+    // Add your error handling logic here
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -464,15 +658,15 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
                                 height: 8,
                               ),
                               Text(
-                                'Votes: $votesCount',
+                                'Votes: ${option.numvotes.toInt()}',
                                 style:
                                     TextStyle(fontSize: 14, color: Colors.grey),
                               ),
                               SizedBox(height: 8),
-                              getVoteLine(votesCount),
+                              getVoteLine(option.numvotes.toInt()),
                             ],
                           ),
-                          onTap: () => voteForOption(option.option),
+                          onTap: () => voteForOption(option.id),
                           contentPadding: EdgeInsets.all(16),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -493,7 +687,7 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
                                   size: 20,
                                 ),
                                 onPressed: () {
-                                  _showDeleteOptionDialog(option.option);
+                                  _showDeleteOptionDialog(option.id);
                                 },
                               ),
                             ],
