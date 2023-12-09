@@ -35,7 +35,7 @@ class _PlanningState extends State<Planning> {
   int? selectedPlanIndex;
   String planid = '';
 
-  final apiService = ApiService('http://192.168.1.3:3000/api');
+  final apiService = ApiService('http://192.168.1.7:3000/api');
 
   @override
   void initState() {
@@ -59,7 +59,7 @@ class _PlanningState extends State<Planning> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.3:3000/api/oneplan'),
+        Uri.parse('http://192.168.1.7:3000/api/oneplan'),
       );
 
       request.fields['name'] = name;
@@ -105,7 +105,7 @@ class _PlanningState extends State<Planning> {
 
 
       final response = await http.get(
-        Uri.parse('http://192.168.1.3:3000/api/userplans/$userid'),
+        Uri.parse('http://192.168.1.7:3000/api/userplans/$userid'),
       );
 
       if (response.statusCode == 200) {
@@ -119,7 +119,7 @@ class _PlanningState extends State<Planning> {
                     id: planData['_id'],
                     title: planData['name'],
                     description: planData['description'],
-                    image:'http://192.168.1.3:3000/' + planData['image'].replaceAll('\\', '/'),
+                    image:'http://192.168.1.7:3000/' + planData['image'].replaceAll('\\', '/'),
               ))    
               .toList();
 

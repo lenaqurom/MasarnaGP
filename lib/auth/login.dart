@@ -27,7 +27,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _usernameOrEmailController =
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.1.3:3000/api');
+  final apiService = ApiService('http://192.168.1.7:3000/api');
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _LoginState extends State<Login> {
       // print("Request body: email=$email, username=$username, password=$password");
 
       final response = await post(
-        Uri.parse('http://192.168.1.3:3000/api/login'),
+        Uri.parse('http://192.168.1.7:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -89,7 +89,7 @@ class _LoginState extends State<Login> {
             "Request body: email=$email, username=$username, password=$password");
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => Planning()));
-
+         //  Navigator.pushNamed(context, '/addparticipants');
         // Successful registration
         // You can navigate to a different screen or show a success message
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

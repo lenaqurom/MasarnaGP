@@ -3,18 +3,31 @@ const router = express.Router();
 
 
 const Friendslist = require('../models/friendslist');
+const User = require('../models/user');
 
-// Define the route to get a user's friends
-router.get('/friendslist/:username', async (req, res) => {
-  const username = req.params.username;
+router.get('/friendslist/:userid', async (req, res) => {
+  const userId = req.params.userid;
 
-  
   try {
-    const friendslist = await Friendslist.find({ userName: username });
-    res.json(friendslist);
+    // Find the friends list by user ID
+    const friendsList = await Friendslist.findOne({ userid: userId });
+
+    if (!friendsList) {
+      return res.status(404).json({ message: 'Friends list not found' });
+    }
+
+    // Extract friend IDs from the friends list
+    const friendIds = friendsList.friendid;
+
+    // Fetch user details for each friend
+    const friendDetails = await User.find({ _id: { $in: friendIds } }, 'username profilepicture');
+
+    res.json(friendDetails);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: 'An error occurred while fetching friends.' });
   }
 });
 
 module.exports = router;
+

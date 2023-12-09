@@ -13,6 +13,8 @@ const commentSchema = new mongoose.Schema({
       profilepicture: String,
     },
   ],
+
+  
 });
 
 const pollOptionSchema = new mongoose.Schema({
@@ -42,6 +44,7 @@ const groupdayplanSchema = new mongoose.Schema({
 
 const calendareventSchema = new mongoose.Schema({
   type: String,
+  sectionname: String, 
   name: String,
   date: Date,
   starttime: Date,
@@ -49,6 +52,14 @@ const calendareventSchema = new mongoose.Schema({
   location: String,
   price: Number,
   user: String,
+});
+
+const calendarSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  calendarevents: [calendareventSchema],
 });
 
 const planmembersSchema = new mongoose.Schema({
@@ -65,7 +76,7 @@ const oneplanSchema = new mongoose.Schema({
   name: String,
   image: String,
   description: String,
-  calendarevents: [calendareventSchema],
+  calendars: [calendarSchema],
   groupdayplans: [groupdayplanSchema],
 });
 

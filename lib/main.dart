@@ -18,7 +18,7 @@ import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/profile_page.dart';
 import 'package:masarna/user/edit_profile.dart';
 import 'package:masarna/trip/homesection.dart';
-
+import 'package:masarna/trip/drawer/addparticipants.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -115,7 +115,7 @@ class MyApp extends StatelessWidget {
         "/profilescreen": (context) => ProfileScreen(),
         "/editprofile": (context) => EditProfile(),
         "/staycomment": (context) => StayCommentPage(),
-        // "/singlechat": (context) => SingleChat(),
+        "/addparticipants":(context) => AddParticipantsPage(),        // "/singlechat": (context) => SingleChat(),
         //"/homesections": (context) => HomeSectionsPage(),
       },
     );
