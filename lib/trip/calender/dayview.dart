@@ -179,7 +179,7 @@ class _DayViewPageState extends State<DayViewPage> {
         onPressed: () {
           _showEventForm(context, widget.selectedDate);
         },
-        child: Icon(Icons.add),
+        child: Icon(Icons.add, color: Colors.white,),
       ),
     );
   }
@@ -224,13 +224,14 @@ class _DayViewPageState extends State<DayViewPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  icon: Icon(Icons.edit, size: 20),
+                  icon: Icon(Icons.edit, size: 20, color: Colors.white,),
                   label: Text(
                     'Edit',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Montserrat',
+                      color: Colors.white
                     ),
                   ),
                 ),
@@ -250,13 +251,14 @@ class _DayViewPageState extends State<DayViewPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  icon: Icon(Icons.delete, size: 20),
+                  icon: Icon(Icons.delete, size: 20, color: Colors.white),
                   label: Text(
                     'Delete',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Montserrat',
+                      color: Colors.white
                     ),
                   ),
                 ),
