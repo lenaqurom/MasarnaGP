@@ -46,7 +46,7 @@ class _UserListItemState extends State<UserListItem> {
           radius: 24.0,
           // Use a conditional expression to check if imagePath is not null
           backgroundImage: widget.user.imagePath != null
-              ? AssetImage(widget.user.imagePath!)
+              ? NetworkImage(widget.user.imagePath!)
               : null,
         ),
         title: Text(
@@ -79,14 +79,14 @@ class AddParticipantsPage extends StatefulWidget {
 class _AddParticipantsPageState extends State<AddParticipantsPage> {
   List<User> userList = [];
   Set<String> selectedUserIds = {};
-   List<User> addedMembers = [];
+  List<User> addedMembers = [];
 
-     @override
+  @override
   void initState() {
     super.initState();
 
     // Fetch and set the initial state of addedMembers
-    fetchMembers('6567bf72e0b164fa214f33d3').then((members) {
+    fetchMembers('65720ce9bbfa2f36ed8dd5f5').then((members) {
       if (members != null) {
         setState(() {
           addedMembers = members;
@@ -99,9 +99,9 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
     });
   }
 
-   Future<List<User>> fetchFriendList(String userId) async {
+  Future<List<User>> fetchFriendList(String userId) async {
     final response = await http.get(
-      Uri.parse('http://192.168.1.7:3000/api/friendslist/$userId'), 
+      Uri.parse('http://192.168.1.7:3000/api/memberstoadd/$userId'),
     );
 
     if (response.statusCode == 200) {
@@ -110,7 +110,8 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
         return User(
           friend['username'],
           friend['_id'],
-          friend['profilepicture'],
+          'http://192.168.1.7:3000/' +
+              friend['profilepicture'].replaceAll('\\', '/'),
         );
       }).toList();
     } else {
@@ -128,10 +129,13 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body)['members'];
         return data.map((member) {
+          print('Profile Picture: ${member['profilepicture']}');
           return User(
             member['username'],
             member['user'],
-            member['profilepicture'] ?? null,
+            'http://192.168.1.7:3000/' +
+                    member['profilepicture'].replaceAll('\\', '/') ??
+                null,
           );
         }).toList();
       } else {
@@ -142,10 +146,6 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
       throw error;
     }
   }
-
-
-  
-
 
   /*void _showAddUsersDialog() async {
     List<String>? result = await showDialog(
@@ -165,8 +165,9 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
       });
     }
   }
-
-  void _removeUser(String userId) {
+*/
+  void _removeUser(User user) {
+    String userId = user.id;
     AwesomeDialog(
       context: context,
       dialogType: DialogType.WARNING,
@@ -177,14 +178,32 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
       btnCancelColor: Colors.grey,
       btnOkColor: Color.fromARGB(255, 39, 26, 99),
       btnOkText: 'Delete',
-      btnOkOnPress: () {
-        setState(() {
-          selectedUserIds.remove(userId);
-        });
-      },
+      btnOkOnPress: () async {
+        try {
+          // Make the DELETE request to remove the user from the plan
+          String planId = '65720ce9bbfa2f36ed8dd5f5'; // Replace with your actual plan ID
+          String url = 'http://192.168.1.7:3000/api/oneplan/$planId/members/$userId';
+
+          final response = await http.delete(Uri.parse(url));
+
+          if (response.statusCode == 200) {
+          print('Member deleted successfully');
+          // Reload the page without keeping it in the stack
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => AddParticipantsPage(),
+            ),
+          );
+        } else {
+          print('Failed to delete member: ${response.statusCode}');
+        }
+      } catch (error) {
+        print('Error deleting member: $error');
+      }
+    },
     )..show();
   }
-*/
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -232,8 +251,10 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
                 MaterialButton(
                   onPressed: () async {
                     try {
-                          String id = Provider.of<GlobalState>(context, listen: false).id;
-                      List<User> friendList = await fetchFriendList(id); // Replace 'USER_ID' with the actual user ID
+                      String id =
+                          Provider.of<GlobalState>(context, listen: false).id;
+                      List<User> friendList = await fetchFriendList(
+                          id); // Replace 'USER_ID' with the actual user ID
                       List<String>? result = await showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -272,11 +293,11 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
             child: ListView.builder(
               itemCount: addedMembers.length,
               itemBuilder: (context, index) {
-              //  final String userId = selectedUserIds.elementAt(index);
+                //  final String userId = selectedUserIds.elementAt(index);
                 final User user = addedMembers[index];
-                   // userList.firstWhere((user) => user.id == userId, orElse: () {
-                 // return User('Unknown', 'unknown_id', 'images/profile.png');
-               // });
+                // userList.firstWhere((user) => user.id == userId, orElse: () {
+                // return User('Unknown', 'unknown_id', 'images/profile.png');
+                // });
                 return Card(
                   margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
                   elevation: 2.0,
@@ -285,10 +306,10 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
                   child: ListTile(
                     contentPadding: EdgeInsets.all(16.0),
                     leading: CircleAvatar(
-  backgroundImage: user.imagePath != null
-      ? AssetImage(user.imagePath!)
-      : AssetImage('logo4.png'), // You can replace 'fallback_image_path' with the path of a default image
-),
+                      backgroundImage: user.imagePath != null
+                          ? NetworkImage(user.imagePath as String)
+                          : null,
+                    ),
                     title: Text(
                       user.username,
                       style: TextStyle(
@@ -297,7 +318,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
                     trailing: IconButton(
                       icon: Icon(AntDesign.delete),
                       onPressed: () {
-                       // _removeUser(userId);
+                         _removeUser(user);
                       },
                     ),
                   ),
@@ -310,7 +331,6 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
     );
   }
 }
-
 
 class UserListDialog extends StatefulWidget {
   final List<User> userList;
@@ -326,31 +346,30 @@ class _UserListDialogState extends State<UserListDialog> {
   bool selectAll = false;
 
   Future<void> addMembers(String planId, List<String> userIds) async {
-  final String baseUrl = 'http://192.168.1.7:3000/api';
-  final String endpoint = '/oneplan/$planId/members';
+    final String baseUrl = 'http://192.168.1.7:3000/api';
+    final String endpoint = '/oneplan/$planId/members';
 
-  try {
-    for (String userId in userIds) {
-      final response = await http.post(
-        Uri.parse('$baseUrl$endpoint/$userId'),
-      );
+    try {
+      for (String userId in userIds) {
+        final response = await http.post(
+          Uri.parse('$baseUrl$endpoint/$userId'),
+        );
 
-      if (response.statusCode == 200) {
-        print('Member added successfully');
-      } else {
-        print('Failed to add member: ${response.statusCode}');
+        if (response.statusCode == 200) {
+          print('Member added successfully');
+        } else {
+          print('Failed to add member: ${response.statusCode}');
+        }
       }
-    }
 // Fetch and update the added members
-   //   final List<User> members = await fetchMembers(planId);
-   //   setState(() {
-  //      addedMembers = members;
-  //    });
+      //   final List<User> members = await fetchMembers(planId);
+      //   setState(() {
+      //      addedMembers = members;
+      //    });
     } catch (error) {
-    print('Error adding members: $error');
+      print('Error adding members: $error');
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -397,8 +416,7 @@ class _UserListDialogState extends State<UserListDialog> {
           itemCount: widget.userList.length,
           itemBuilder: (context, index) {
             final User user = widget.userList[index];
-            final bool isSelected =
-                widget.selectedUserIds.contains(user.id);
+            final bool isSelected = widget.selectedUserIds.contains(user.id);
             final bool isDisabled =
                 isSelected; // Disable checkbox for already selected users
             return UserListItem(
@@ -418,6 +436,7 @@ class _UserListDialogState extends State<UserListDialog> {
                 });
               },
               isDisabled: isDisabled,
+              
             );
           },
         ),
@@ -425,20 +444,20 @@ class _UserListDialogState extends State<UserListDialog> {
       actions: <Widget>[
         ElevatedButton(
           onPressed: () async {
-    try {
-      
-      await addMembers('6567bf72e0b164fa214f33d3', widget.selectedUserIds.toList());
-      // Replace 'YOUR_PLAN_ID' with the actual plan ID
-    } catch (e) {
-      print('Error adding members: $e');
-    }
+            try {
+              await addMembers(
+                  '65720ce9bbfa2f36ed8dd5f5', widget.selectedUserIds.toList());
+              // Replace 'YOUR_PLAN_ID' with the actual plan ID
+            } catch (e) {
+              print('Error adding members: $e');
+            }
             // Pass the selected user IDs back to the caller
             Navigator.of(context).pop();
-             Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => AddParticipantsPage(),
-      ),
-    );
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => AddParticipantsPage(),
+              ),
+            );
           },
           style: ElevatedButton.styleFrom(
             primary: Color.fromARGB(255, 39, 26, 99),

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Plan = require('../models/plan');
 const User = require('../models/user');
+const Friendslist = require('../models/friendslist');
 const mongoose = require('mongoose');
 
 // add member 
@@ -98,5 +99,40 @@ router.delete('/oneplan/:planId/members/:userId', async (req, res) => {
               res.status(500).json({ message: 'Internal Server Error' });
             }
           });
+
+  //fetch friendslist 
+  router.get('/memberstoadd/:userid', async (req, res) => {
+    const userId = req.params.userid;
+  
+    try {
+      // Find the friends list by user ID
+      const friendsList = await Friendslist.findOne({ userid: userId });
+  
+      if (!friendsList) {
+        return res.status(404).json({ message: 'Friends list not found' });
+      }
+  
+      // Extract friend IDs from the friends list
+      const friendIds = friendsList.friendid;
+  
+      // Fetch user details for each friend, excluding existing members
+      const existingMembers = await Plan.findOne({ 'members.user': userId });
+      const existingMemberIds = existingMembers ? existingMembers.members.map(member => member.user.toString()) : [];
+  
+      const friendDetails = await User.find(
+        {
+          _id: { $in: friendIds },
+          _id: { $nin: existingMemberIds }, // Exclude existing members
+        },
+        'username profilepicture'
+      );
+  
+      res.json(friendDetails);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'An error occurred while fetching friends.' });
+    }
+  });
+  
 
 module.exports = router;

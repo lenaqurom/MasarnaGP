@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/home.dart';
@@ -87,8 +88,8 @@ class _LoginState extends State<Login> {
         }
         print(
             "Request body: email=$email, username=$username, password=$password");
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Planning()));
+       Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => MyCalendarPage()));
          //  Navigator.pushNamed(context, '/addparticipants');
         // Successful registration
         // You can navigate to a different screen or show a success message

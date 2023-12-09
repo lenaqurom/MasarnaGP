@@ -312,6 +312,18 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
   }
 });
 
+// Function to check for date conflicts between events
+function hasConflict(event1, event2) {
+  const start1 = new Date(event1.starttime);
+  const end1 = new Date(event1.endtime);
+  const start2 = new Date(event2.starttime);
+  const end2 = new Date(event2.endtime);
+
+  // Check if the events overlap
+  return (
+    (start1 <= start2 && end1 >= start2) || (start2 <= start1 && end2 >= start1)
+  );
+}
 
 ///here auto adding winning option done after every vote
 router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/poll-option/:optionId/vote', async (req, res) => {

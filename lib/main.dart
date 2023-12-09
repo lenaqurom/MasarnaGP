@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/stays/staycomment.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -115,7 +116,9 @@ class MyApp extends StatelessWidget {
         "/profilescreen": (context) => ProfileScreen(),
         "/editprofile": (context) => EditProfile(),
         "/staycomment": (context) => StayCommentPage(),
-        "/addparticipants":(context) => AddParticipantsPage(),        // "/singlechat": (context) => SingleChat(),
+        "/addparticipants":(context) => AddParticipantsPage(), 
+        "/calendar":(context) => MyCalendarPage(),   
+         // "/singlechat": (context) => SingleChat(),
         //"/homesections": (context) => HomeSectionsPage(),
       },
     );
