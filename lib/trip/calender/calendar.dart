@@ -213,7 +213,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           _showEventType();
         },
         backgroundColor: Color.fromARGB(255, 39, 26, 99),
-        child: Icon(Icons.add),
+        
+        child: Icon(Icons.add, color: Colors.white,),
       ),
     );
   }
@@ -265,13 +266,14 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                icon: Icon(Icons.schedule, size: 30),
+                icon: Icon(Icons.schedule, size: 30, color: Colors.white),
                 label: Text(
                   'View my schedule',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Montserrat',
+                    color: Colors.white
                   ),
                 ),
               ),
@@ -296,13 +298,14 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                icon: Icon(Icons.group_work, size: 30),
+                icon: Icon(Icons.group_work, size: 30, color: Colors.white),
                 label: Text(
                   'Plan with group',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Montserrat',
+                    color: Colors.white
                   ),
                 ),
               ),
@@ -355,13 +358,14 @@ void _showEventType() {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                icon: Icon(Icons.person, size: 30),
+                icon: Icon(Icons.person, size: 30, color: Colors.white,),
                 label: Text(
                   'Personal Event',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Montserrat',
+                    color: Colors.white
                   ),
                 ),
               ),
@@ -381,13 +385,14 @@ void _showEventType() {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                icon: Icon(Icons.group, size: 30),
+                icon: Icon(Icons.group, size: 30, color: Colors.white,),
                 label: Text(
                   'Group Event',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     fontFamily: 'Montserrat',
+                    color: Colors.white
                   ),
                 ),
               ),
