@@ -18,6 +18,7 @@ class MyCalendarPage extends StatefulWidget {
 class _MyCalendarPageState extends State<MyCalendarPage> {
   List<Appointment> _events = <Appointment>[];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Map<DateTime, String> _groupDayPlans = {};
 
   @override
   void initState() {
@@ -197,13 +198,34 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           ),
         ),
         onTap: (CalendarTapDetails details) {
+          
           if (details.targetElement == CalendarElement.calendarCell &&
               details.appointments != null &&
               details.appointments!.isNotEmpty) {
-            if (details.appointments!
-                .any((event) => event.color == Color(0xFF004aad))) {
-              _showGroupEventDialog(context, details.date!);
-            } else {
+           if (details.appointments!
+    .any((event) => event.color == Color(0xFF004aad))) {
+final DateTime selectedDate = details.date!;
+print('Selected Date: $selectedDate');
+
+print('_groupDayPlans: $_groupDayPlans'); // Print the contents of _groupDayPlans
+
+final groupDayPlanId = _groupDayPlans[selectedDate.toUtc()];
+print('Group Day Plan ID: $groupDayPlanId');
+print('selectedDate.toUtc(): ${selectedDate.toUtc()}');
+print('_groupDayPlans[selectedDate.toUtc()]: ${_groupDayPlans[selectedDate.toUtc()]}');
+
+
+if (groupDayPlanId != null) {
+  _showGroupEventDialog(context, selectedDate, groupDayPlanId);
+} else {
+  // Handle the case where groupDayPlanId is null
+  print("GroupDayPlanId is null!");
+}
+
+
+
+
+} else {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -230,7 +252,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
     );
   }
 
-  void _showGroupEventDialog(BuildContext context, DateTime date) {
+  void _showGroupEventDialog(
+      BuildContext context, DateTime date, String groupPlanId) {
     AwesomeDialog(
       context: context,
       dialogType: DialogType.NO_HEADER,
@@ -294,12 +317,12 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                 height: 40,
                 child: ElevatedButton.icon(
                   onPressed: () {
+                    print(groupPlanId);
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>
-                            SectionsPage(planId: '65720ce9bbfa2f36ed8dd5f5'),
+                        builder: (context) => SectionsPage(planId: groupPlanId),
                       ),
                     );
                   },
@@ -688,17 +711,17 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
         setState(() {
           print("setting state");
           _events.clear();
-
+          _groupDayPlans.clear();
           for (Map<String, dynamic> event in calendarevents) {
-            final String startTimeString = event['starttime'];
-            final DateTime startTimeDateTime = DateTime.parse(startTimeString);
+            final DateTime startTimeDateTime =
+                DateTime.parse(event['starttime']).toLocal();
             final TimeOfDay startTime =
                 TimeOfDay.fromDateTime(startTimeDateTime);
-                print('Start Time: $startTimeDateTime');
-
-            final String endTimeString = event['endtime'];
-            final DateTime endTimeDateTime = DateTime.parse(endTimeString);
+            print('Start Time: $startTimeDateTime');
+            final DateTime endTimeDateTime =
+                DateTime.parse(event['endtime']).toLocal();
             final TimeOfDay endTime = TimeOfDay.fromDateTime(endTimeDateTime);
+
             print('End Time: $endTimeDateTime');
 
             // Create an Appointment object and add it to the _events list
@@ -729,6 +752,14 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           print('Number of events fetched: ${_events.length}');
           print('Events: $_events');
 
+          for (Map<String, dynamic> groupDayPlan in groupDayPlans) {
+              print('Group Day Plan: $groupDayPlan');
+  final DateTime planDate = DateTime.parse(groupDayPlan['date']);
+  final String planId = groupDayPlan['id'];
+      
+            // Add the planId to the groupDayPlans
+            _groupDayPlans[planDate] = planId;
+          }
         });
       } else {
         // Handle error - You might want to show an error message to the user
