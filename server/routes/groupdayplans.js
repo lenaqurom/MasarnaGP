@@ -130,8 +130,8 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     }
 
     // Parse starttime and endtime to Date objects
-    const parsedStartTime = new Date(`1970-01-01T${starttime}:00.000Z`);
-    const parsedEndTime = new Date(`1970-01-01T${endtime}:00.000Z`);
+    const parsedStartTime = new Date(`2023-12-15T${starttime}:00.000Z`);
+    const parsedEndTime = new Date(`2023-12-15T${endtime}:00.000Z`);
 
     // Add the poll option
     targetSection.poll.options.push({

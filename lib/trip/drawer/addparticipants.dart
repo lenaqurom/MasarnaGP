@@ -101,7 +101,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
 
   Future<List<User>> fetchFriendList(String userId) async {
     final response = await http.get(
-      Uri.parse('http://192.168.1.7:3000/api/memberstoadd/$userId'),
+      Uri.parse('http://192.168.1.2:3000/api/memberstoadd/$userId'),
     );
 
     if (response.statusCode == 200) {
@@ -110,7 +110,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
         return User(
           friend['username'],
           friend['_id'],
-          'http://192.168.1.7:3000/' +
+          'http://192.168.1.2:3000/' +
               friend['profilepicture'].replaceAll('\\', '/'),
         );
       }).toList();
@@ -120,7 +120,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
   }
 
   Future<List<User>> fetchMembers(String planId) async {
-    final String baseUrl = 'http://192.168.1.7:3000/api';
+    final String baseUrl = 'http://192.168.1.2:3000/api';
     final String endpoint = '/oneplan/$planId/members';
 
     try {
@@ -133,7 +133,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
           return User(
             member['username'],
             member['user'],
-            'http://192.168.1.7:3000/' +
+            'http://192.168.1.2:3000/' +
                     member['profilepicture'].replaceAll('\\', '/') ??
                 null,
           );
@@ -182,7 +182,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
         try {
           // Make the DELETE request to remove the user from the plan
           String planId = '65720ce9bbfa2f36ed8dd5f5'; // Replace with your actual plan ID
-          String url = 'http://192.168.1.7:3000/api/oneplan/$planId/members/$userId';
+          String url = 'http://192.168.1.2:3000/api/oneplan/$planId/members/$userId';
 
           final response = await http.delete(Uri.parse(url));
 
@@ -346,7 +346,7 @@ class _UserListDialogState extends State<UserListDialog> {
   bool selectAll = false;
 
   Future<void> addMembers(String planId, List<String> userIds) async {
-    final String baseUrl = 'http://192.168.1.7:3000/api';
+    final String baseUrl = 'http://192.168.1.2:3000/api';
     final String endpoint = '/oneplan/$planId/members';
 
     try {

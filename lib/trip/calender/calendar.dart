@@ -90,7 +90,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600)),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/addparticipants');
                 },
               ),
               ListTile(
@@ -226,7 +226,7 @@ if (groupDayPlanId != null) {
 
 
 } else {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => DayViewPage(
@@ -690,7 +690,7 @@ if (groupDayPlanId != null) {
 
   Future<void> _fetchEventsFromBackend() async {
     final String baseUrl =
-        'http://192.168.1.7:3000/api'; // Replace with your actual API base URL
+        'http://192.168.1.2:3000/api'; // Replace with your actual API base URL
     final String planId =
         '65720ce9bbfa2f36ed8dd5f5'; // Replace with your actual planId
     final String userId = Provider.of<GlobalState>(context, listen: false)

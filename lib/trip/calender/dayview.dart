@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:intl/intl.dart';
@@ -20,32 +22,6 @@ class DayViewPage extends StatefulWidget {
 
   @override
   _DayViewPageState createState() => _DayViewPageState();
-  void addExploredEvent(
-      DateTime selectedDay,
-      TimeOfDay startTime,
-      TimeOfDay endTime,
-      String title,
-      String price,
-      String location,
-      bool isGroupEvent) {
-    DayViewPage.dayViewStateKey.currentState?._addExploredEvent(
-      selectedDay,
-      startTime,
-      endTime,
-      title,
-      price,
-      location,
-      isGroupEvent,
-    );
-    print('Selected Day: ${DateFormat('yyyy-MM-dd').format(selectedDay)}');
-    // print('Start Time: ${startTime.hour}:${startTime.minute}');
-    // print('End Time: ${endTime.hour}:${endTime.minute}');
-    print('Start Time: ${_formatTimeOfDay(startTime)}');
-    print('End Time: ${_formatTimeOfDay(endTime)}');
-    print('Event Name: $title');
-    print('Event Price: $price');
-    print('Location Event: $location');
-  }
 
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();
@@ -60,8 +36,10 @@ class _DayViewPageState extends State<DayViewPage> {
   TextEditingController eventNameController = TextEditingController();
   TextEditingController eventPriceController = TextEditingController();
   final GlobalKey _calendarKey = GlobalKey();
-  int selectedMonth = 0; 
+  int selectedMonth = 0;
   int selectedYear = 0;
+  String eventName = '';
+  String eventPrice = '0';
   @override
   void initState() {
     super.initState();
@@ -83,6 +61,7 @@ class _DayViewPageState extends State<DayViewPage> {
         selectedMonth = widget.selectedDate.month;
         selectedYear = widget.selectedDate.year;
       });
+      _fetchCalendarEvents();
     }
   }
 
@@ -112,24 +91,23 @@ class _DayViewPageState extends State<DayViewPage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.explore,
-              color: Color.fromARGB(255, 39, 26, 99),
-            ),
-            onPressed: () async {
-              DateTime? selectedDate = await Navigator.push(
+              icon: Icon(
+                Icons.explore,
+                color: Color.fromARGB(255, 39, 26, 99),
+              ),
+              onPressed: () {
+                /*    DateTime? selectedDate = await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ExplorePage(
+                builder: (context) => ExplorePage(
                       widget.selectedDate ?? DateTime.now(), widget),
                 ),
               );
               if (selectedDate != null) {
                 // Handle the selected date returned from ExplorePage
                 // You can update the state or perform any other necessary actions
-              }
-            },
-          ),
+            */
+              }),
         ],
       ),
       body: SfCalendar(
@@ -179,13 +157,169 @@ class _DayViewPageState extends State<DayViewPage> {
         onPressed: () {
           _showEventForm(context, widget.selectedDate);
         },
-        child: Icon(Icons.add, color: Colors.white,),
+        child: Icon(
+          Icons.add,
+          color: Colors.white,
+        ),
       ),
     );
   }
 
+  Future<void> _fetchCalendarEvents() async {
+    try {
+      // Replace with your API endpoint and parameters
+      String apiUrl =
+          'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/655e701ae784f2d47cd02151/calendarevents/${formatDateForAPI(widget.selectedDate)}';
+
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        final List<Map<String, dynamic>> eventsData =
+            List<Map<String, dynamic>>.from(
+                json.decode(response.body)['events']);
+
+        final List<Appointment> fetchedEvents = eventsData.map((eventData) {
+          return Appointment(
+            notes: eventData['user'],
+            id: eventData['_id'],
+            startTime: DateTime.parse(eventData['starttime']),
+            endTime: DateTime.parse(eventData['endtime']),
+            subject: eventData['name'],
+            resourceIds: [eventData['price'].toString()],
+            color: eventData['type'] == 'group'
+                ? Color(0xFF004aad)
+                : Color(0xFFcb6ce6),
+          );
+        }).toList();
+
+        setState(() {
+          widget.events.clear();
+          widget.events.addAll(fetchedEvents);
+        });
+      } else {
+        print('Failed to fetch calendar events: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching calendar events: $error');
+    }
+  }
+
+  String formatDateForAPI(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+
+  Future<void> _addPersonalEvent(DateTime selectedDate, TimeOfDay startTime,
+      TimeOfDay endTime, String eventName, String eventPrice) async {
+    // Print the request body for debugging
+    print('Request Body: ${json.encode({
+          'name': eventName,
+          'date': formatDateForAPI(selectedDate),
+          'price': eventPrice,
+          'starttime': _formatTimeOfDay(startTime),
+          'endtime': _formatTimeOfDay(endTime),
+          // Add other event details as needed
+        })}');
+    print('Event Name: ${eventName}');
+
+    // Replace with your API endpoint
+    String apiUrl =
+        'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/personalplan/655e701ae784f2d47cd02151';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        body: json.encode({
+          'name': eventName,
+          'date': formatDateForAPI(selectedDate),
+          'price': eventPrice,
+          'starttime': _formatTimeOfDay(startTime),
+          'endtime': _formatTimeOfDay(endTime),
+          // Add other event details as needed
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 201) {
+        print('Personal event added successfully');
+        // Refresh the calendar events after adding a new event
+        _fetchCalendarEvents();
+      } else {
+        print('Failed to add personal event: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error adding personal event: $error');
+    }
+  }
+
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dateTime =
+        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    final formattedTime = DateFormat.Hm().format(dateTime);
+    return formattedTime;
+  }
+
+  Future<void> _updateEventOnServer(Appointment event) async {
+    try {
+      print('put request');
+      final response = await http.put(
+        Uri.parse(
+            'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/${event.notes}/calendarevents/${event.id}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: json.encode({
+          'name': event.subject,
+          'starttime': event.startTime.toUtc().toIso8601String(),
+          'endtime': event.endTime.toUtc().toIso8601String(),
+          'price': event.resourceIds?.first?.toString() ?? '0',
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Event updated successfully');
+        // Handle success if needed
+      } else {
+        print('Failed to update event. Status code: ${response.statusCode}');
+        // Handle error if needed
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error updating event: $e');
+
+      // Handle network or other errors
+    }
+  }
+
+  Future<void> _deleteEventOnServer(String eventId, String userId) async {
+    try {
+      final response = await http.delete(
+        Uri.parse(
+            'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/${userId}/calendarevents/${eventId}'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Event deleted successfully');
+        // Handle success if needed
+      } else {
+        print('Failed to delete event. Status code: ${response.statusCode}');
+        // Handle error if needed
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error deleting event: $e');
+      // Handle network or other errors
+    }
+  }
+
   Future<void> _showEditDeleteDialog(
       BuildContext context, Appointment existingEvent) async {
+    print("Before deleting in dialog - User ID: ${existingEvent.notes}");
+    print("Before deleting in dialog - Event ID: ${existingEvent.id}");
+
     AwesomeDialog(
       context: context,
       dialogType: DialogType.NO_HEADER,
@@ -224,15 +358,18 @@ class _DayViewPageState extends State<DayViewPage> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  icon: Icon(Icons.edit, size: 20, color: Colors.white,),
+                  icon: Icon(
+                    Icons.edit,
+                    size: 20,
+                    color: Colors.white,
+                  ),
                   label: Text(
                     'Edit',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                      color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Montserrat',
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -255,11 +392,10 @@ class _DayViewPageState extends State<DayViewPage> {
                   label: Text(
                     'Delete',
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Montserrat',
-                      color: Colors.white
-                    ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Montserrat',
+                        color: Colors.white),
                   ),
                 ),
               ),
@@ -287,20 +423,18 @@ class _DayViewPageState extends State<DayViewPage> {
       eventPrice: eventPrice,
       selectedStartTime: selectedStartTime,
       selectedEndTime: selectedEndTime,
+      eventId: existingEvent.id.toString(),
+      userId: existingEvent.notes.toString(),
     );
   }
 
   void _deleteEvent(Appointment existingEvent) {
+    String eventId = existingEvent.id.toString();
+    String userId = existingEvent.notes.toString();
+    _deleteEventOnServer(eventId, userId);
     setState(() {
       widget.events.remove(existingEvent);
     });
-
-    print('Event deleted:');
-    print('Event Name: ${existingEvent.subject}');
-    print('Event Price: ${existingEvent.resourceIds?.first}');
-    print('Event Start Time: ${existingEvent.startTime}');
-    print('Event End Time: ${existingEvent.endTime}');
-    print('-----');
   }
 
   Future<void> _showEventForm(
@@ -310,8 +444,8 @@ class _DayViewPageState extends State<DayViewPage> {
       hour: (selectedStartTime.hour + 1) % TimeOfDay.hoursPerDay,
     );
 
-    String eventName = '';
-    String eventPrice = '0';
+    eventName = '';
+    eventPrice = '0';
 
     await AwesomeDialog(
       context: context,
@@ -378,13 +512,12 @@ class _DayViewPageState extends State<DayViewPage> {
       btnOkText: 'Add',
       btnOkOnPress: () {
         if (eventName.isNotEmpty) {
-          _addEvent(
+          _addPersonalEvent(
             selectedDate,
             selectedStartTime,
             selectedEndTime,
             eventName,
             eventPrice,
-            false,
           );
         } else {
           AwesomeDialog(
@@ -484,6 +617,8 @@ class _DayViewPageState extends State<DayViewPage> {
     required String eventPrice,
     required TimeOfDay selectedStartTime,
     required TimeOfDay selectedEndTime,
+    required String eventId,
+    required String userId,
   }) async {
     TextEditingController eventNameController =
         TextEditingController(text: eventName);
@@ -679,141 +814,12 @@ class _DayViewPageState extends State<DayViewPage> {
             updatedEndTime,
             eventName,
             eventPrice,
+            eventId,
+            userId,
           );
         }
       },
     ).show();
-  }
-
-  void _addExploredEvent(
-    DateTime selectedDate,
-    TimeOfDay startTime,
-    TimeOfDay endTime,
-    String eventName,
-    String eventPrice,
-    String eventLocation,
-    bool isGroupEvent,
-  ) {
-    final DateTime startDate = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      startTime.hour,
-      startTime.minute,
-    );
-    final DateTime endDate = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      endTime.hour,
-      endTime.minute,
-    );
-    // Check for conflicts
-    List<Appointment> conflictingEvents = widget.events
-        .where(
-          (event) =>
-              (event.startTime.isBefore(endDate) &&
-                  event.endTime.isAfter(startDate)) ||
-              (event.startTime.isAfter(startDate) &&
-                  event.startTime.isBefore(endDate)) ||
-              (event.endTime.isAfter(startDate) &&
-                  event.endTime.isBefore(endDate)),
-        )
-        .toList();
-
-    if (conflictingEvents.isNotEmpty) {
-      // Remove conflicting events
-      setState(() {
-        widget.events.removeWhere(
-          (event) => conflictingEvents.contains(event),
-        );
-      });
-    }
-
-    // Add the new event
-    setState(() {
-      widget.events.add(Appointment(
-        startTime: startDate,
-        endTime: endDate,
-        subject: eventName,
-        resourceIds: [eventPrice],
-        color: isGroupEvent ? Color(0xFF004aad) : Color(0xFFcb6ce6),
-      ));
-    });
-
-    print('Event added:');
-    print('Event Name: $eventName');
-    print('Event Price: $eventPrice');
-    print('Event Location: $eventLocation');
-    print('Event Start Time: $startDate');
-    print('Event End Time: $endDate');
-    print('-----');
-
-    // _budgetEvent(eventName, eventPrice, selectedDate, isGroupEvent);
-  }
-
-  void _addEvent(
-    DateTime selectedDate,
-    TimeOfDay startTime,
-    TimeOfDay endTime,
-    String eventName,
-    String eventPrice,
-    bool isGroupEvent,
-  ) {
-    final DateTime startDate = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      startTime.hour,
-      startTime.minute,
-    );
-    final DateTime endDate = DateTime(
-      selectedDate.year,
-      selectedDate.month,
-      selectedDate.day,
-      endTime.hour,
-      endTime.minute,
-    );
-
-    // Check for conflicts
-    List<Appointment> conflictingEvents = widget.events
-        .where(
-          (event) =>
-              (event.startTime.isBefore(endDate) &&
-                  event.endTime.isAfter(startDate)) ||
-              (event.startTime.isAfter(startDate) &&
-                  event.startTime.isBefore(endDate)) ||
-              (event.endTime.isAfter(startDate) &&
-                  event.endTime.isBefore(endDate)),
-        )
-        .toList();
-
-    if (conflictingEvents.isNotEmpty) {
-      // Remove conflicting events
-      setState(() {
-        widget.events.removeWhere(
-          (event) => conflictingEvents.contains(event),
-        );
-      });
-    }
-
-    // Add the new event
-    setState(() {
-      widget.events.add(Appointment(
-        startTime: startDate,
-        endTime: endDate,
-        subject: eventName,
-        resourceIds: [eventPrice],
-        color: isGroupEvent ? Color(0xFF004aad) : Color(0xFFcb6ce6),
-      ));
-    });
-
-    print('Event added:');
-    print('Event Name: $eventName');
-    print('Event Price: $eventPrice');
-    print('Event Start Time: $startDate');
-    print('Event End Time: $endDate');
-    print('-----');
   }
 
   void _updateEvent(
@@ -823,7 +829,9 @@ class _DayViewPageState extends State<DayViewPage> {
     TimeOfDay updatedEndTime,
     String eventName,
     String eventPrice,
-  ) {
+    String eventId,
+    String userId,
+  ) async {
     final DateTime startDate = DateTime(
       selectedDate.year,
       selectedDate.month,
@@ -840,7 +848,7 @@ class _DayViewPageState extends State<DayViewPage> {
     );
 
     // Check for conflicts
-    List<Appointment> conflictingEvents = widget.events
+    /* List<Appointment> conflictingEvents = widget.events
         .where(
           (event) =>
               event != existingEvent &&
@@ -860,7 +868,7 @@ class _DayViewPageState extends State<DayViewPage> {
           (event) => conflictingEvents.contains(event),
         );
       });
-    }
+    }*/
 
     // Update the event
     setState(() {
@@ -870,11 +878,7 @@ class _DayViewPageState extends State<DayViewPage> {
       existingEvent.resourceIds = [eventPrice];
     });
 
-    print('Event updated:');
-    print('Event Name: ${existingEvent.subject}');
-    print('Event Price: ${existingEvent.resourceIds?.first}');
-    print('Event Start Time: ${existingEvent.startTime}');
-    print('Event End Time: ${existingEvent.endTime}');
-    print('-----');
+    await _updateEventOnServer(existingEvent);
+    _fetchCalendarEvents();
   }
 }
