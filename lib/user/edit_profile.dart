@@ -23,7 +23,7 @@ class _EditProfileState extends State<EditProfile> {
   File? selectedImage;
   RiveAsset selectedBottomNav = bottomNavs.elementAt(3);
   final _name = TextEditingController();
-  final apiService = ApiService('http://192.168.1.5:3000/api');
+  final apiService = ApiService('http://192.168.1.7:3000/api');
 
   void dispose() {
     _name.dispose();
@@ -39,7 +39,7 @@ class _EditProfileState extends State<EditProfile> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.5:3000/api/profilepage'),
+        Uri.parse('http://192.168.1.7:3000/api/profilepage'),
       );
 
       request.fields['name'] = name;

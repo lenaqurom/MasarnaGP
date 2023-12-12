@@ -20,29 +20,42 @@ router.post('/oneplan', upload.single('image'), async (req, res) => {
       imagePath = req.file.path.replace(/\\/g, '/');
     }
 
+    // Fetch user details from the User model
+    const user = await User.findById(userid);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
     const newPlan = new Plan({
-      members: [{ user: userid }],
+      members: [{
+        user: userid,
+        profilepicture: user.profilepicture,
+        username: user.username,
+      }],
       name: name,
       image: imagePath ? path.join('uploads', path.basename(imagePath)) : '',
       description: description,
       calendarevents: [],
       groupdayplans: [],
-      
     });
 
     await newPlan.save();
+    
     const populatedPlan = await Plan.findById(newPlan._id)
-    .populate({
-      path: 'members.user',
-      select: 'profilepicture username',
-    })
-    .exec();
+      .populate({
+        path: 'members.user',
+        select: 'profilepicture username',
+      })
+      .exec();
+
     res.status(201).json({ message: 'Plan added successfully', plan: populatedPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
   
 

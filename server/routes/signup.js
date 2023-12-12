@@ -37,8 +37,8 @@ router.post('/signup', async (req, res) => {
     await newUser.save();
 
     const usersfl = new FriendsList({
-      userName: username,
-      friendName: '',
+      userid: newUser._id,
+      friendid: [],
     });
     await usersfl.save();
 

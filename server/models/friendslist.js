@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const friendslistSchema = new mongoose.Schema({
-  userName: String,
-  friendName: String,
+  userid: String,
+  friendid: [String],
 });
 
 const FriendsList = mongoose.model('FriendsList', friendslistSchema);

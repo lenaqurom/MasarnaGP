@@ -14,6 +14,8 @@ const profilepageRoutes = require('./routes/profilepage');
 const friendslistRoutes = require('./routes/friendslist');
 const oneplanRoutes = require('./routes/oneplan');
 const groupdayplansRoutes = require('./routes/groupdayplans');
+const calendarviewRoutes = require('./routes/calendarview');
+const calendareventsRoutes = require('./routes/calendarevents');
 app.use(bodyParser.json());
 
 // MongoDB Atlas connection
@@ -34,6 +36,8 @@ app.use('/api', profilepageRoutes);
 app.use('/api', friendslistRoutes);
 app.use('/api', oneplanRoutes);
 app.use('/api', groupdayplansRoutes);
+app.use('/api', calendarviewRoutes);
+app.use('/api', calendareventsRoutes);
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

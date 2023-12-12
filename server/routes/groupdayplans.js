@@ -19,9 +19,17 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
     // Extract the date from the request body
     const { date } = req.body;
 
+    const existingGroupDayPlan = existingPlan.groupdayplans.find(
+      (plan) => plan.date && plan.date.toISOString() === new Date(date).toISOString()
+    );
+
+    if (existingGroupDayPlan) {
+      return res.status(400).json({ error: 'Group day plan already exists for this date' });
+    }
+
     // Create a new group day plan with the provided date and empty sections
     const groupDayPlan = {
-      date: date,
+      date: new Date(date), // Store as a Date object
       sections: [
         { name: 'eateries', poll: { options: [] }, comments: [] },
         { name: 'flights', poll: { options: [] }, comments: [] },
@@ -32,16 +40,54 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
 
     // Add the new group day plan to the existing plan
     existingPlan.groupdayplans.push(groupDayPlan);
+    await existingPlan.save();
+
+   // const currentTime = new Date();
+    const newEvent = {
+      type: 'group',
+      sectionname: '',
+      user: 1,
+      name: 'dummy',
+      date: groupDayPlan.date,
+      price: 0,
+      location: '',
+      starttime: groupDayPlan.date,
+      endtime: groupDayPlan.date,
+    };
+
+    // Iterate through each member's calendar and add the new event
+    existingPlan.members.forEach((member) => {
+      const memberCalendar = existingPlan.calendars.find(
+        (cal) => cal.user.toString() === member.user.toString()
+      );
+
+      if (!memberCalendar) {
+        // If the member's calendar doesn't exist, create it
+        existingPlan.calendars.push({
+          user: member.user,
+          calendarevents: [],
+        });
+      }
+
+      // Find the user's calendar again (either existing or newly created)
+      const updatedMemberCalendar = existingPlan.calendars.find(
+        (cal) => cal.user.toString() === member.user.toString()
+      );
+
+      // Add the new event to the member's calendar
+      updatedMemberCalendar.calendarevents.push(newEvent);
+    });
 
     // Save the updated plan
     await existingPlan.save();
 
-    res.status(201).json({ message: 'Group day plan added successfully', plan: existingPlan });
+    res.status(201).json({ message: 'Group day plan added successfully', plan: groupDayPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 
 router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/poll-option', async (req, res) => {
@@ -72,8 +118,8 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     }
 
     // Parse starttime and endtime to Date objects
-    const parsedStartTime = new Date(`1970-01-01T${starttime}:00.000Z`);
-    const parsedEndTime = new Date(`1970-01-01T${endtime}:00.000Z`);
+    const parsedStartTime = new Date(`2023-12-15T${starttime}:00.000Z`);
+    const parsedEndTime = new Date(`2023-12-15T${endtime}:00.000Z`);
 
     // Add the poll option
     targetSection.poll.options.push({
@@ -226,6 +272,21 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
       return res.status(404).json({ error: 'Poll option not found' });
     }
 
+     // Remove the poll option from members' personal calendars
+     existingPlan.members.forEach((member) => {
+      const memberCalendar = existingPlan.calendars.find((cal) => cal.user.toString() === member.user.toString());
+
+      if (memberCalendar) {
+        memberCalendar.calendarevents = memberCalendar.calendarevents.filter(
+          (event) =>
+            !(event.type === 'group' &&
+            event.sectionname === targetSection.name &&
+            event.date.toISOString() === targetGroupDayPlan.date.toISOString() &&
+            event.name === targetOption.name) // Adjust the condition based on your data structure
+        );
+      }
+    });
+
     // Remove the poll option
     targetSection.poll.options.pull(targetOption);
 
@@ -239,8 +300,20 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
   }
 });
 
+// Function to check for date conflicts between events
+function hasConflict(event1, event2) {
+  const start1 = new Date(event1.starttime);
+  const end1 = new Date(event1.endtime);
+  const start2 = new Date(event2.starttime);
+  const end2 = new Date(event2.endtime);
 
-///here auto adding winning option should be done after every vote
+  // Check if the events overlap
+  return (
+    (start1 <= start2 && end1 >= start2) || (start2 <= start1 && end2 >= start1)
+  );
+}
+
+///here auto adding winning option done after every vote
 router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/poll-option/:optionId/vote', async (req, res) => {
   try {
     const planId = req.params.planId;
@@ -280,15 +353,76 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
 
     await existingPlan.save();
 
-    res.status(200).json({
-      message: 'Vote recorded successfully',
-      votedOption: targetOption, // Include information about the voted option
+
+// Check which poll option is the winner
+const winningOption = targetSection.poll.options.reduce((winner, option) => (option.votes > winner.votes ? option : winner), targetSection.poll.options[0]);
+
+// Check if there's a clear winner (no tie)
+const isClearWinner = targetSection.poll.options.filter(option => option.votes === winningOption.votes).length === 1;
+
+// Proceed only if there's a clear winner
+if (isClearWinner) {
+      // Remove the previously winning poll option from all members' calendars if it exists for the same sectionname and date
+      existingPlan.members.forEach((member) => {
+        const memberCalendar = existingPlan.calendars.find((cal) => cal.user.toString() === member.user.toString());
+
+        if (memberCalendar) {
+          memberCalendar.calendarevents = memberCalendar.calendarevents.filter(
+            (event) =>{ const shouldRemove=
+              event.type === 'group' &&
+              event.sectionname === targetSection.name &&
+              event.date.toISOString() === targetGroupDayPlan.date.toISOString();
+
+              if(shouldRemove){
+                console.log('Date comparison:', event.date.toISOString(), targetGroupDayPlan.date.toISOString());
+                console.log('Section comparison:', event.sectionname, targetSection.name);
+              }
+              return !shouldRemove; // Return true for items that should not be removed
+            });
+        }
+      });
+
       
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Server error' });
+
+  // Create a calendarevent based on the winning option and add it to everyone's calendars
+  const newEvent = {
+    type: 'group',
+    user: 1, // replace with actual user id
+    name: winningOption.name,
+    date: targetGroupDayPlan.date,
+    starttime: winningOption.starttime,
+    endtime: winningOption.endtime,
+    location: winningOption.location,
+    price: winningOption.price,
+    sectionname: targetSection.name, // Add the sectionname to the calendarevent
+  };
+ // Remove conflicting events and add the new event
+ existingPlan.members.forEach((member) => {
+  const memberCalendar = existingPlan.calendars.find((cal) => cal.user.toString() === member.user.toString());
+
+  if (memberCalendar) {
+    // Remove conflicting events
+    memberCalendar.calendarevents = memberCalendar.calendarevents.filter(
+      (event) => !(event.type === 'group' && hasConflict(event, newEvent))
+    );
+
+    // Add the new event
+    memberCalendar.calendarevents.push(newEvent);
   }
+});
+  // Save the updated plan with the new calendarevent
+  await existingPlan.save();
+}
+
+res.status(200).json({
+  message: 'Vote recorded successfully',
+  votedOption: targetOption, // Include information about the voted option
+  winningOption: winningOption, // Include information about the winning option
+});
+} catch (error) {
+console.error(error);
+res.status(500).json({ error: 'Server error' });
+}
 });
 
 

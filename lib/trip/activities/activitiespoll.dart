@@ -116,7 +116,7 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
 
   Future<void> voteForOption(String optionId) async {
   final String apiUrl =
-      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-option/$optionId/vote';
+      'http://192.168.1.3:3000/api/oneplan/65720ce9bbfa2f36ed8dd5f5/groupdayplan/65721675218150f8f8037d64/section/activities/poll-option/$optionId/vote';
 
   try {
     final response = await http.post(Uri.parse(apiUrl));
@@ -176,7 +176,7 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
 
     // API endpoint details
     final String apiUrl =
-        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-option'; // Your full URL
+        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/65721675218150f8f8037d64/section/activities/poll-option'; // Your full URL
 
     // Your backend API expects a JSON body
     final Map<String, dynamic> requestBody = {
@@ -558,7 +558,7 @@ Widget getVoteLine(int numvotes) {
 
   Future<void> deleteOption(String optionId) async {
   final String apiUrl =
-      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-option/$optionId';
+      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/65721675218150f8f8037d64/section/activities/poll-option/$optionId';
 
   try {
     final response = await http.delete(Uri.parse(apiUrl));

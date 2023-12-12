@@ -1,12 +1,14 @@
-import 'package:flutter/material.dart';
+import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/dayview.dart';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class BudgetPage extends StatefulWidget {
   const BudgetPage({Key? key}) : super(key: key);
-    static late GlobalKey<_BudgetPageState> budgetStateKey =
-      GlobalKey<_BudgetPageState>();
-
-
+  // static late GlobalKey<_BudgetPageState> budgetStateKey =
+  //   GlobalKey<_BudgetPageState>();
 
   @override
   State<BudgetPage> createState() => _BudgetPageState();
@@ -16,36 +18,50 @@ class BudgetPage extends StatefulWidget {
   //   // Assign the key to the state
   //   BudgetPage.budgetStateKey = GlobalKey<_BudgetPageState>();
   // }
-
 }
 
 class _BudgetPageState extends State<BudgetPage> {
-  List<Event> events = [
-    Event(
-      name: 'Personal Event 1',
-      type: EventType.personal,
-      price: 50.0,
-      date: DateTime(2023, 12, 12),
-    ),
-    Event(
-      name: 'Personal Event 2',
-      type: EventType.personal,
-      price: 30.0,
-      date: DateTime(2023, 12, 14),
-    ),
-    Event(
-      name: 'Group Event 1',
-      type: EventType.group,
-      price: 100.0,
-      date: DateTime(2023, 12, 12),
-    ),
-    Event(
-      name: 'Group Event 2',
-      type: EventType.group,
-      price: 75.0,
-      date: DateTime(2023, 12, 14),
-    ),
-  ];
+  List<Event> events = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchBudgetDetails(); // Fetch budget details when the page is initialized
+  }
+
+  Future<void> fetchBudgetDetails() async {
+    try {
+      final String userId = Provider.of<GlobalState>(context, listen: false).id;
+    final Uri uri =
+          Uri.parse('http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/$userId/calendarevents');
+      final response = await http.get(
+          uri);
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> calendarevents = data['calendarevents'];
+
+        setState(() {
+          events = calendarevents
+              .map((eventData) => Event(
+                    name: eventData['name'],
+                    type: eventData['type'] == 'group'
+                        ? EventType.group
+                        : EventType.personal,
+                    price: eventData['price'].toDouble(),
+                    date: DateTime.parse(eventData['date']),
+                  ))
+              .toList();
+        });
+      } else {
+        // Handle error
+        print('Failed to fetch budget details');
+      }
+    } catch (error) {
+      // Handle error
+      print('Error: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -108,16 +124,25 @@ class _BudgetPageState extends State<BudgetPage> {
     // Group events by date
     Map<DateTime, List<Event>> groupedEvents = {};
     for (var event in events) {
+if (event.type == EventType.group && event.name == 'dummy') {
+      continue;
+    }
+
       if (!groupedEvents.containsKey(event.date)) {
         groupedEvents[event.date] = [];
       }
       groupedEvents[event.date]?.add(event);
     }
 
+    
+  // Sort dates from least recent to most recent
+  var sortedDates = groupedEvents.keys.toList()
+    ..sort((a, b) => a.compareTo(b));
+
     // Build cards for each date
-    groupedEvents.forEach((date, events) {
-      widgets.add(_buildDateCard(date, events));
-    });
+    for (var date in sortedDates) {
+    widgets.add(_buildDateCard(date, groupedEvents[date]!));
+  }
 
     return widgets;
   }
@@ -155,58 +180,58 @@ class _BudgetPageState extends State<BudgetPage> {
     );
   }
 
-Widget _buildEventCard(Event event) {
-  return ClipRRect(
-    borderRadius: BorderRadius.circular(22),
-    child: Container(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        color: event.type == EventType.personal
-            ? Colors.pink[50]
-            : Colors.blue[50],
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Stack(
-        children: [
-          ListTile(
-            contentPadding: EdgeInsets.all(16),
-            title: Text(
-              event.name,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-                color: event.type == EventType.personal
-                    ? Colors.pink[800]
-                    : Color(0xFF004aad),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 0.0,
-            right: 0.0,
-            child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 13 * 1.5,
-                vertical: 15 / 4,
-              ),
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 39, 26, 99),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
+  Widget _buildEventCard(Event event) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(22),
+      child: Container(
+        margin: EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: event.type == EventType.personal
+              ? Colors.pink[50]
+              : Colors.blue[50],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Stack(
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.all(16),
+              title: Text(
+                event.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: event.type == EventType.personal
+                      ? Colors.pink[800]
+                      : Color(0xFF004aad),
                 ),
               ),
-              child: Text(
-                "\$${event.price}",
-                style: TextStyle(color: Colors.white),
+            ),
+            Positioned(
+              top: 0.0,
+              right: 0.0,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 13 * 1.5,
+                  vertical: 15 / 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Color.fromARGB(255, 39, 26, 99),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                ),
+                child: Text(
+                  "\$${event.price}",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildTotalForDate(List<Event> events) {
     double totalForDate = _calculateTotalForDate(events);
@@ -371,7 +396,9 @@ class EventSearch extends SearchDelegate<Event> {
   Widget buildResults(BuildContext context) {
     final results = events.where((event) =>
         '${event.date.day}/${event.date.month}/${event.date.year}'
-            .contains(query));
+            .contains(query))
+                  .where((event) => !(event.type == EventType.group && event.name == 'dummy'));
+
 
     return _buildSearchResults(results);
   }
@@ -380,7 +407,9 @@ class EventSearch extends SearchDelegate<Event> {
   Widget buildSuggestions(BuildContext context) {
     final results = events.where((event) =>
         '${event.date.day}/${event.date.month}/${event.date.year}'
-            .contains(query));
+            .contains(query))
+                  .where((event) => !(event.type == EventType.group && event.name == 'dummy'));
+
 
     return _buildSearchResults(results);
   }
@@ -463,3 +492,4 @@ class EventSearch extends SearchDelegate<Event> {
     );
   }
 }
+
