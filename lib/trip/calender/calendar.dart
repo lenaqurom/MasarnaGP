@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/datetime.dart';
 import 'package:masarna/trip/calender/dayview.dart';
+import 'package:masarna/trip/drawer/calculatebudget.dart';
 import 'package:masarna/trip/homesection.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -115,7 +116,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600)),
                 onTap: () {
-                  Navigator.pop(context);
+                 Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => BudgetPage()));
                 },
               ),
               ListTile(
