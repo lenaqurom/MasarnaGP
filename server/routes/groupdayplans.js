@@ -40,21 +40,9 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
 
     // Add the new group day plan to the existing plan
     existingPlan.groupdayplans.push(groupDayPlan);
-
-    // Save the updated plan
     await existingPlan.save();
 
-    ////dummy calendar event part
-
-    // Get the current time
-    const currentTime = new Date();
-
-    // Set starttime to the current time
-    // groupDayPlan.starttime = currentTime;
-
-    // Set endtime to one minute from the current time
-    // groupDayPlan.endtime = new Date(currentTime.getTime() + 60000); // 60000 milliseconds = 1 minute
-
+   // const currentTime = new Date();
     const newEvent = {
       type: 'group',
       sectionname: '',
@@ -63,8 +51,8 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
       date: groupDayPlan.date,
       price: 0,
       location: '',
-      starttime: currentTime,
-      endtime: new Date(currentTime.getTime() + 60000),
+      starttime: groupDayPlan.date,
+      endtime: groupDayPlan.date,
     };
 
     // Iterate through each member's calendar and add the new event
@@ -93,7 +81,7 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
     // Save the updated plan
     await existingPlan.save();
 
-    res.status(201).json({ message: 'Group day plan added successfully', plan: existingPlan });
+    res.status(201).json({ message: 'Group day plan added successfully', plan: groupDayPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });

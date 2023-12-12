@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:icons_flutter/icons_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/datetime.dart';
 import 'package:masarna/trip/calender/dayview.dart';
@@ -529,13 +530,13 @@ if (groupDayPlanId != null) {
       btnOkText: 'Add',
       btnOkOnPress: () {
         if (eventName.isNotEmpty) {
-          _addEvent(
+          _addPersonalEvent(
             selectedDate,
             selectedStartTime,
             selectedEndTime,
             eventName,
             eventPrice,
-            false, // personal events
+            // personal events
           );
         } else {
           _showErrorDialog(context, 'Event Name is required.');
@@ -588,17 +589,100 @@ if (groupDayPlanId != null) {
       ),
       btnOkColor: Color.fromRGBO(39, 26, 99, 1),
       btnOkText: 'Add',
-      btnOkOnPress: () {
-        _addEvent(
-          selectedDate,
-          selectedStartTime,
-          selectedEndTime,
-          eventName,
-          eventPrice,
-          true, // group events
-        );
+      btnOkOnPress: () async {
+        try {
+    // Replace the URL with your actual backend endpoint
+    final String apiUrl = 'http://192.168.1.2:3000/api/oneplan/65720ce9bbfa2f36ed8dd5f5/groupdayplan';
+
+  final formattedDate = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+
+    final response = await http.post(
+      Uri.parse(apiUrl),
+      body: jsonEncode({
+        'date': formattedDate,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 201) {
+      final Map<String, dynamic> responseData = json.decode(response.body);
+
+      // Update the UI and fetch events
+      setState(() {
+        _fetchEventsFromBackend();
+      });
+
+      // Show a success message or perform any other actions
+      print(responseData['message']);
+      print(responseData['plan']);
+    } else {
+      // Handle errors
+      print('Failed to add group event. Status code: ${response.statusCode}');
+    }
+  } catch (error) {
+    // Handle network errors
+    print('Error adding group event: $error');
+  }
+
       },
     ).show();
+  }
+
+  Future<void> _addPersonalEvent(DateTime selectedDate, TimeOfDay startTime,
+      TimeOfDay endTime, String eventName, String eventPrice) async {
+    // Print the request body for debugging
+    print('Request Body: ${json.encode({
+          'name': eventName,
+          'date': formatDateForAPI(selectedDate),
+          'price': eventPrice,
+          'starttime': _formatTimeOfDay(startTime),
+          'endtime': _formatTimeOfDay(endTime),
+          // Add other event details as needed
+        })}');
+    print('Event Name: ${eventName}');
+
+    // Replace with your API endpoint
+    String apiUrl =
+        'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/personalplan/655e701ae784f2d47cd02151';
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        body: json.encode({
+          'name': eventName,
+          'date': formatDateForAPI(selectedDate),
+          'price': eventPrice,
+          'starttime': _formatTimeOfDay(startTime),
+          'endtime': _formatTimeOfDay(endTime),
+          // Add other event details as needed
+        }),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 201) {
+        print('Personal event added successfully');
+        // Refresh the calendar events after adding a new event
+        _fetchEventsFromBackend();
+      } else {
+        print('Failed to add personal event: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error adding personal event: $error');
+    }
+  }
+
+  String formatDateForAPI(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
+  
+  String _formatTimeOfDay(TimeOfDay time) {
+    final now = DateTime.now();
+    final dateTime =
+        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    final formattedTime = DateFormat.Hm().format(dateTime);
+    return formattedTime;
   }
 
   Widget _buildBorderedTextField(

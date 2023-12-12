@@ -22,8 +22,8 @@ router.post('/:planId/personalplan/:userId', async (req, res) => {
         return res.status(404).json({ error: 'User or plan not found' });
       }
       
-    const parsedStartTime = new Date(`2023-12-15T${starttime}:00.000Z`);
-    const parsedEndTime = new Date(`2023-12-15T${endtime}:00.000Z`);
+    const parsedStartTime = new Date(`${date}T${starttime}:00.000Z`);
+    const parsedEndTime = new Date(`${date}T${endtime}:00.000Z`);
 
     // Find the user's calendar in the plan's calendars array
 let userCalendar = planExists.calendars.find((calendar) => calendar.user.equals(userId));
@@ -44,7 +44,7 @@ if (!userCalendar) {
       sectionname: '',
       user: userId,
       name: name,
-      date: date,
+      date: new Date(date),
       price: price || null,
       location: location || null,
       starttime: parsedStartTime,

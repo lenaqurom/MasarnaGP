@@ -291,11 +291,11 @@ class _DayViewPageState extends State<DayViewPage> {
     }
   }
 
-  Future<void> _deleteEventOnServer(String eventId, String userId) async {
+  Future<void> _deleteEventOnServer(Appointment event) async {
     try {
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/${userId}/calendarevents/${eventId}'),
+            'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/655e701ae784f2d47cd02151/calendarevents/${event.id.toString()}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -304,6 +304,10 @@ class _DayViewPageState extends State<DayViewPage> {
       if (response.statusCode == 200) {
         print('Event deleted successfully');
         // Handle success if needed
+        setState(() {
+          widget.events.remove(event);
+          _fetchCalendarEvents();
+        });
       } else {
         print('Failed to delete event. Status code: ${response.statusCode}');
         // Handle error if needed
@@ -350,6 +354,9 @@ class _DayViewPageState extends State<DayViewPage> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.pop(context);
+                    ("in edit");
+                    print(existingEvent.id.toString());
+                    print(existingEvent.notes.toString());
                     _editEvent(existingEvent);
                   },
                   style: ElevatedButton.styleFrom(
@@ -431,10 +438,7 @@ class _DayViewPageState extends State<DayViewPage> {
   void _deleteEvent(Appointment existingEvent) {
     String eventId = existingEvent.id.toString();
     String userId = existingEvent.notes.toString();
-    _deleteEventOnServer(eventId, userId);
-    setState(() {
-      widget.events.remove(existingEvent);
-    });
+    _deleteEventOnServer(existingEvent);
   }
 
   Future<void> _showEventForm(
