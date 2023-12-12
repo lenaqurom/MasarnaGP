@@ -492,3 +492,4 @@ class EventSearch extends SearchDelegate<Event> {
     );
   }
 }
+
