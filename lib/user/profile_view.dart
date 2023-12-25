@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 
 class User {
@@ -58,7 +59,35 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
       appBar: AppBar(
         backgroundColor: Color.fromARGB(213, 226, 224, 243),
         elevation: 0,
-        leading: Icon(Icons.arrow_back_ios, color: Color.fromARGB(255, 39, 26, 99)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Color.fromARGB(255, 39, 26, 99)),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          PopupMenuButton(
+            itemBuilder: (context) {
+              return [
+                PopupMenuItem(
+                  child: Row(
+                    children: [
+                      Icon(Icons.report),
+                      SizedBox(width: 8),
+                      Text("Report User"),
+                    ],
+                  ),
+                  value: "report_user",
+                ),
+              ];
+            },
+            onSelected: (value) {
+              if (value == "report_user") {
+                showReportDialog();
+              }
+            },
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -176,6 +205,36 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
     );
   }
 
+  void showReportDialog() {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.WARNING,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Are you sure you want to report this user?',
+      desc: 'This action cannot be undone.',
+      btnOkText: 'Report',
+      btnCancelOnPress: () {},
+      btnCancelColor: Colors.grey,
+      btnOkColor: Color.fromARGB(255, 39, 26, 99),
+      btnOkOnPress: () {
+        // Handle the "OK" button press (e.g., show a success dialog)
+        showSuccessDialog();
+      },
+    )..show();
+  }
+
+  void showSuccessDialog() {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.SUCCES,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Successfully Reported',
+      desc: 'Thank you for reporting this user.',
+      btnOkOnPress: () {},
+      btnOkColor: Color.fromARGB(255, 39, 26, 99),
+    )..show();
+  }
+
   String getFriendshipLabel() {
     switch (friendshipStatus) {
       case FriendshipStatus.notFriends:
@@ -241,7 +300,7 @@ class SocialMediaButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        primary: color,
+        backgroundColor: color,
         padding: EdgeInsets.symmetric(vertical: 13, horizontal: 42),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(25),
