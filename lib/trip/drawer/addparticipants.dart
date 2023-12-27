@@ -84,9 +84,11 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
   @override
   void initState() {
     super.initState();
+    final String planId =
+        Provider.of<GlobalState>(context, listen: false).planid;
 
     // Fetch and set the initial state of addedMembers
-    fetchMembers('65720ce9bbfa2f36ed8dd5f5').then((members) {
+    fetchMembers(planId).then((members) {
       if (members != null) {
         setState(() {
           addedMembers = members;
@@ -101,7 +103,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
 
   Future<List<User>> fetchFriendList(String userId) async {
     final response = await http.get(
-      Uri.parse('http://192.168.1.2:3000/api/memberstoadd/$userId'),
+      Uri.parse('http://192.168.1.13:3000/api/memberstoadd/$userId'),
     );
 
     if (response.statusCode == 200) {
@@ -110,7 +112,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
         return User(
           friend['username'],
           friend['_id'],
-          'http://192.168.1.2:3000/' +
+          'http://192.168.1.13:3000/' +
               friend['profilepicture'].replaceAll('\\', '/'),
         );
       }).toList();
@@ -120,7 +122,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
   }
 
   Future<List<User>> fetchMembers(String planId) async {
-    final String baseUrl = 'http://192.168.1.2:3000/api';
+    final String baseUrl = 'http://192.168.1.13:3000/api';
     final String endpoint = '/oneplan/$planId/members';
 
     try {
@@ -133,7 +135,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
           return User(
             member['username'],
             member['user'],
-            'http://192.168.1.2:3000/' +
+            'http://192.168.1.13:3000/' +
                     member['profilepicture'].replaceAll('\\', '/') ??
                 null,
           );
@@ -181,26 +183,28 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
       btnOkOnPress: () async {
         try {
           // Make the DELETE request to remove the user from the plan
-          String planId = '65720ce9bbfa2f36ed8dd5f5'; // Replace with your actual plan ID
-          String url = 'http://192.168.1.2:3000/api/oneplan/$planId/members/$userId';
+          String planId =
+              Provider.of<GlobalState>(context, listen: false).planid;
+          String url =
+              'http://192.168.1.13:3000/api/oneplan/$planId/members/$userId';
 
           final response = await http.delete(Uri.parse(url));
 
           if (response.statusCode == 200) {
-          print('Member deleted successfully');
-          // Reload the page without keeping it in the stack
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => AddParticipantsPage(),
-            ),
-          );
-        } else {
-          print('Failed to delete member: ${response.statusCode}');
+            print('Member deleted successfully');
+            // Reload the page without keeping it in the stack
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => AddParticipantsPage(),
+              ),
+            );
+          } else {
+            print('Failed to delete member: ${response.statusCode}');
+          }
+        } catch (error) {
+          print('Error deleting member: $error');
         }
-      } catch (error) {
-        print('Error deleting member: $error');
-      }
-    },
+      },
     )..show();
   }
 
@@ -253,6 +257,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
                     try {
                       String id =
                           Provider.of<GlobalState>(context, listen: false).id;
+                      print(id);
                       List<User> friendList = await fetchFriendList(
                           id); // Replace 'USER_ID' with the actual user ID
                       List<String>? result = await showDialog(
@@ -318,7 +323,7 @@ class _AddParticipantsPageState extends State<AddParticipantsPage> {
                     trailing: IconButton(
                       icon: Icon(AntDesign.delete),
                       onPressed: () {
-                         _removeUser(user);
+                        _removeUser(user);
                       },
                     ),
                   ),
@@ -346,7 +351,7 @@ class _UserListDialogState extends State<UserListDialog> {
   bool selectAll = false;
 
   Future<void> addMembers(String planId, List<String> userIds) async {
-    final String baseUrl = 'http://192.168.1.2:3000/api';
+    final String baseUrl = 'http://192.168.1.13:3000/api';
     final String endpoint = '/oneplan/$planId/members';
 
     try {
@@ -436,7 +441,6 @@ class _UserListDialogState extends State<UserListDialog> {
                 });
               },
               isDisabled: isDisabled,
-              
             );
           },
         ),
@@ -445,8 +449,10 @@ class _UserListDialogState extends State<UserListDialog> {
         ElevatedButton(
           onPressed: () async {
             try {
+               String planid =
+                          Provider.of<GlobalState>(context, listen: false).planid;
               await addMembers(
-                  '65720ce9bbfa2f36ed8dd5f5', widget.selectedUserIds.toList());
+                  planid, widget.selectedUserIds.toList());
               // Replace 'YOUR_PLAN_ID' with the actual plan ID
             } catch (e) {
               print('Error adding members: $e');

@@ -47,8 +47,10 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
   }
 
   Future<void> fetchComments() async {
+    final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     final response = await http.get(Uri.parse(
-        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/comments'));
+        'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/comments'));
 
     if (response.statusCode == 200) {
       // Parse the response data
@@ -73,7 +75,7 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
               userId: replyUserId,
               userName: replyData['username'] ?? '',
               commentText: replyData['text'] ?? '',
-              profileImage: 'http://192.168.1.3:3000/' +
+              profileImage: 'http://192.168.1.13:3000/' +
                   replyData['profilepicture'].replaceAll('\\', '/'),
             );
           }).toList();
@@ -84,7 +86,7 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
           userId: userId,
           userName: commentData['username'] ?? '',
           commentText: commentData['text'] ?? '',
-          profileImage: 'http://192.168.1.3:3000/' +
+          profileImage: 'http://192.168.1.13:3000/' +
               commentData['profilepicture'].replaceAll('\\', '/'),
           replies: replies,
         );
@@ -376,9 +378,11 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
     // Perform the network request to add a new comment
     try {
       String userId = Provider.of<GlobalState>(context, listen: false).id;
+      final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.post(
         Uri.parse(
-            'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/$userId/comment'),
+            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/$userId/comment'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -411,7 +415,7 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
                   userId: replyUserId,
                   userName: replyData['username'] ?? '',
                   commentText: replyData['text'] ?? '',
-                  profileImage: 'http://192.168.1.3:3000/' +
+                  profileImage: 'http://192.168.1.13:3000/' +
                       replyData['profilepicture'].replaceAll('\\', '/'),
                 );
               }).toList();
@@ -422,7 +426,7 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
               userId: userId,
               userName: commentData['username'] ?? '',
               commentText: commentData['text'] ?? '',
-              profileImage: 'http://192.168.1.3:3000/' +
+              profileImage: 'http://192.168.1.13:3000/' +
                   commentData['profilepicture'].replaceAll('\\', '/'),
               replies: replies,
             );
@@ -457,11 +461,12 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
     try {
       // Obtain the user ID from your global state or another source
       String userId = Provider.of<GlobalState>(context, listen: false).id;
-
+      final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+      final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       // Send a POST request to the API endpoint
       final response = await http.post(
         Uri.parse(
-            'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/$parentCommentId/reply'),
+            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/$parentCommentId/reply'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -496,7 +501,7 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
                   userId: replyUserId,
                   userName: replyData['username'] ?? '',
                   commentText: replyData['text'] ?? '',
-                  profileImage: 'http://192.168.1.3:3000/' +
+                  profileImage: 'http://192.168.1.13:3000/' +
                       replyData['profilepicture'].replaceAll('\\', '/'),
                 );
               }).toList();
@@ -507,7 +512,7 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
               userId: userId,
               userName: commentData['username'] ?? '',
               commentText: commentData['text'] ?? '',
-              profileImage: 'http://192.168.1.3:3000/' +
+              profileImage: 'http://192.168.1.13:3000/' +
                   commentData['profilepicture'].replaceAll('\\', '/'),
               replies: replies,
             );
@@ -582,9 +587,11 @@ void _updateComment(int index, String newText, String commentId) async {
     // Make API call to update the comment on the server
     final Map<String, dynamic> requestBody = {'newText': newText};
     try {
+      final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+      final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/$commentId'),
+            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/$commentId'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -627,9 +634,11 @@ void _updateReply(int parentIndex, String newText, String replyCommentId) async 
   // Make API call to update the reply on the server
   final Map<String, dynamic> requestBody = {'newText': newText};
   try {
+    final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/$replyCommentId'),
+          'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/$replyCommentId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(requestBody),
     );
@@ -677,9 +686,11 @@ void _updateReply(int parentIndex, String newText, String replyCommentId) async 
   void _deleteReply(String commentId) async {
     // Make the API call to delete the reply using the commentId
     try {
+      final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/$commentId'),
+            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/$commentId'),
       );
 if (response.statusCode == 200) {
       // Update the UI to remove the deleted reply
@@ -704,9 +715,11 @@ if (response.statusCode == 200) {
   void _deleteComment(String commentId) async {
     // Make the API call to delete the comment using the commentId
     try {
+      final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/flights/$commentId'),
+            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/$commentId'),
       );
  if (response.statusCode == 200) {
       // Update the UI to remove the deleted comment

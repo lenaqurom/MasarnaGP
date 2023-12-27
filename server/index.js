@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const path = require('path');
 const app = express();
+const axios = require('axios');
+const cheerio = require('cheerio');
+const NodeGeocoder = require('node-geocoder');  // Make sure this line is here
 
 // Serve the 'uploads' directory as a static resource
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -16,6 +19,7 @@ const oneplanRoutes = require('./routes/oneplan');
 const groupdayplansRoutes = require('./routes/groupdayplans');
 const calendarviewRoutes = require('./routes/calendarview');
 const calendareventsRoutes = require('./routes/calendarevents');
+const externalapiRoutes = require('./routes/externalapi');
 app.use(bodyParser.json());
 
 // MongoDB Atlas connection
@@ -38,6 +42,7 @@ app.use('/api', oneplanRoutes);
 app.use('/api', groupdayplansRoutes);
 app.use('/api', calendarviewRoutes);
 app.use('/api', calendareventsRoutes);
+app.use('/api', externalapiRoutes);
 // Start the server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

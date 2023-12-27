@@ -4,6 +4,9 @@ import 'package:icons_flutter/icons_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/homesection.dart';
+import 'package:provider/provider.dart'; // Import the intl package for date/time formatting
 
 class VotingOption {
   String id;
@@ -12,8 +15,9 @@ class VotingOption {
   TimeOfDay? endTime;
   Set<String> votedUsers;
   double price = 0;
-  String location = '';
- double numvotes = 0;
+  double longitude = 0;
+  double latitude = 0;
+  double numvotes = 0;
 
   VotingOption(
     this.id,
@@ -21,7 +25,8 @@ class VotingOption {
     this.startTime,
     this.endTime,
     this.price,
-    this.location,
+    this.longitude,
+    this.latitude,
     this.numvotes, // Add this line
   ) : votedUsers = {};
 }
@@ -38,6 +43,7 @@ class _StayVotingPageState extends State<StayVotingPage> {
   TextEditingController _priceController = TextEditingController();
   TextEditingController _locationController = TextEditingController();
   int totalVotes = 0;
+
   @override
   void initState() {
     super.initState();
@@ -53,8 +59,11 @@ class _StayVotingPageState extends State<StayVotingPage> {
   }
 
   Future<void> fetchOptions() async {
+    final String planId =
+        Provider.of<GlobalState>(context, listen: false).planid;
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/stays/poll-options'; // Update with your specific API endpoint
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-options'; // Update with your specific API endpoint
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -75,16 +84,18 @@ class _StayVotingPageState extends State<StayVotingPage> {
               optionData['price'] != null
                   ? optionData['price'].toDouble()
                   : 0.0,
-              optionData['location'],
+              optionData['location'][0].toDouble(),
+              optionData['location'][1].toDouble(),
               optionData['votes'] != null
-    ? optionData['votes'].toDouble()
-    : 0.0,
+                  ? optionData['votes'].toDouble()
+                  : 0.0,
             );
           }).toList();
-        
-            totalVotes = votes.map((option) => option.numvotes.toInt()).reduce((a, b) => a + b);
-  });
 
+          totalVotes = votes
+              .map((option) => option.numvotes.toInt())
+              .reduce((a, b) => a + b);
+        });
       } else {
         print('Error response: ${response.statusCode}');
         print('Error body: ${response.body}');
@@ -104,49 +115,50 @@ class _StayVotingPageState extends State<StayVotingPage> {
     }
   }
 
+  TimeOfDay? _parseTimeOfDay(String? timeString) {
+    if (timeString == null) return null;
 
-TimeOfDay? _parseTimeOfDay(String? timeString) {
-  if (timeString == null) return null;
-
-  DateTime dateTime = DateTime.parse(timeString).toLocal();
-  return TimeOfDay.fromDateTime(dateTime);
-}
-
+    DateTime dateTime = DateTime.parse(timeString).toLocal();
+    return TimeOfDay.fromDateTime(dateTime);
+  }
 
   Future<void> voteForOption(String optionId) async {
-  final String apiUrl =
-      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/stays/poll-option/$optionId/vote';
+    final String planId =
+        Provider.of<GlobalState>(context, listen: false).planid;
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
+    final String apiUrl =
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option/$optionId/vote';
 
-  try {
-    final response = await http.post(Uri.parse(apiUrl));
+    try {
+      final response = await http.post(Uri.parse(apiUrl));
 
-    if (response.statusCode == 200) {
-      // Vote recorded successfully, you may want to update UI or handle success
-      print('Vote recorded successfully');
+      if (response.statusCode == 200) {
+        // Vote recorded successfully, you may want to update UI or handle success
+        print('Vote recorded successfully');
 
-      // Extract updated votes count for the specific option from the response
-      final Map<String, dynamic> responseData = jsonDecode(response.body);
-      final int updatedVotes = responseData['votedOption']['votes'];
+        // Extract updated votes count for the specific option from the response
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final int updatedVotes = responseData['votedOption']['votes'];
 
-      setState(() {
-        VotingOption votedOption = votes.firstWhere((v) => v.id == optionId);
-        votedOption.numvotes = updatedVotes.toDouble();
-        totalVotes = votes.map((option) => option.numvotes.toInt()).reduce((a, b) => a + b);
-
-      });
-    } else {
-      // Handle error, maybe show an error dialog or log the error
-      print('Error response: ${response.statusCode}');
-      print('Error body: ${response.body}');
+        setState(() {
+          VotingOption votedOption = votes.firstWhere((v) => v.id == optionId);
+          votedOption.numvotes = updatedVotes.toDouble();
+          totalVotes = votes
+              .map((option) => option.numvotes.toInt())
+              .reduce((a, b) => a + b);
+        });
+      } else {
+        // Handle error, maybe show an error dialog or log the error
+        print('Error response: ${response.statusCode}');
+        print('Error body: ${response.body}');
+        // Add your error handling logic here
+      }
+    } catch (error) {
+      // Handle exception, maybe show an error dialog or log the error
+      print('Exception during HTTP request: $error');
       // Add your error handling logic here
     }
-  } catch (error) {
-    // Handle exception, maybe show an error dialog or log the error
-    print('Exception during HTTP request: $error');
-    // Add your error handling logic here
   }
-}
-
 
   Future<void> addOptionWithTime(
       String id,
@@ -154,12 +166,15 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
       TimeOfDay? startTime,
       TimeOfDay? endTime,
       String price,
-      String location,
+      double longitude,
+      double latitude,
       String numvotes) async {
+         String date =
+              Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
     double parsedPrice = double.tryParse(price) ?? 0.0;
     double parsedVotes = double.tryParse(numvotes) ?? 0.0;
     VotingOption votingOption = VotingOption(
-        id, option, startTime, endTime, parsedPrice, location, parsedVotes);
+        id, option, startTime, endTime, parsedPrice, longitude, latitude, parsedVotes);
 
     // Format TimeOfDay to strings
     String formatTimeOfDay(TimeOfDay timeOfDay) {
@@ -172,17 +187,20 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
     String formattedStartTime =
         startTime != null ? formatTimeOfDay(startTime) : '';
     String formattedEndTime = endTime != null ? formatTimeOfDay(endTime) : '';
-
+    final String planId =
+        Provider.of<GlobalState>(context, listen: false).planid;
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     // API endpoint details
     final String apiUrl =
-        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/stays/poll-option'; // Your full URL
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option'; // Your full URL
 
     // Your backend API expects a JSON body
     final Map<String, dynamic> requestBody = {
+      'date':date,
       'name': votingOption.option,
       'starttime': formattedStartTime,
       'endtime': formattedEndTime,
-      'location': votingOption.location,
+      'location': {'longitude': votingOption.longitude, 'latitude': votingOption.latitude },
       'price': votingOption.price,
     };
 
@@ -329,7 +347,8 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
                     _startTime,
                     _endTime,
                     _priceController.text,
-                    _locationController.text,
+                    0,
+                    0,
                     '',
                   );
                   _textController.clear();
@@ -358,7 +377,6 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
     )..show();
   }
 
-  
   void _showAwesomeDialog(String title, String content, DialogType dialogType) {
     AwesomeDialog(
       context: context,
@@ -375,24 +393,23 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
   }
 
   Widget getVoteLine(int numvotes) {
-  double percentage = totalVotes > 0 ? numvotes / totalVotes : 0.0;
+    double percentage = totalVotes > 0 ? numvotes / totalVotes : 0.0;
 
-  return Container(
-    height: 8,
-    width: MediaQuery.of(context).size.width,
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          Color.fromARGB(255, 39, 26, 99),
-          Color.fromARGB(213, 226, 224, 243),
-        ],
-        stops: [percentage, percentage],
+    return Container(
+      height: 8,
+      width: MediaQuery.of(context).size.width,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 39, 26, 99),
+            Color.fromARGB(213, 226, 224, 243),
+          ],
+          stops: [percentage, percentage],
+        ),
+        borderRadius: BorderRadius.circular(5),
       ),
-      borderRadius: BorderRadius.circular(5),
-    ),
-  );
-}
-
+    );
+  }
 
   void _showEditOptionDialog(String option) {
     _textController.text = option;
@@ -500,7 +517,6 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
                 _startTime,
                 _endTime,
                 _priceController.text,
-                _locationController.text,
               );
               _textController.clear();
               _priceController.clear();
@@ -521,27 +537,25 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
   }
 
   void _showDeleteOptionDialog(String optionId) {
-  AwesomeDialog(
-    context: context,
-    dialogType: DialogType.WARNING,
-    animType: AnimType.BOTTOMSLIDE,
-    title: 'Delete Option',
-    desc: 'Are you sure you want to delete this option?',
-    btnCancelOnPress: () {},
-    btnCancelText: 'Cancel',
-    btnOkOnPress: () {
-      deleteOption(optionId);
-    },
-    btnOkColor: Color.fromARGB(255, 39, 26, 99),
-    btnCancelColor: Colors.grey,
-    btnOkText: 'Delete',
-  )..show();
-}
-
-
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.WARNING,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Delete Option',
+      desc: 'Are you sure you want to delete this option?',
+      btnCancelOnPress: () {},
+      btnCancelText: 'Cancel',
+      btnOkOnPress: () {
+        deleteOption(optionId);
+      },
+      btnOkColor: Color.fromARGB(255, 39, 26, 99),
+      btnCancelColor: Colors.grey,
+      btnOkText: 'Delete',
+    )..show();
+  }
 
   void editOption(String oldOption, String newOption, TimeOfDay? newStartTime,
-      TimeOfDay? newEndTime, String newPrice, String newLocation) {
+      TimeOfDay? newEndTime, String newPrice) {
     double? parsedPrice = double.tryParse(newPrice);
     double oldPrice = votes.firstWhere((v) => v.option == oldOption).price;
 
@@ -552,36 +566,38 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
       editedOption.startTime = newStartTime ?? editedOption.startTime;
       editedOption.endTime = newEndTime ?? editedOption.endTime;
       editedOption.price = parsedPrice ?? oldPrice;
-      editedOption.location = newLocation;
     });
   }
 
   Future<void> deleteOption(String optionId) async {
-  final String apiUrl =
-      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/stays/poll-option/$optionId';
+    final String planId =
+        Provider.of<GlobalState>(context, listen: false).planid;
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
+    final String apiUrl =
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option/$optionId';
 
-  try {
-    final response = await http.delete(Uri.parse(apiUrl));
+    try {
+      final response = await http.delete(Uri.parse(apiUrl));
 
-    if (response.statusCode == 200) {
-      // Poll option deleted successfully, you may want to update UI or handle success
-      print('Poll option deleted successfully');
+      if (response.statusCode == 200) {
+        // Poll option deleted successfully, you may want to update UI or handle success
+        print('Poll option deleted successfully');
 
-      setState(() {
-        votes.removeWhere((v) => v.id == optionId);
-      });
-    } else {
-      // Handle error, maybe show an error dialog or log the error
-      print('Error response: ${response.statusCode}');
-      print('Error body: ${response.body}');
+        setState(() {
+          votes.removeWhere((v) => v.id == optionId);
+        });
+      } else {
+        // Handle error, maybe show an error dialog or log the error
+        print('Error response: ${response.statusCode}');
+        print('Error body: ${response.body}');
+        // Add your error handling logic here
+      }
+    } catch (error) {
+      // Handle exception, maybe show an error dialog or log the error
+      print('Exception during HTTP request: $error');
       // Add your error handling logic here
     }
-  } catch (error) {
-    // Handle exception, maybe show an error dialog or log the error
-    print('Exception during HTTP request: $error');
-    // Add your error handling logic here
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -593,11 +609,13 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
-          },
+Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => SectionsPage()),
+                      );          },
         ),
         title: Text(
-          'Stays Voting',
+          'Stay Voting',
           style: TextStyle(
             color: Color.fromARGB(255, 39, 26, 99),
             fontFamily: 'Montserrat',
@@ -666,7 +684,10 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
                               getVoteLine(option.numvotes.toInt()),
                             ],
                           ),
-                          onTap: () => voteForOption(option.id),
+                          onTap: () {
+                            voteForOption(option.id);
+                            print(option.id);
+                          },
                           contentPadding: EdgeInsets.all(16),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,

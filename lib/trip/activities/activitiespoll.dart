@@ -4,6 +4,8 @@ import 'package:icons_flutter/icons_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:masarna/globalstate.dart';
+import 'package:provider/provider.dart';
 
 class VotingOption {
   String id;
@@ -12,7 +14,8 @@ class VotingOption {
   TimeOfDay? endTime;
   Set<String> votedUsers;
   double price = 0;
-  String location = '';
+  double longitude = 0;
+  double latitude = 0;
   double numvotes = 0;
 
   VotingOption(
@@ -21,7 +24,8 @@ class VotingOption {
     this.startTime,
     this.endTime,
     this.price,
-    this.location,
+    this.longitude,
+    this.latitude,
     this.numvotes, // Add this line
   ) : votedUsers = {};
 }
@@ -54,8 +58,10 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
   }
 
   Future<void> fetchOptions() async {
+    final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     final String apiUrl =
-        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/6567c3038632a75709c3366d/section/activities/poll-options'; // Update with your specific API endpoint
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-options'; // Update with your specific API endpoint
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -76,7 +82,8 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
               optionData['price'] != null
                   ? optionData['price'].toDouble()
                   : 0.0,
-              optionData['location'],
+              optionData['location'][0].toDouble(),
+              optionData['location'][1].toDouble(),
               optionData['votes'] != null
     ? optionData['votes'].toDouble()
     : 0.0,
@@ -115,8 +122,10 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
 
 
   Future<void> voteForOption(String optionId) async {
+    final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
   final String apiUrl =
-      'http://192.168.1.3:3000/api/oneplan/65720ce9bbfa2f36ed8dd5f5/groupdayplan/65721675218150f8f8037d64/section/activities/poll-option/$optionId/vote';
+      'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option/$optionId/vote';
 
   try {
     final response = await http.post(Uri.parse(apiUrl));
@@ -155,12 +164,18 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
       TimeOfDay? startTime,
       TimeOfDay? endTime,
       String price,
-      String location,
+      double longitude,
+      double latitude,
       String numvotes) async {
+         String date =
+              Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
     double parsedPrice = double.tryParse(price) ?? 0.0;
     double parsedVotes = double.tryParse(numvotes) ?? 0.0;
+    double parsedlat = longitude ?? 0.0;
+    double parsedlng = latitude ?? 0.0;
+
     VotingOption votingOption = VotingOption(
-        id, option, startTime, endTime, parsedPrice, location, parsedVotes);
+        id, option, startTime, endTime, parsedPrice, longitude, latitude, parsedVotes);
 
     // Format TimeOfDay to strings
     String formatTimeOfDay(TimeOfDay timeOfDay) {
@@ -173,17 +188,19 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
     String formattedStartTime =
         startTime != null ? formatTimeOfDay(startTime) : '';
     String formattedEndTime = endTime != null ? formatTimeOfDay(endTime) : '';
-
+    final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     // API endpoint details
     final String apiUrl =
-        'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/65721675218150f8f8037d64/section/activities/poll-option'; // Your full URL
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option'; // Your full URL
 
     // Your backend API expects a JSON body
     final Map<String, dynamic> requestBody = {
+      'date':date,
       'name': votingOption.option,
       'starttime': formattedStartTime,
       'endtime': formattedEndTime,
-      'location': votingOption.location,
+      'location': {'longitude': votingOption.longitude, 'latitude': votingOption.latitude },
       'price': votingOption.price,
     };
 
@@ -330,7 +347,8 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
                     _startTime,
                     _endTime,
                     _priceController.text,
-                    _locationController.text,
+                    0,
+                    0,
                     '',
                   );
                   _textController.clear();
@@ -552,13 +570,14 @@ Widget getVoteLine(int numvotes) {
       editedOption.startTime = newStartTime ?? editedOption.startTime;
       editedOption.endTime = newEndTime ?? editedOption.endTime;
       editedOption.price = parsedPrice ?? oldPrice;
-      editedOption.location = newLocation;
     });
   }
 
   Future<void> deleteOption(String optionId) async {
+    final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
+    final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
   final String apiUrl =
-      'http://192.168.1.3:3000/api/oneplan/6567bf72e0b164fa214f33d3/groupdayplan/65721675218150f8f8037d64/section/activities/poll-option/$optionId';
+      'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option/$optionId';
 
   try {
     final response = await http.delete(Uri.parse(apiUrl));
