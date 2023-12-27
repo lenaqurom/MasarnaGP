@@ -21,7 +21,7 @@ class _SignupState extends State<Signup> {
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.1.5:3000/api');
+  final apiService = ApiService('http://192.168.1.13:3000/api');
   @override
   void initState() {
     super.initState();
@@ -43,7 +43,7 @@ Future<void> signUp() async {
   if (_formKey.currentState!.validate()) {
     try {
       final response = await post(
-        Uri.parse('http://192.168.1.5:3000/api/signup'), // Replace with your backend URL
+        Uri.parse('http://192.168.1.13:3000/api/signup'), // Replace with your backend URL
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

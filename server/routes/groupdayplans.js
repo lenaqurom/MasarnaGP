@@ -95,7 +95,8 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     const planId = req.params.planId;
     const sectionName = req.params.sectionName;
     const groupDayPlanId = req.params.groupDayPlanId;
-    const { name, starttime, endtime, location, price } = req.body;
+    const { name, starttime, endtime, price, date } = req.body;
+    const { longitude, latitude } = req.body.location;
 
     // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
@@ -118,15 +119,16 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     }
 
     // Parse starttime and endtime to Date objects
-    const parsedStartTime = new Date(`2023-12-15T${starttime}:00.000Z`);
-    const parsedEndTime = new Date(`2023-12-15T${endtime}:00.000Z`);
+    const parsedStartTime = new Date(`${date}T${starttime}:00.000Z`);
+    const parsedEndTime = new Date(`${date}T${endtime}:00.000Z`);
 
     // Add the poll option
     targetSection.poll.options.push({
       name: name,
+      date: new Date(date),
       starttime: parsedStartTime,
       endtime: parsedEndTime,
-      location: location, 
+      location: [longitude, latitude], 
       price: price, 
       votes: 0,
     });

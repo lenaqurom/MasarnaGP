@@ -11,6 +11,7 @@ import 'package:masarna/navbar/animatedbar.dart';
 import 'package:masarna/navbar/rive_asset.dart';
 import 'package:masarna/navbar/rive_utils.dart';
 import 'package:masarna/trip/PlanSearch.dart';
+import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/homesection.dart';
 import 'package:masarna/user/home.dart';
 import 'package:masarna/user/makeprofile.dart';
@@ -35,7 +36,7 @@ class _PlanningState extends State<Planning> {
   int? selectedPlanIndex;
   String planid = '';
 
-  final apiService = ApiService('http://192.168.1.7:3000/api');
+  final apiService = ApiService('http://192.168.1.16:3000/api');
 
   @override
   void initState() {
@@ -59,7 +60,7 @@ class _PlanningState extends State<Planning> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.7:3000/api/oneplan'),
+        Uri.parse('http://192.168.1.13:3000/api/oneplan'),
       );
 
       request.fields['name'] = name;
@@ -91,7 +92,6 @@ class _PlanningState extends State<Planning> {
       // Print the response for debugging
       print('Response: ${response.statusCode}');
       print('Response Body: ${await response.stream.bytesToString()}');
-      
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
@@ -101,11 +101,8 @@ class _PlanningState extends State<Planning> {
 
   Future<void> viewPlans(String userid) async {
     try {
-
-
-
       final response = await http.get(
-        Uri.parse('http://192.168.1.7:3000/api/userplans/$userid'),
+        Uri.parse('http://192.168.1.16:3000/api/userplans/$userid'),
       );
 
       if (response.statusCode == 200) {
@@ -113,14 +110,15 @@ class _PlanningState extends State<Planning> {
 
         if (responseData.containsKey('plans')) {
           List<dynamic> userPlansData = responseData['plans'];
-         
+
           List<Plan> fetchedPlans = userPlansData
               .map((planData) => Plan(
                     id: planData['_id'],
                     title: planData['name'],
                     description: planData['description'],
-                    image:'http://192.168.1.7:3000/' + planData['image'].replaceAll('\\', '/'),
-              ))    
+                    image: 'http://192.168.1.16:3000/' +
+                        planData['image'].replaceAll('\\', '/'),
+                  ))
               .toList();
 
           setState(() {
@@ -158,7 +156,7 @@ class _PlanningState extends State<Planning> {
   Future<void> deletePlanapi(String planid) async {
     try {
       var response = await http.delete(
-        Uri.parse('http://192.168.1.9:3000/api/oneplan/$planid'),
+        Uri.parse('http://192.168.1.13:3000/api/oneplan/$planid'),
       );
 
       if (response.statusCode == 200) {
@@ -189,7 +187,7 @@ class _PlanningState extends State<Planning> {
     try {
       var request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://192.168.1.9:3000/api/oneplan/$planid'),
+        Uri.parse('http://192.168.1.13:3000/api/oneplan/$planid'),
       );
 
       request.fields['name'] = name;
@@ -215,7 +213,7 @@ class _PlanningState extends State<Planning> {
       if (response.statusCode == 200) {
         // Handle successful update
         print('Plan updated successfully');
-         Navigator.of(context).pushReplacement(
+        Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => Planning()),
         );
 
@@ -375,25 +373,24 @@ class _PlanningState extends State<Planning> {
       },
     )..show();
   }
-void editPlan(int index) {
-  selectedPlanIndex = index;
-  planid = plans[index].id;
-  titleController.text = plans[index].title;
-  descriptionController.text = plans[index].description;
 
-  // Check if the image is a File or a network URL
-  if (plans[index].image is File) {
-    // If it's a File, directly assign it to selectedImage
-    selectedImage = plans[index].image as File?;
-  } else if (plans[index].image is String) {
-    // If it's a network URL, you might want to load the image using Image.network
-    // However, since the image is stored on the server, there's no need to load it here
+  void editPlan(int index) {
+    selectedPlanIndex = index;
+    planid = plans[index].id;
+    titleController.text = plans[index].title;
+    descriptionController.text = plans[index].description;
+
+    // Check if the image is a File or a network URL
+    if (plans[index].image is File) {
+      // If it's a File, directly assign it to selectedImage
+      selectedImage = plans[index].image as File?;
+    } else if (plans[index].image is String) {
+      // If it's a network URL, you might want to load the image using Image.network
+      // However, since the image is stored on the server, there's no need to load it here
+    }
+
+    addPlan(); // Open the addPlan dialog
   }
-
-  addPlan();  // Open the addPlan dialog
-}
-
-
 
   void deletePlan(int index) {
     planid = plans[index].id;
@@ -476,12 +473,18 @@ void editPlan(int index) {
                   ),
                   child: InkWell(
                     onTap: () {
-                       Navigator.of(context).push(
-                       MaterialPageRoute(
-                         builder: (context) => SectionsPage(planId:plans[index].id),
-                        ),
-                       );
-                      
+                      String userid =
+                          Provider.of<GlobalState>(context, listen: false).id;
+                      String planid = plans[index].id;
+                      final globalState =
+                          Provider.of<GlobalState>(context, listen: false);
+                      globalState.addToState(planid: planid, id: userid);
+                      print(userid +'  .  '+ planid);
+
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => MyCalendarPage()),
+                      );
                     },
                     child: SingleChildScrollView(
                       child: Column(
@@ -496,11 +499,11 @@ void editPlan(int index) {
                                 topRight: Radius.circular(12.0),
                               ),
                               image: plans[index].image != null
-        ? DecorationImage(
-            image: NetworkImage(plans[index].image!),
-            fit: BoxFit.cover,
-          )
-        : null,
+                                  ? DecorationImage(
+                                      image: NetworkImage(plans[index].image!),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : null,
                             ),
                           ),
                           Padding(

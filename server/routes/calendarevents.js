@@ -7,7 +7,8 @@ const mongoose = require('mongoose');
 // create personal plan 
 router.post('/:planId/personalplan/:userId', async (req, res) => {
     try {
-      const {name, date, price, location, starttime, endtime} = req.body;
+      const {name, date, price, starttime, endtime} = req.body;
+      const { longitude, latitude } = req.body.location;
       const { userId, planId} = req.params;
   
       if (!userId || !planId || !date) {
@@ -24,6 +25,12 @@ router.post('/:planId/personalplan/:userId', async (req, res) => {
       
     const parsedStartTime = new Date(`${date}T${starttime}:00.000Z`);
     const parsedEndTime = new Date(`${date}T${endtime}:00.000Z`);
+    
+console.log('Received Time Strings:', starttime, endtime, date);
+
+
+console.log('Parsed Start Time:', parsedStartTime);
+console.log('Parsed End Time:', parsedEndTime);
 
     // Find the user's calendar in the plan's calendars array
 let userCalendar = planExists.calendars.find((calendar) => calendar.user.equals(userId));
@@ -46,7 +53,7 @@ if (!userCalendar) {
       name: name,
       date: new Date(date),
       price: price || null,
-      location: location || null,
+      location: [longitude, latitude], 
       starttime: parsedStartTime,
       endtime: parsedEndTime,
     };
