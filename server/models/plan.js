@@ -21,7 +21,10 @@ const pollOptionSchema = new mongoose.Schema({
   name: String,
   starttime: Date,
   endtime: Date,
-  location: String,
+  location: {
+    type: [Number], // [longitude, latitude]
+    index: '2dsphere', // Index for geospatial queries
+  },
   price: Number,
   votes: { type: Number, default: 0 },
 });
@@ -49,7 +52,10 @@ const calendareventSchema = new mongoose.Schema({
   date: Date,
   starttime: Date,
   endtime: Date,
-  location: String,
+  location: {
+    type: [Number], // [longitude, latitude]
+    index: '2dsphere', // Index for geospatial queries
+  },
   price: Number,
   user: String,
 });

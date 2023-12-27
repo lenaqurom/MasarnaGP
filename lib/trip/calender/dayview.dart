@@ -3,10 +3,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/datetime.dart';
 import 'package:masarna/trip/drawer/calculatebudget.dart';
 import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/homesection.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 
@@ -96,17 +98,13 @@ class _DayViewPageState extends State<DayViewPage> {
                 color: Color.fromARGB(255, 39, 26, 99),
               ),
               onPressed: () {
-                /*    DateTime? selectedDate = await Navigator.push(
-                context,
-                MaterialPageRoute(
-                builder: (context) => ExplorePage(
-                      widget.selectedDate ?? DateTime.now(), widget),
-                ),
-              );
-              if (selectedDate != null) {
-                // Handle the selected date returned from ExplorePage
-                // You can update the state or perform any other necessary actions
-            */
+                   Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExplorePage(selectedDate: widget.selectedDate),
+      ),
+    );
+  
               }),
         ],
       ),
@@ -167,9 +165,13 @@ class _DayViewPageState extends State<DayViewPage> {
 
   Future<void> _fetchCalendarEvents() async {
     try {
-      // Replace with your API endpoint and parameters
+      final String planId =
+          Provider.of<GlobalState>(context, listen: false).planid;
+      final String userId = Provider.of<GlobalState>(context, listen: false).id;
+      final String gdpId =
+          Provider.of<GlobalState>(context, listen: false).gdpid;
       String apiUrl =
-          'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/655e701ae784f2d47cd02151/calendarevents/${formatDateForAPI(widget.selectedDate)}';
+          'http://192.168.1.16:3000/api/$planId/$userId/calendarevents/${formatDateForAPI(widget.selectedDate)}';
 
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -221,9 +223,10 @@ class _DayViewPageState extends State<DayViewPage> {
         })}');
     print('Event Name: ${eventName}');
 
-    // Replace with your API endpoint
-    String apiUrl =
-        'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/personalplan/655e701ae784f2d47cd02151';
+    final String planId =
+        Provider.of<GlobalState>(context, listen: false).planid;
+    final String userId = Provider.of<GlobalState>(context, listen: false).id;
+    String apiUrl = 'http://192.168.1.16:3000/api/$planId/personalplan/$userId';
 
     try {
       final response = await http.post(
@@ -261,10 +264,12 @@ class _DayViewPageState extends State<DayViewPage> {
 
   Future<void> _updateEventOnServer(Appointment event) async {
     try {
+      final String planId =
+          Provider.of<GlobalState>(context, listen: false).planid;
       print('put request');
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/${event.notes}/calendarevents/${event.id}'),
+            'http://192.168.1.16:3000/api/$planId/${event.notes}/calendarevents/${event.id}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -293,9 +298,12 @@ class _DayViewPageState extends State<DayViewPage> {
 
   Future<void> _deleteEventOnServer(Appointment event) async {
     try {
+      final String planId =
+          Provider.of<GlobalState>(context, listen: false).planid;
+      final String userId = Provider.of<GlobalState>(context, listen: false).id;
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/655e701ae784f2d47cd02151/calendarevents/${event.id.toString()}'),
+            'http://192.168.1.16:3000/api/$planId/$userId/calendarevents/${event.id.toString()}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

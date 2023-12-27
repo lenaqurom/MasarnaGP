@@ -5,7 +5,9 @@ import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/datetime.dart';
 import 'package:masarna/trip/calender/dayview.dart';
 import 'package:masarna/trip/drawer/calculatebudget.dart';
+import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/homesection.dart';
+import 'package:masarna/trip/planning.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -50,7 +52,9 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => Planning()),
+            );
           },
         ),
         actions: [
@@ -116,8 +120,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600)),
                 onTap: () {
-                 Navigator.pushReplacement(
-           context, MaterialPageRoute(builder: (context) => BudgetPage()));
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => BudgetPage()));
                 },
               ),
               ListTile(
@@ -152,9 +156,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                         fontFamily: 'Dosis',
                         fontSize: 18,
                         fontWeight: FontWeight.w600)),
-                onTap: () {
-                  Navigator.pop(context);
-                },
+                onTap: () {},
               ),
               ListTile(
                 leading: Icon(Icons.schedule),
@@ -201,34 +203,51 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           ),
         ),
         onTap: (CalendarTapDetails details) {
-          
           if (details.targetElement == CalendarElement.calendarCell &&
               details.appointments != null &&
               details.appointments!.isNotEmpty) {
-           if (details.appointments!
-    .any((event) => event.color == Color(0xFF004aad))) {
-final DateTime selectedDate = details.date!;
-print('Selected Date: $selectedDate');
+            if (details.appointments!
+                .any((event) => event.color == Color(0xFF004aad))) {
+              final DateTime selectedDate = details.date!;
 
-print('_groupDayPlans: $_groupDayPlans'); // Print the contents of _groupDayPlans
-
-final groupDayPlanId = _groupDayPlans[selectedDate.toUtc()];
-print('Group Day Plan ID: $groupDayPlanId');
-print('selectedDate.toUtc(): ${selectedDate.toUtc()}');
-print('_groupDayPlans[selectedDate.toUtc()]: ${_groupDayPlans[selectedDate.toUtc()]}');
+                final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
 
 
-if (groupDayPlanId != null) {
-  _showGroupEventDialog(context, selectedDate, groupDayPlanId);
-} else {
-  // Handle the case where groupDayPlanId is null
-  print("GroupDayPlanId is null!");
-}
+              // Access the GlobalState instance and add the selected date
+              final globalState =
+                  Provider.of<GlobalState>(context, listen: false);
+              String planid =
+                  Provider.of<GlobalState>(context, listen: false).planid;
+              String userid =
+                  Provider.of<GlobalState>(context, listen: false).id;
+              String gdpid =
+                  Provider.of<GlobalState>(context, listen: false).gdpid;
+              globalState.addToState(
+                  selectedFormattedDate: formattedDate,
+                  planid: planid,
+                  id: userid,
+                  gdpid: gdpid);
 
+            String datedate =
+                  Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
+              print('Selected Date iafter adding to global: $datedate');
 
+              print(
+                  '_groupDayPlans: $_groupDayPlans'); // Print the contents of _groupDayPlans
 
+              final groupDayPlanId = _groupDayPlans[selectedDate.toUtc()];
+              print('Group Day Plan ID: $groupDayPlanId');
+              print('selectedDate.toUtc(): ${selectedDate.toUtc()}');
+              print(
+                  '_groupDayPlans[selectedDate.toUtc()]: ${_groupDayPlans[selectedDate.toUtc()]}');
 
-} else {
+              if (groupDayPlanId != null) {
+                _showGroupEventDialog(context, selectedDate, groupDayPlanId);
+              } else {
+                // Handle the case where groupDayPlanId is null
+                print("GroupDayPlanId is null!");
+              }
+            } else {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -321,11 +340,22 @@ if (groupDayPlanId != null) {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     print(groupPlanId);
+                     String datedate =
+                  Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
+              
+                    String userid =
+                        Provider.of<GlobalState>(context, listen: false).id;
+                    String planid =
+                        Provider.of<GlobalState>(context, listen: false).planid;
+                    final globalState =
+                        Provider.of<GlobalState>(context, listen: false);
+                    globalState.addToState(
+                        planid: planid, id: userid, gdpid: groupPlanId, selectedFormattedDate: datedate);
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SectionsPage(planId: groupPlanId),
+                        builder: (context) => SectionsPage(),
                       ),
                     );
                   },
@@ -593,41 +623,45 @@ if (groupDayPlanId != null) {
       btnOkText: 'Add',
       btnOkOnPress: () async {
         try {
-    // Replace the URL with your actual backend endpoint
-    final String apiUrl = 'http://192.168.1.2:3000/api/oneplan/65720ce9bbfa2f36ed8dd5f5/groupdayplan';
+          String planid =
+              Provider.of<GlobalState>(context, listen: false).planid;
+          final String apiUrl =
+              'http://192.168.1.16:3000/api/oneplan/$planid/groupdayplan';
 
-  final formattedDate = "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+          final formattedDate =
+              "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
 
-    final response = await http.post(
-      Uri.parse(apiUrl),
-      body: jsonEncode({
-        'date': formattedDate,
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    );
+          final response = await http.post(
+            Uri.parse(apiUrl),
+            body: jsonEncode({
+              'date': formattedDate,
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          );
 
-    if (response.statusCode == 201) {
-      final Map<String, dynamic> responseData = json.decode(response.body);
+          if (response.statusCode == 201) {
+            final Map<String, dynamic> responseData =
+                json.decode(response.body);
 
-      // Update the UI and fetch events
-      setState(() {
-        _fetchEventsFromBackend();
-      });
+            // Update the UI and fetch events
+            setState(() {
+              _fetchEventsFromBackend();
+            });
 
-      // Show a success message or perform any other actions
-      print(responseData['message']);
-      print(responseData['plan']);
-    } else {
-      // Handle errors
-      print('Failed to add group event. Status code: ${response.statusCode}');
-    }
-  } catch (error) {
-    // Handle network errors
-    print('Error adding group event: $error');
-  }
-
+            // Show a success message or perform any other actions
+            print(responseData['message']);
+            print(responseData['plan']);
+          } else {
+            // Handle errors
+            print(
+                'Failed to add group event. Status code: ${response.statusCode}');
+          }
+        } catch (error) {
+          // Handle network errors
+          print('Error adding group event: $error');
+        }
       },
     ).show();
   }
@@ -645,11 +679,12 @@ if (groupDayPlanId != null) {
         })}');
     print('Event Name: ${eventName}');
 
-    // Replace with your API endpoint
-    String apiUrl =
-        'http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/personalplan/655e701ae784f2d47cd02151';
+    String planid = Provider.of<GlobalState>(context, listen: false).planid;
+    String userid = Provider.of<GlobalState>(context, listen: false).id;
+    String apiUrl = 'http://192.168.1.16:3000/api/$planid/personalplan/$userid';
 
     try {
+      print(userid + '  .  ' + planid + 'in personal');
       final response = await http.post(
         Uri.parse(apiUrl),
         body: json.encode({
@@ -678,7 +713,7 @@ if (groupDayPlanId != null) {
   String formatDateForAPI(DateTime date) {
     return DateFormat('yyyy-MM-dd').format(date);
   }
-  
+
   String _formatTimeOfDay(TimeOfDay time) {
     final now = DateTime.now();
     final dateTime =
@@ -776,12 +811,11 @@ if (groupDayPlanId != null) {
 
   Future<void> _fetchEventsFromBackend() async {
     final String baseUrl =
-        'http://192.168.1.2:3000/api'; // Replace with your actual API base URL
+        'http://192.168.1.16:3000/api'; // Replace with your actual API base URL
     final String planId =
-        '65720ce9bbfa2f36ed8dd5f5'; // Replace with your actual planId
-    final String userId = Provider.of<GlobalState>(context, listen: false)
-        .id; // Replace with your actual userId
-
+        Provider.of<GlobalState>(context, listen: false).planid;
+    final String userId = Provider.of<GlobalState>(context, listen: false).id;
+    print(userId + '' + planId);
     try {
       final Uri uri = Uri.parse('$baseUrl/$planId/$userId/calendarevents');
       final response = await http.get(uri);
@@ -839,10 +873,10 @@ if (groupDayPlanId != null) {
           print('Events: $_events');
 
           for (Map<String, dynamic> groupDayPlan in groupDayPlans) {
-              print('Group Day Plan: $groupDayPlan');
-  final DateTime planDate = DateTime.parse(groupDayPlan['date']);
-  final String planId = groupDayPlan['id'];
-      
+            print('Group Day Plan: $groupDayPlan');
+            final DateTime planDate = DateTime.parse(groupDayPlan['date']);
+            final String planId = groupDayPlan['id'];
+
             // Add the planId to the groupDayPlans
             _groupDayPlans[planDate] = planId;
           }

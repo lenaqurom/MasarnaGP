@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/calendar.dart';
+import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/home.dart';
@@ -28,7 +29,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _usernameOrEmailController =
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.1.2:3000/api');
+  final apiService = ApiService('http://192.168.1.16:3000/api');
 
   @override
   void initState() {
@@ -61,7 +62,7 @@ class _LoginState extends State<Login> {
       // print("Request body: email=$email, username=$username, password=$password");
 
       final response = await post(
-        Uri.parse('http://192.168.1.2:3000/api/login'),
+        Uri.parse('http://192.168.1.16:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -80,16 +81,14 @@ class _LoginState extends State<Login> {
        String id = userData["_id"];
         if (email.isNotEmpty) {
           globalState.addToState(email: email, id: id);
-         // globalState.addToState(id: id );
         }
         if (email.isEmpty) {
           globalState.addToState(username: username, id: id);
-        //  globalState.addToState(id: id);
         }
         print(
             "Request body: email=$email, username=$username, password=$password");
        Navigator.pushReplacement(
-           context, MaterialPageRoute(builder: (context) => MyCalendarPage()));
+           context, MaterialPageRoute(builder: (context) => Home()));
           // Navigator.pushNamed(context, '/addparticipants');
         // Successful registration
         // You can navigate to a different screen or show a success message

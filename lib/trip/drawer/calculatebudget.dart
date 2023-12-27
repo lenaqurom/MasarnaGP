@@ -1,4 +1,5 @@
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/calender/dayview.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -32,8 +33,9 @@ class _BudgetPageState extends State<BudgetPage> {
   Future<void> fetchBudgetDetails() async {
     try {
       final String userId = Provider.of<GlobalState>(context, listen: false).id;
+      final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
     final Uri uri =
-          Uri.parse('http://192.168.1.2:3000/api/65720ce9bbfa2f36ed8dd5f5/$userId/calendarevents');
+          Uri.parse('http://192.168.1.13:3000/api/$planId/$userId/calendarevents');
       final response = await http.get(
           uri);
 
@@ -84,7 +86,8 @@ class _BudgetPageState extends State<BudgetPage> {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
+           Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => MyCalendarPage()));
           },
         ),
         actions: [

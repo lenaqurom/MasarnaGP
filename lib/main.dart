@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/trip/calender/calendar.dart';
+import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/stays/staycomment.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
@@ -57,7 +58,7 @@ class MyApp extends StatelessWidget {
             //color: Colors.white
           ))),
 
-      home: Login(),
+      home: Welcome(),
       onGenerateRoute: (settings) {
         if (settings.name == '/singlechat') {
           // Extract the userId from the arguments
@@ -79,20 +80,17 @@ class MyApp extends StatelessWidget {
           }
         }
 
-        else if (settings.name == '/section') {
-          // Extract the planId from the arguments
+        else if (settings.name == '/explore') {
           final Map<String, dynamic>? arguments =
               settings.arguments as Map<String, dynamic>?;
 
-          // Check if arguments contain planId
-          final planId = arguments?['planId'] as String?;
-          if (planId != null) {
+          final selectedDate = arguments?['selectedDate'] as DateTime?;
+          if (selectedDate != null) {
             return MaterialPageRoute(
-              builder: (context) => SectionsPage(planId: planId),
+              builder: (context) => ExplorePage(selectedDate: selectedDate),
             );
           } else {
-            // Handle error or navigate to a default screen
-            // For now, navigating to Welcome() as an example
+            
             return MaterialPageRoute(
               builder: (context) => Welcome(),
             );
@@ -111,15 +109,14 @@ class MyApp extends StatelessWidget {
         "/forgot": (context) => ForgotPassword(),
         "/home": (context) => Home(),
         "/planning": (context) => Planning(),
-        // "/tripplan": (context) => TripPlan(),
         "/chatlist": (context) => ChatList(),
         "/profilescreen": (context) => ProfileScreen(),
         "/editprofile": (context) => EditProfile(),
         "/staycomment": (context) => StayCommentPage(),
         "/addparticipants":(context) => AddParticipantsPage(), 
-        "/calendar":(context) => MyCalendarPage(),   
-         // "/singlechat": (context) => SingleChat(),
-        //"/homesections": (context) => HomeSectionsPage(),
+        "/calendar":(context) => MyCalendarPage(),  
+        //"/explore":(context) => ExplorePage(), 
+         
       },
     );
   }
