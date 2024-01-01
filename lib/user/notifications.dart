@@ -1,158 +1,173 @@
 import 'package:flutter/material.dart';
-import 'package:masarna/user/friends_list.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-void main() {
-  runApp(MyNotificationApp());
-}
+import 'package:masarna/globalstate.dart';
+import 'package:provider/provider.dart';
 
 class NotificationModel {
+  final String? id;
+  final String text;
+  final String subtext;
+  final String image;
+  final String userId;
   final String type;
-  final String userName;
-  final String userImage;
-  final String? planName; // Nullable planName parameter
-  final bool isAccepted; // Add this line
 
   NotificationModel({
+    String? id,
+    this.text = '.',
+    this.subtext = '.',
+    required this.image,
+    this.userId = "1",
     required this.type,
-    required this.userName,
-    required this.userImage,
-    this.planName, // Include planName in the constructor
-    this.isAccepted = false, // Default value is false
-  });
-}
+  }) : id = id ?? UniqueKey().toString();
 
-class MyNotificationApp extends StatelessWidget {
-  final List<NotificationModel> notifications = [
-    NotificationModel(
-        type: "Friend Request",
-        userName: "John Doe",
-        userImage: "https://placekitten.com/100/100"),
-    NotificationModel(
-        type: "Friend Accept",
-        userName: "Jane Smith",
-        userImage: "https://placekitten.com/101/101"),
-    NotificationModel(
-        type: "Plan Participant",
-        userName: "Bob Johnson",
-        userImage: "https://placekitten.com/102/102",
-        planName: "Antalya"),
-    NotificationModel(
-        type: "Plan Update",
-        userName: "Alice Williams",
-        userImage: "https://placekitten.com/103/103",
-        planName: "Bali"),
-    NotificationModel(
-        type: "Plan Removal",
-        userName: "Charlie Brown",
-        userImage: "https://placekitten.com/104/104",
-        planName: "Greece"),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Notifications', style: TextStyle(fontFamily: 'Montserrat', fontSize: 24, fontWeight: FontWeight.bold,
-          color: Color.fromARGB(255, 39, 26, 99),),),
-          backgroundColor: Colors.white,
-          elevation: 0,
-        ),
-        body: NotificationPage(
-          notifications: notifications,
-          friends: [],
-          acceptedFriendRequests: [],
-        ),
-      ),
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    return NotificationModel(
+      id: json['_id'],
+      text: json['title'],
+      subtext: json['text'],
+      image: json['image'] ?? 'images/logo4.png',
+      userId:
+          json['from'] ?? "", // Adjust this based on your actual JSON structure
+      type: json['type'],
     );
   }
 }
 
-class NotificationPage extends StatefulWidget {
-  final List<NotificationModel> notifications;
-  final List<Friend> friends; // Add this line
-
-  final List<Friend> acceptedFriendRequests; // Add this line
-
-  NotificationPage(
-      {Key? key,
-      required this.friends,
-      required this.acceptedFriendRequests,
-      required this.notifications})
-      : super(key: key);
-
+class MyNotificationApp extends StatefulWidget {
   @override
-  _NotificationPageState createState() => _NotificationPageState();
+  _MyNotificationAppState createState() => _MyNotificationAppState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
+class _MyNotificationAppState extends State<MyNotificationApp> {
   late GlobalKey<AnimatedListState> _listKey;
+  final List<NotificationModel> notifications = [];
 
   @override
   void initState() {
     super.initState();
     _listKey = GlobalKey<AnimatedListState>();
+    // Fetch notifications when the page is loaded
+    fetchNotifications();
+  }
+
+  Future<void> fetchNotifications() async {
+    String userId = Provider.of<GlobalState>(context, listen: false).id;
+    print(userId);
+    final url = 'http://192.168.1.16:3000/api/notifications/$userId';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        print('status 200 bruv');
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> notificationsData = data['notifications'];
+        final List<NotificationModel> newNotifications = notificationsData
+            .map((item) => NotificationModel.fromJson(item))
+            .toList();
+
+        // Clear existing notifications
+        setState(() {
+          notifications.clear();
+        });
+
+        // Add new notifications with proper animation
+        for (var i = 0; i < newNotifications.length; i++) {
+          await Future.delayed(Duration(milliseconds: 50));
+          setState(() {
+            notifications.add(newNotifications[i]);
+            _listKey.currentState!.insertItem(i);
+          });
+        }
+        print('hello');
+        print('Notifications length: ${notifications.length}');
+      } else {
+        // Handle error
+        print(
+            'Failed to load notifications. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      // Handle error
+      print('Error fetching notifications: $e');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedList(
-      key: _listKey,
-      initialItemCount: widget.notifications.length,
-      itemBuilder: (context, index, animation) {
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(1, 0),
-            end: Offset.zero,
-          ).animate(animation),
-          child: Dismissible(
-            key: Key(widget.notifications[index].type),
-            direction: DismissDirection.endToStart,
-            onDismissed: (direction) {
-              // Store the last deleted notification
-              var lastDeletedNotification = widget.notifications[index];
+    print('building');
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Notifications',
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 39, 26, 99),
+            ),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Container(
+          child: AnimatedList(
+            key: _listKey,
+            initialItemCount: notifications.length,
+            itemBuilder: (context, index, animation) {
+              print('Building item at index $index');
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: Dismissible(
+                  key: Key(notifications[index].id ?? UniqueKey().toString()),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (direction) {
+                    var lastDeletedNotification = notifications[index];
+                    _deleteFriendRequest(notifications[index]);
 
-              // Remove the notification from the list
-              widget.notifications.removeAt(index);
+                    notifications.removeAt(index);
+                    _listKey.currentState!.removeItem(
+                      index,
+                      (context, animation) => SizedBox.shrink(),
+                      duration: const Duration(milliseconds: 500),
+                    );
 
-              // Remove the item from the AnimatedList
-              _listKey.currentState!.removeItem(
-                index,
-                (context, animation) => SizedBox.shrink(),
-                duration: const Duration(milliseconds: 500),
-              );
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text("Notification deleted"),
-                  action: SnackBarAction(
-                    label: "Undo",
-                    onPressed: () {
-                      setState(() {
-                        // Insert the last deleted notification back to the list
-                        widget.notifications.insert(index, lastDeletedNotification);
-
-                        // Insert the item back to the AnimatedList
-                        _listKey.currentState!.insertItem(index);
-                      });
-                    },
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Notification deleted"),
+                        action: SnackBarAction(
+                          label: "Undo",
+                          onPressed: () {
+                            setState(() {
+                              notifications.insert(
+                                  index, lastDeletedNotification);
+                              _listKey.currentState!.insertItem(index);
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                  background: Container(
+                    alignment: AlignmentDirectional.centerEnd,
+                    color: Colors.red,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 16.0),
+                      child: Icon(Icons.delete, color: Colors.white),
+                    ),
                   ),
+                  child: buildNotificationCard(context, notifications[index]),
                 ),
               );
             },
-            background: Container(
-              alignment: AlignmentDirectional.centerEnd,
-              color: Colors.red,
-              child: Padding(
-                padding: EdgeInsets.only(right: 16.0),
-                child: Icon(Icons.delete, color: Colors.white),
-              ),
-            ),
-            child: buildNotificationCard(context, widget.notifications[index]),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -171,38 +186,48 @@ class _NotificationPageState extends State<NotificationPage> {
           padding: EdgeInsets.all(16),
           child: Row(
             children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: NetworkImage(notification.userImage),
+              if (notification.image != null &&
+                  notification.image.isNotEmpty) ...[
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage(notification.image),
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(width: 16),
+                SizedBox(width: 16),
+              ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      notification.userName,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20, fontFamily: 'Montserrat'),
+                      notification.text,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 19,
+                        fontFamily: 'Montserrat',
+                      ),
                     ),
                     SizedBox(height: 8),
+                    // Subtext
                     Text(
-                      getNotificationText(notification),
-                      style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                      notification.subtext,
+                      style: TextStyle(
+                        fontSize: 15, // Adjust the font size as needed
+                        color: Color.fromARGB(
+                            255, 128, 127, 127), // Adjust the color as needed
+                      ),
                     ),
-                    if (notification.type == "Friend Request" &&
-                        notification.isAccepted) ...[
-                      SizedBox(height: 8),
-                    ] else if (notification.type == "Friend Request" &&
-                        !notification.isAccepted) ...[
-                      SizedBox(height: 8),
+                    SizedBox(height: 8),
+
+                    if (notification.type == "req" &&
+                        notification.userId != null &&
+                        notification.userId.isNotEmpty) ...[
                       Row(
                         children: [
                           Expanded(
@@ -225,7 +250,6 @@ class _NotificationPageState extends State<NotificationPage> {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                // Handle deleting the friend request
                                 _deleteFriendRequest(notification);
                               },
                               style: ElevatedButton.styleFrom(
@@ -250,57 +274,36 @@ class _NotificationPageState extends State<NotificationPage> {
     );
   }
 
-  String getNotificationText(NotificationModel notification) {
-    switch (notification.type) {
-      case "Friend Request":
-        return "sent you a friend request.";
-      case "Friend Accept":
-        return "accepted your friend request.";
-      case "Plan Participant":
-        return "added you to the ${notification.planName} Plan.";
-      case "Plan Update":
-        return "made an update to the ${notification.planName} Plan.";
-      case "Plan Removal":
-        return "removed you from the ${notification.planName} Plan.";
-      case "Friend Confirm":
-        return "You and ${notification.userName} are now friends.";
-      default:
-        return "";
+  void _acceptFriendRequest(NotificationModel notification) {}
+
+  void _deleteFriendRequest(NotificationModel notification) async {
+    try {
+      String userId = Provider.of<GlobalState>(context, listen: false).id;
+
+      // Assuming your API endpoint for deleting a notification is something like this
+      final deleteUrl =
+          'http://192.168.1.16:3000/api/notifications/$userId/${notification.id}';
+
+      // Make the DELETE request
+      final response = await http.delete(Uri.parse(deleteUrl));
+
+      if (response.statusCode == 200) {
+        print('Notification deleted successfully from the backend.');
+
+        setState(() {
+          // Remove the notification from the local list
+          notifications.remove(notification);
+        });
+      } else {
+        // Handle API error
+        print(
+            'Failed to delete notification. Status code: ${response.statusCode}');
+        // You might want to show a snackbar or some feedback to the user
+      }
+    } catch (e) {
+      // Handle other errors
+      print('Error deleting notification: $e');
+      // You might want to show a snackbar or some feedback to the user
     }
-  }
-
-  void _acceptFriendRequest(NotificationModel notification) {
-    Friend newFriend =
-        Friend(name: notification.userName, imageUrl: notification.userImage);
-
-    setState(() {
-      widget.friends.add(newFriend);
-      widget.acceptedFriendRequests.add(newFriend);
-    });
-
-    // Find the index of the accepted notification
-    int notificationIndex = widget.notifications.indexOf(notification);
-
-    // Update the notification type and planName (if applicable) for the accepted friend request
-    widget.notifications[notificationIndex] = NotificationModel(
-      type: "Friend Confirm",
-      userName: notification.userName,
-      userImage: notification.userImage,
-      isAccepted: true, // Add a flag to indicate that the request is accepted
-    );
-
-    print("Friend request from ${notification.userName} accepted.");
-    print(
-        "Updated Friends List: ${widget.friends.map((friend) => friend.name).toList()}");
-    print(
-        "Updated Accepted Friend Requests: ${widget.acceptedFriendRequests.map((friend) => friend.name).toList()}");
-  }
-
-  void _deleteFriendRequest(NotificationModel notification) {
-    setState(() {
-      widget.notifications.remove(notification);
-    });
-
-    print("Friend request from ${notification.userName} deleted.");
   }
 }

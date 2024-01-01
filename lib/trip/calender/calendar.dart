@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:intl/intl.dart';
@@ -211,8 +210,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                 .any((event) => event.color == Color(0xFF004aad))) {
               final DateTime selectedDate = details.date!;
 
-                final formattedDate = DateFormat('yyyy-MM-dd').format(selectedDate);
-
+              final formattedDate =
+                  DateFormat('yyyy-MM-dd').format(selectedDate);
 
               // Access the GlobalState instance and add the selected date
               final globalState =
@@ -229,8 +228,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                   id: userid,
                   gdpid: gdpid);
 
-            String datedate =
-                  Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
+              String datedate = Provider.of<GlobalState>(context, listen: false)
+                  .selectedFormattedDate;
               print('Selected Date iafter adding to global: $datedate');
 
               print(
@@ -341,9 +340,10 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                 child: ElevatedButton.icon(
                   onPressed: () {
                     print(groupPlanId);
-                     String datedate =
-                  Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
-              
+                    String datedate =
+                        Provider.of<GlobalState>(context, listen: false)
+                            .selectedFormattedDate;
+
                     String userid =
                         Provider.of<GlobalState>(context, listen: false).id;
                     String planid =
@@ -351,7 +351,10 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                     final globalState =
                         Provider.of<GlobalState>(context, listen: false);
                     globalState.addToState(
-                        planid: planid, id: userid, gdpid: groupPlanId, selectedFormattedDate: datedate);
+                        planid: planid,
+                        id: userid,
+                        gdpid: groupPlanId,
+                        selectedFormattedDate: datedate);
                     Navigator.pop(context);
                     Navigator.push(
                       context,
@@ -669,6 +672,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
 
   Future<void> _addPersonalEvent(DateTime selectedDate, TimeOfDay startTime,
       TimeOfDay endTime, String eventName, String eventPrice) async {
+    double latitude = 0;
+    double longitude = 0;
     // Print the request body for debugging
     print('Request Body: ${json.encode({
           'name': eventName,
@@ -676,6 +681,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           'price': eventPrice,
           'starttime': _formatTimeOfDay(startTime),
           'endtime': _formatTimeOfDay(endTime),
+          'location': {'longitude': longitude, 'latitude': latitude}
           // Add other event details as needed
         })}');
     print('Event Name: ${eventName}');
@@ -694,6 +700,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           'price': eventPrice,
           'starttime': _formatTimeOfDay(startTime),
           'endtime': _formatTimeOfDay(endTime),
+          'location': {'longitude': longitude, 'latitude': latitude}
+
           // Add other event details as needed
         }),
         headers: {'Content-Type': 'application/json'},

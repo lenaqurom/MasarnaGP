@@ -168,7 +168,7 @@ router.get('/nightlifeactivities', async (req, res) => {
           coordinatesString.split(',').length === 2 &&
           coordinatesString.split(',').every(coord => !isNaN(Number(coord.trim())))
             ? coordinatesString.split(',').map(coord => Number(coord.trim()))
-            : [null, null];
+            : [0, 0];
                   const goodfor = 'nightlife'; 
         
 

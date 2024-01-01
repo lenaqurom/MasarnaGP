@@ -4,6 +4,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/homesection.dart';
 import 'package:provider/provider.dart';
 
 class Comment {
@@ -122,8 +123,10 @@ class _FlightCommentPageState extends State<FlightCommentPage> {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
-          },
+Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => SectionsPage()),
+                      );           },
         ),
       ),
       body: Column(

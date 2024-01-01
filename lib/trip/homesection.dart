@@ -820,7 +820,7 @@ class _SectionsPageState extends State<SectionsPage>
                   longitude: flight['location'][1],
                   title: flight['airline'] ?? '',
                   address: 'Antalya',
-                  cardId: flight['id'].toString(),
+                  cardId: flight['_id'].toString(),
                   price: (flight['price'] * 1.41).ceil().toString(),
                   description: flight['description'] ?? '',
                   onTap: () {
@@ -862,7 +862,7 @@ class _SectionsPageState extends State<SectionsPage>
                 _buildExampleCard(
                   title: stay['name'] ?? '',
                   address: 'Antalya',
-                  cardId: stay['id'].toString(),
+                  cardId: stay['_id'].toString(),
                   price: (stay['price'] / 3.5).ceil().toString(),
                   description: stay['description'] ?? '',
                   onTap: () {
@@ -906,7 +906,7 @@ class _SectionsPageState extends State<SectionsPage>
                   longitude: eatery['location'][1],
                   title: eatery['name'] ?? '',
                   address: eatery['address'] ?? '',
-                  cardId: eatery['id'].toString(),
+                  cardId: eatery['_id'].toString(),
                   description: eatery['description'] ?? '',
                   onTap: () {
                     // Handle tap for the stay

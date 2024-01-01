@@ -41,6 +41,23 @@ router.post('/oneplan/:planId/members/:userId', async (req, res) => {
     // Save the updated plan
     await plan.save();
 
+    const title = `${plan.name}`;  
+    const text = `you've been added to plan`;
+    
+    const notification = {
+      title: title,
+      text: text,
+      type: 'news',
+    };
+    if (plan.image) {
+      notification.image = plan.image;
+    }
+    // Add the notification to the user's notifications array
+    user.notifications.push(notification);
+
+    // Save the updated user
+    await user.save();
+
     res.status(200).json({ message: 'Member added successfully', members: plan.members });
   } catch (error) {
     console.error(error);
@@ -63,6 +80,7 @@ router.delete('/oneplan/:planId/members/:userId', async (req, res) => {
         
             // Check if the user is a member of the plan
             const memberIndex = plan.members.findIndex(member => member.user.equals(userId));
+            const user = await User.findById(userId);
         
             if (memberIndex === -1) {
               return res.status(400).json({ message: 'User is not a member of the plan' });
@@ -73,6 +91,21 @@ router.delete('/oneplan/:planId/members/:userId', async (req, res) => {
         
             // Save the updated plan
             await plan.save();
+            const title = `${plan.name}`;  
+            const text = `you've been removed from plan`;
+            const notification = {
+              title: title,
+              text: text,
+              type: 'news',
+            };
+            if (plan.image) {
+              notification.image = plan.image;
+            }
+            // Add the notification to the user's notifications array
+            user.notifications.push(notification);
+        
+            // Save the updated user
+            await user.save();
         
             res.status(200).json({ message: 'Member deleted successfully', members: plan.members });
           } catch (error) {

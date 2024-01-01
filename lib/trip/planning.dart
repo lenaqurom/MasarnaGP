@@ -60,7 +60,7 @@ class _PlanningState extends State<Planning> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.13:3000/api/oneplan'),
+        Uri.parse('http://192.168.1.16:3000/api/oneplan'),
       );
 
       request.fields['name'] = name;
@@ -156,7 +156,7 @@ class _PlanningState extends State<Planning> {
   Future<void> deletePlanapi(String planid) async {
     try {
       var response = await http.delete(
-        Uri.parse('http://192.168.1.13:3000/api/oneplan/$planid'),
+        Uri.parse('http://192.168.1.16:3000/api/oneplan/$planid'),
       );
 
       if (response.statusCode == 200) {

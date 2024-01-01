@@ -12,6 +12,8 @@ const flightSchema = new mongoose.Schema({
   description: String,
   type: String,
   image: String, 
+  favs: { type: Number, default: 0 },
+  reports: { type: Number, default: 0 },
 });
 
 const staySchema = new mongoose.Schema({
@@ -26,7 +28,9 @@ const staySchema = new mongoose.Schema({
     description: String,
     type: String,
     image: String,
-    rating: String,  
+    rating: String, 
+    favs: { type: Number, default: 0 },
+    reports: { type: Number, default: 0 }, 
   });
 
 const eaterySchema = new mongoose.Schema({
@@ -42,6 +46,8 @@ const eaterySchema = new mongoose.Schema({
     type: String,
     image: String,
     address: String,
+    favs: { type: Number, default: 0 },
+    reports: { type: Number, default: 0 },
   });
 
   const activitySchema = new mongoose.Schema({
@@ -58,6 +64,8 @@ const eaterySchema = new mongoose.Schema({
     image: String,
     goodfor: String, 
     address: String,
+    favs: { type: Number, default: 0 },
+    reports: { type: Number, default: 0 },
   });
 
 
