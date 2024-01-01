@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/homesection.dart';
 import 'package:provider/provider.dart';
 
 class VotingOption {
@@ -218,7 +219,7 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
         setState(() {
           votes.add(votingOption);
         });
-        Navigator.of(context).pop();
+        
       } else {
         // Handle error, maybe show an error dialog or log the error
         print('Error response: ${response.statusCode}');
@@ -612,8 +613,10 @@ Widget getVoteLine(int numvotes) {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
-          },
+Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => SectionsPage()),
+                      );           },
         ),
         title: Text(
           'Activities Voting',

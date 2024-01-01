@@ -4,6 +4,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/homesection.dart';
 import 'package:provider/provider.dart';
 
 class Comment {
@@ -50,7 +51,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
     final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     final response = await http.get(Uri.parse(
-        'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/comments'));
+        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/comments'));
 
     if (response.statusCode == 200) {
       // Parse the response data
@@ -75,7 +76,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
               userId: replyUserId,
               userName: replyData['username'] ?? '',
               commentText: replyData['text'] ?? '',
-              profileImage: 'http://192.168.1.13:3000/' +
+              profileImage: 'http://192.168.1.16:3000/' +
                   replyData['profilepicture'].replaceAll('\\', '/'),
             );
           }).toList();
@@ -86,7 +87,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
           userId: userId,
           userName: commentData['username'] ?? '',
           commentText: commentData['text'] ?? '',
-          profileImage: 'http://192.168.1.13:3000/' +
+          profileImage: 'http://192.168.1.16:3000/' +
               commentData['profilepicture'].replaceAll('\\', '/'),
           replies: replies,
         );
@@ -122,8 +123,10 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
-          },
+Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => SectionsPage()),
+                      );           },
         ),
       ),
       body: Column(
@@ -382,7 +385,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
       String userId = Provider.of<GlobalState>(context, listen: false).id;
       final response = await http.post(
         Uri.parse(
-            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$userId/comment'),
+            'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$userId/comment'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -415,7 +418,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
                   userId: replyUserId,
                   userName: replyData['username'] ?? '',
                   commentText: replyData['text'] ?? '',
-                  profileImage: 'http://192.168.1.13:3000/' +
+                  profileImage: 'http://192.168.1.16:3000/' +
                       replyData['profilepicture'].replaceAll('\\', '/'),
                 );
               }).toList();
@@ -426,7 +429,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
               userId: userId,
               userName: commentData['username'] ?? '',
               commentText: commentData['text'] ?? '',
-              profileImage: 'http://192.168.1.13:3000/' +
+              profileImage: 'http://192.168.1.16:3000/' +
                   commentData['profilepicture'].replaceAll('\\', '/'),
               replies: replies,
             );
@@ -466,7 +469,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
       // Send a POST request to the API endpoint
       final response = await http.post(
         Uri.parse(
-            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$parentCommentId/reply'),
+            'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$parentCommentId/reply'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -501,7 +504,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
                   userId: replyUserId,
                   userName: replyData['username'] ?? '',
                   commentText: replyData['text'] ?? '',
-                  profileImage: 'http://192.168.1.13:3000/' +
+                  profileImage: 'http://192.168.1.16:3000/' +
                       replyData['profilepicture'].replaceAll('\\', '/'),
                 );
               }).toList();
@@ -512,7 +515,7 @@ class _EeatriesCommentPageState extends State<EeatriesCommentPage> {
               userId: userId,
               userName: commentData['username'] ?? '',
               commentText: commentData['text'] ?? '',
-              profileImage: 'http://192.168.1.13:3000/' +
+              profileImage: 'http://192.168.1.16:3000/' +
                   commentData['profilepicture'].replaceAll('\\', '/'),
               replies: replies,
             );
@@ -591,7 +594,7 @@ void _updateComment(int index, String newText, String commentId) async {
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$commentId'),
+            'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$commentId'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
@@ -638,7 +641,7 @@ void _updateReply(int parentIndex, String newText, String replyCommentId) async 
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     final response = await http.put(
       Uri.parse(
-          'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$replyCommentId'),
+          'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$replyCommentId'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(requestBody),
     );
@@ -690,7 +693,7 @@ void _updateReply(int parentIndex, String newText, String replyCommentId) async 
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$commentId'),
+            'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$commentId'),
       );
 if (response.statusCode == 200) {
       // Update the UI to remove the deleted reply
@@ -719,7 +722,7 @@ if (response.statusCode == 200) {
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.13:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$commentId'),
+            'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/eateries/$commentId'),
       );
  if (response.statusCode == 200) {
       // Update the UI to remove the deleted comment

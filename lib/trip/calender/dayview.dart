@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:icons_flutter/icons_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/calender/datetime.dart';
 import 'package:masarna/trip/drawer/calculatebudget.dart';
 import 'package:masarna/trip/explore.dart';
@@ -89,8 +90,10 @@ class _DayViewPageState extends State<DayViewPage> {
             color: Color.fromARGB(255, 39, 26, 99),
           ),
           onPressed: () {
-            Navigator.pop(context);
-          },
+Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => MyCalendarPage()),
+                      );           },
         ),
         actions: [
           IconButton(
@@ -213,6 +216,8 @@ class _DayViewPageState extends State<DayViewPage> {
 
   Future<void> _addPersonalEvent(DateTime selectedDate, TimeOfDay startTime,
       TimeOfDay endTime, String eventName, String eventPrice) async {
+        double latitude = 0;
+    double longitude = 0;
     // Print the request body for debugging
     print('Request Body: ${json.encode({
           'name': eventName,
@@ -238,6 +243,8 @@ class _DayViewPageState extends State<DayViewPage> {
           'price': eventPrice,
           'starttime': _formatTimeOfDay(startTime),
           'endtime': _formatTimeOfDay(endTime),
+          'location': {'longitude': longitude, 'latitude': latitude}
+
           // Add other event details as needed
         }),
         headers: {'Content-Type': 'application/json'},

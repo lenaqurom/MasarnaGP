@@ -414,7 +414,26 @@ if (isClearWinner) {
 });
   // Save the updated plan with the new calendarevent
   await existingPlan.save();
-}
+ const title=`${existingPlan.name}`;
+ const text = `has new updates`;
+
+    // Iterate through all members of the plan
+    existingPlan.members.forEach(async (member) => {
+      const user = await User.findById(member.user);
+
+      if (user) {
+        // Add the notification to the user's notifications array
+        user.notifications.push({
+          title: title,
+          text: text,
+          type: 'news',
+        });
+
+        // Save the updated user
+        await user.save();
+      }
+    });
+  }
 
 res.status(200).json({
   message: 'Vote recorded successfully',

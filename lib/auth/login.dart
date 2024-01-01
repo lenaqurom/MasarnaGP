@@ -6,6 +6,7 @@ import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/home.dart';
+import 'package:masarna/user/notifications.dart';
 import 'package:masarna/user/profile_page.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _LoginState extends State<Login> {
         print(
             "Request body: email=$email, username=$username, password=$password");
        Navigator.pushReplacement(
-           context, MaterialPageRoute(builder: (context) => Home()));
+           context, MaterialPageRoute(builder: (context) => MyNotificationApp()));
           // Navigator.pushNamed(context, '/addparticipants');
         // Successful registration
         // You can navigate to a different screen or show a success message

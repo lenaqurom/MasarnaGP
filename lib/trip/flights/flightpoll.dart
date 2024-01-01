@@ -218,7 +218,6 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
         setState(() {
           votes.add(votingOption);
         });
-        Navigator.of(context).pop();
       } else {
         // Handle error, maybe show an error dialog or log the error
         print('Error response: ${response.statusCode}');
