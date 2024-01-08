@@ -426,8 +426,12 @@ if (isClearWinner) {
         user.notifications.push({
           title: title,
           text: text,
-          type: 'news',
+          type: 'cal',
         });
+
+        if (existingPlan.image) {
+          notification.image = existingPlan.image;
+        }
 
         // Save the updated user
         await user.save();

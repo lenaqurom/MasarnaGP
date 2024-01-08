@@ -4,7 +4,12 @@ const notifSchema = new mongoose.Schema({
   title: String,
   text: String,
   type: String,
-  from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+  from: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  image: String,
+});
+
+const requestSchema = new mongoose.Schema({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
 });
 
 const userSchema = new mongoose.Schema({
@@ -15,6 +20,7 @@ const userSchema = new mongoose.Schema({
   name: String,
   notifications: [notifSchema],
   reports: { type: Number, default: 0 },
+  requests: [requestSchema],
 });
 
 const User = mongoose.model('User', userSchema);

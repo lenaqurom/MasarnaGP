@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 import 'package:masarna/user/singlechat.dart';
 import 'package:masarna/user/chatlist.dart';
 import 'package:masarna/user/profile_page.dart';
+import 'package:masarna/user/profile_view.dart';
 import 'package:masarna/user/edit_profile.dart';
 import 'package:masarna/trip/homesection.dart';
 import 'package:masarna/trip/drawer/addparticipants.dart';
@@ -81,6 +82,27 @@ class MyApp extends StatelessWidget {
           }
         }
 
+        else if (settings.name == '/profileview') {
+          // Extract the userId from the arguments
+          final Map<String, dynamic>? arguments =
+              settings.arguments as Map<String, dynamic>?;
+
+          // Check if arguments contain userId
+          final userId = arguments?['userId'] as String?;
+          final myuserId = arguments?['userId'] as String?;
+          if (userId != null && myuserId != null ) {
+            return MaterialPageRoute(
+              builder: (context) => ProfileViewPage(userId: userId, myuserId: myuserId),
+            );
+          } else {
+            // Handle error or navigate to a default screen
+            // For now, navigating to Welcome() as an example
+            return MaterialPageRoute(
+              builder: (context) => Welcome(),
+            );
+          }
+        }
+
         else if (settings.name == '/explore') {
           final Map<String, dynamic>? arguments =
               settings.arguments as Map<String, dynamic>?;
@@ -97,6 +119,8 @@ class MyApp extends StatelessWidget {
             );
           }
         }
+
+        
 
         return MaterialPageRoute(
           builder: (context) =>

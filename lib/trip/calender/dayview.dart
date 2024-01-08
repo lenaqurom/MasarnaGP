@@ -175,7 +175,7 @@ Navigator.of(context).pushReplacement(
       final String gdpId =
           Provider.of<GlobalState>(context, listen: false).gdpid;
       String apiUrl =
-          'http://192.168.1.16:3000/api/$planId/$userId/calendarevents/${formatDateForAPI(widget.selectedDate)}';
+          'http://192.168.1.4:3000/api/$planId/$userId/calendarevents/${formatDateForAPI(widget.selectedDate)}';
 
       final response = await http.get(Uri.parse(apiUrl));
 

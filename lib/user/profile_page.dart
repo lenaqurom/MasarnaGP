@@ -11,6 +11,7 @@ import 'package:masarna/navbar/rive_asset.dart';
 import 'package:masarna/navbar/rive_utils.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/edit_profile.dart';
+import 'package:masarna/user/friends_list.dart';
 import 'package:masarna/user/home.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
@@ -44,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Provider.of<GlobalState>(context, listen: false).username;
        String email=       Provider.of<GlobalState>(context, listen: false).email;
         
-      final response = await ApiService('http://192.168.1.7:3000/api').getProfile(
+      final response = await ApiService('http://192.168.1.11:3000/api').getProfile(
         email, username);
      // print("Constructed profile picture URL: $_profilePicture");
      // final globalState = Provider.of<GlobalState>(context, listen: false);
@@ -58,7 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           String profilePicturePath = userData["profilepicture"];
         profilePicturePath = profilePicturePath.replaceAll('\\', '/');
         // Combine the base URL with the local path to create a complete URL
-        _profilePicture = 'http://192.168.1.7:3000/$profilePicturePath';
+        _profilePicture = 'http://192.168.1.11:3000/$profilePicturePath';
         print("Constructed profile picture URL: $_profilePicture");
         });
       } else {
@@ -264,8 +265,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          // Add your Friends button logic here
-                        },
+Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => FriendsListPage()));                        },
                         style: ElevatedButton.styleFrom(
                           primary: Color.fromARGB(213, 226, 224,
                               243), // Set your desired button color

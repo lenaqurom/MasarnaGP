@@ -47,7 +47,7 @@ router.post('/oneplan/:planId/members/:userId', async (req, res) => {
     const notification = {
       title: title,
       text: text,
-      type: 'news',
+      type: 'plan',
     };
     if (plan.image) {
       notification.image = plan.image;
@@ -96,7 +96,7 @@ router.delete('/oneplan/:planId/members/:userId', async (req, res) => {
             const notification = {
               title: title,
               text: text,
-              type: 'news',
+              type: 'plan',
             };
             if (plan.image) {
               notification.image = plan.image;

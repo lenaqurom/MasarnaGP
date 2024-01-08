@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const FriendsList = require('../models/friendslist');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' }); 
 const path = require('path');
@@ -51,5 +52,241 @@ router.post('/profilepage', upload.single('profilepicture'), async (req, res) =>
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+router.get('/profileview/:userId/:myuserid', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const loggedInUserId = req.params.myuserid;
+
+    // Check if the requested user is a friend
+    const friendsList = await FriendsList.findOne({ userid: loggedInUserId });
+    const isFriend = friendsList && friendsList.friendid.includes(userId);
+
+    const requestedUser = await User.findById(userId);
+    const requestedthem = requestedUser && requestedUser.requests.some(request => request.user.equals(loggedInUserId));
+
+    const me = await User.findById(loggedInUserId);
+    const requestedme = me && me.requests.some(request => request.user.equals(userId));
+
+    // Get the user's information
+    const user = await User.findById(userId);
+
+    // Prepare the user object to send back
+    const userProfile = {
+      username: user.username,
+      email: user.email,
+      profilepicture: user.profilepicture,
+      name: user.name,
+      isFriend,
+      requestedthem,
+      requestedme,
+    };
+
+    res.json(userProfile);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+router.post('/unfriend', async (req, res) => {
+  const { userId, friendId } = req.body;
+
+  try {
+    // Remove friendId from userId's friendslist
+    await FriendsList.updateOne(
+      { userid: userId },
+      { $pull: { friendid: friendId } }
+    );
+
+    // Remove userId from friendId's friendslist
+    await FriendsList.updateOne(
+      { userid: friendId },
+      { $pull: { friendid: userId } }
+    );
+
+    res.status(200).json({ message: 'Unfriended successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+router.post('/request', async (req, res) => {
+  try {
+    const { userId, recipientId } = req.body;
+
+    // Check if the recipient and sender exist
+    const recipient = await User.findById(recipientId);
+    const sender = await User.findById(userId);
+
+    if (!recipient || !sender) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the friend request already exists
+    const existingRequest = recipient.requests.find(request => request.user.equals(sender._id));
+
+    if (existingRequest) {
+      return res.status(400).json({ error: 'Friend request already sent' });
+    }
+
+    // Create a new friend request
+    recipient.requests.push({ user: sender._id });
+    await recipient.save();
+
+    const notification = {
+      title: `${sender.username}`,
+      text: `sent you a friend request`,
+      type: 'newss', 
+      image: `${sender.profilepicture}`,
+     // from: `${sender._id}`,
+  };
+  recipient.notifications.push(notification);
+        await recipient.save();
+
+    res.status(200).json({ message: 'Friend request sent successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post('/unrequest', async (req, res) => {
+  try {
+    const { userId, recipientId } = req.body;
+
+    // Check if the recipient and sender exist
+    const recipient = await User.findById(recipientId);
+    const sender = await User.findById(userId);
+
+    if (!recipient || !sender) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Find the friend request and remove it
+    recipient.requests = recipient.requests.filter(request => !request.user.equals(sender._id));
+    await recipient.save();
+
+
+    res.status(200).json({ message: 'Friend request cancelled successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post('/friend', async (req, res) => {
+  try {
+    const { userId, senderId } = req.body;
+
+    // Check if the sender and receiver exist
+    const sender = await User.findById(senderId);
+    const receiver = await User.findById(userId);
+
+    if (!sender || !receiver) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if there's an existing friend request from the sender
+    const existingRequest = receiver.requests.find(request => request.user.equals(sender._id));
+
+    if (!existingRequest) {
+      return res.status(400).json({ error: 'No friend request found from this user' });
+    }
+
+     // Update friends' lists
+     const senderFriendsList = await FriendsList.findOne({ userid: sender._id });
+     const receiverFriendsList = await FriendsList.findOne({ userid: receiver._id });
+ 
+     senderFriendsList.friendid.push(receiver._id);
+     receiverFriendsList.friendid.push(sender._id);
+ 
+     await senderFriendsList.save();
+     await receiverFriendsList.save();
+
+    // Remove the friend request from the receiver's requests array
+    receiver.requests = receiver.requests.filter(request => !request.user.equals(sender._id));
+    await receiver.save();
+
+    const notification = {
+      title: `${receiver.username}`,
+      text: `accepted your friend request`,
+      type: 'newss', 
+      image: `${receiver.profilepicture}`,
+  };
+  sender.notifications.push(notification);
+        await sender.save();
+
+    res.status(200).json({ message: 'Friend request accepted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.post('/deleterequest/:param', async (req, res) => {
+  try {
+    const { param } = req.params;
+    const { userId, requestId, senderId } = req.body;
+
+    // Check if the receiver exists
+    const receiver = await User.findById(userId);
+
+    if (!receiver) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (requestId) {
+      // Remove the friend request by ID from the receiver's requests array
+      receiver.requests = receiver.requests.filter(request => !request._id.equals(requestId));
+    } else if (param === 'senderId') {
+      // Remove the friend request based on the sender's ID from the receiver's requests array
+      receiver.requests = receiver.requests.filter(request => !request.user.equals(senderId));
+    } else {
+      return res.status(400).json({ error: 'Invalid parameters' });
+    }
+
+    await receiver.save();
+
+    res.status(200).json({ message: 'Friend request deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.get('/requests/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Check if the user exists
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Retrieve all friend requests from the user's requests array
+    const friendRequests = user.requests;
+
+   // Extract relevant information from friend requests
+   const friendRequestsInfo = await Promise.all(friendRequests.map(async (request) => {
+    const sender = await User.findById(request.user);
+    return {
+      requestId: request._id,
+      _id: sender._id,
+      username: sender.username,
+      profilepicture: sender.profilepicture,
+    };
+  }));
+
+  res.status(200).json(friendRequestsInfo);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 module.exports = router;

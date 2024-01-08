@@ -36,7 +36,7 @@ class _PlanningState extends State<Planning> {
   int? selectedPlanIndex;
   String planid = '';
 
-  final apiService = ApiService('http://192.168.1.16:3000/api');
+  final apiService = ApiService('http://192.168.1.4:3000/api');
 
   @override
   void initState() {
@@ -102,7 +102,7 @@ class _PlanningState extends State<Planning> {
   Future<void> viewPlans(String userid) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.16:3000/api/userplans/$userid'),
+        Uri.parse('http://192.168.1.4:3000/api/userplans/$userid'),
       );
 
       if (response.statusCode == 200) {
