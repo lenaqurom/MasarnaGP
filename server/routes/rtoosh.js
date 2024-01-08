@@ -48,8 +48,23 @@ router.post('/faveatery/:id', async (req, res) => {
   
       // Save the updated Eatery
       await eatery.save();
+
+       
+       const notification = {
+        title: `${eatery.name}`,
+        text: `was reported`,
+        type: 'news', 
+        image: `${eatery.image}`,
+    };
+
+    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const admin = await User.findById(adminId);
+    if (admin) {
+        admin.notifications.push(notification);
+        await admin.save();
+    }
   
-      // Return the updated Eatery with the incremented favs
+      
       res.json(eatery);
     } catch (error) {
       // Handle errors, such as database errors
@@ -103,6 +118,20 @@ router.post('/faveatery/:id', async (req, res) => {
   
       // Save the updated Eatery
       await stay.save();
+
+      const notification = {
+        title: `${stay.name}`,
+        text: `was reported`,
+        type: 'news', 
+        image: `${stay.image}`,
+    };
+
+    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const admin = await User.findById(adminId);
+    if (admin) {
+        admin.notifications.push(notification);
+        await admin.save();
+    }
   
       // Return the updated Eatery with the incremented favs
       res.json(stay);
@@ -157,6 +186,19 @@ router.post('/faveatery/:id', async (req, res) => {
   
       // Save the updated Eatery
       await flight.save();
+
+      const notification = {
+        title: `${flight.airline}`,
+        text: `was reported`,
+        type: 'news', 
+    };
+
+    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const admin = await User.findById(adminId);
+    if (admin) {
+        admin.notifications.push(notification);
+        await admin.save();
+    }
   
       // Return the updated Eatery with the incremented favs
       res.json(flight);
@@ -211,6 +253,21 @@ router.post('/faveatery/:id', async (req, res) => {
   
       // Save the updated Eatery
       await activity.save();
+      console.log(activity);
+
+      const notification = {
+        title: `${activity.name}`,
+        text: `was reported`,
+        type: 'news', 
+        image: `${activity.image}`,
+    };
+    console.log(notification);
+    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const admin = await User.findById(adminId);
+    if (admin) {
+        admin.notifications.push(notification);
+        await admin.save();
+    }
   
       // Return the updated Eatery with the incremented favs
       res.json(activity);
@@ -238,6 +295,20 @@ router.post('/faveatery/:id', async (req, res) => {
   
       // Save the updated Eatery
       await user.save();
+
+      const notification = {
+        title: `${user.username}`,
+        text: `was reported`,
+        type: 'news', 
+        image: `${user.profilepicture}`,
+    };
+
+    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const admin = await User.findById(adminId);
+    if (admin) {
+        admin.notifications.push(notification);
+        await admin.save();
+    }
   
       // Return the updated Eatery with the incremented favs
       res.json(user);
@@ -261,6 +332,29 @@ router.post('/faveatery/:id', async (req, res) => {
   
       // Save the Rating to the database
       await newRating.save();
+
+      const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Create a notification for the rating
+        const notification = {
+            title: `${user.username}`,
+            text: `submitted a new rating`,
+            type: 'news',
+            image: `${user.profilepicture}`,
+        };
+
+        // Notify the admin (replace '65941707201100b4af08d8ea' with the actual admin user ID)
+        const adminId = '65941707201100b4af08d8ea';
+        const admin = await User.findById(adminId);
+
+        if (admin) {
+            admin.notifications.push(notification);
+            await admin.save();
+        }
   
       // Return the new Rating
       res.json(newRating);
@@ -273,17 +367,17 @@ router.post('/faveatery/:id', async (req, res) => {
 
   router.get('/ratings', async (req, res) => {
     try {
-      // Fetch all ratings from the database
-      const ratings = await Rating.find();
-  
-      // Return the fetched ratings in the response
-      res.json(ratings);
+        // Fetch all ratings from the database and populate the 'user' field
+        const ratings = await Rating.find().populate('user', 'username profilepicture');
+
+        // Return the fetched ratings in the response
+        res.json(ratings);
     } catch (error) {
-      // Handle errors, such as database errors
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+        // Handle errors, such as database errors
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  });
+});
 
   router.get('/users', async (req, res) => {
     try {

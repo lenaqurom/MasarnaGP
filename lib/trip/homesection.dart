@@ -43,12 +43,15 @@ class _SectionsPageState extends State<SectionsPage>
   late TabController _tabController;
   late int _selectedTabIndex;
   Map<String, bool> favoritesMap = {};
+  Map<String, bool> reportsMap = {};
+  Map<String, int> reportsCount = {};
+  Map<String, int> favoritesCount = {};
 
   @override
   void initState() {
-     String datedate =
-                  Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
-              print('Selected Date in hs: $datedate');
+    String datedate =
+        Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
+    print('Selected Date in hs: $datedate');
     super.initState();
     _selectedTabIndex = 0;
     _tabController = TabController(length: 4, vsync: this);
@@ -63,7 +66,7 @@ class _SectionsPageState extends State<SectionsPage>
   Future<List<Map<String, dynamic>>> fetchStaysData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/getstays'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/getstays'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -76,7 +79,7 @@ class _SectionsPageState extends State<SectionsPage>
   Future<List<Map<String, dynamic>>> fetchEateriesData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/geteateries'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/geteateries'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -89,7 +92,7 @@ class _SectionsPageState extends State<SectionsPage>
   Future<List<Map<String, dynamic>>> fetchFlightsData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/getflights'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/getflights'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -101,7 +104,7 @@ class _SectionsPageState extends State<SectionsPage>
 
   Future<List<Map<String, dynamic>>> fetchActivitiesData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/getactivities'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/getactivities'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -126,7 +129,7 @@ class _SectionsPageState extends State<SectionsPage>
     String sectionName,
   ) async {
     double parsedPrice = double.tryParse(price) ?? 0.0;
-  
+
     // Format TimeOfDay to strings
     String formatTimeOfDay(TimeOfDay timeOfDay) {
       final now = DateTime.now();
@@ -143,11 +146,11 @@ class _SectionsPageState extends State<SectionsPage>
     String planId = Provider.of<GlobalState>(context, listen: false).planid;
     String groupdayplanId =
         Provider.of<GlobalState>(context, listen: false).gdpid;
-         String daTe =
+    String daTe =
         Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
     print('glo: $daTe');
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$groupdayplanId/section/$sectionNamee/poll-option';
+        'http://192.168.1.4:3000/api/oneplan/$planId/groupdayplan/$groupdayplanId/section/$sectionNamee/poll-option';
 
     final Map<String, dynamic> requestBody = {
       'date': daTe,
@@ -472,7 +475,9 @@ class _SectionsPageState extends State<SectionsPage>
     required String cardId,
   }) {
     bool isFavorite = favoritesMap[cardId] ?? false;
-
+    bool isReport = reportsMap[cardId] ?? false;
+    // int? reports = 50;
+    //int? favorites = 100;
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
       elevation: 8.0,
@@ -515,10 +520,61 @@ class _SectionsPageState extends State<SectionsPage>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              favoritesMap[cardId] = !isFavorite;
-                            });
+                          onTap: () async {
+                            if (favoritesMap[cardId] = !isFavorite) {
+                              try {
+                                String reportwhat = '';
+                                if (_getTabType() == 'Flights') {
+                                  reportwhat = 'favflight';
+                                } else if (_getTabType() == 'Eateries') {
+                                  reportwhat = 'faveatery';
+                                } else if (_getTabType() == 'Activities') {
+                                  reportwhat = 'favactivity';
+                                } else if (_getTabType() == 'Stays') {
+                                  reportwhat = 'favstay';
+                                }
+                                final response = await http.post(
+                                  Uri.parse(
+                                      'http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+                                  headers: {
+                                    'Content-Length':
+                                        '0', // Add any other required headers
+                                  },
+                                );
+                                if (response.statusCode == 200) {
+                                  print('faved sugg successfully');
+                                  setState(() {
+                                    favoritesMap[cardId] = !isFavorite;
+                                  });
+                                }
+                              } catch (error) {
+                                print('Error reporting: $error');
+                              }
+                            } else {
+                              print('nah');
+                               setState(() {
+                                    favoritesMap[cardId] = !isFavorite;
+                                  });
+                            }
+
+/*Future.delayed(Duration(seconds: 2), () {
+  setState(() {
+    favoritesMap[cardId] = isFavorite;
+  });
+});*/
+
+                            /* if (favoritesMap[cardId] == true || favoritesMap[cardId] == null) {
+                                favorites = favorites! + 1;
+                                favoritesCount[cardId] = favorites!;
+                                print('Card $cardId was fav.');
+                                print('Total favs for card $cardId: ${favoritesCount[cardId]}');
+                              } 
+                              else if (favoritesMap[cardId] == false && favoritesMap[cardId] != null) {
+                                favoritesCount[cardId] = favorites!;
+                                print('Card $cardId was unfav.');
+                                print('Total favs for card $cardId: ${favoritesCount[cardId]}');
+                              } */
+                            // });
                           },
                           child: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -547,6 +603,21 @@ class _SectionsPageState extends State<SectionsPage>
                     child: Text(
                       "\$${price}",
                       style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 147.0,
+                  right: 20.0,
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: IconButton(
+                      icon: Icon(Icons.report),
+                      color: Colors.white,
+                      onPressed: () {
+                        _showReportCardDialog(
+                            context, isReport, cardId /*, reports!*/);
+                      },
                     ),
                   ),
                 ),
@@ -686,6 +757,79 @@ class _SectionsPageState extends State<SectionsPage>
       default:
         return 'Flights'; // Default to Flights if the index is unknown
     }
+  }
+
+  void _showReportCardDialog(
+      BuildContext context, bool isReport, String cardId /*, int reports*/) {
+    AwesomeDialog(
+        context: context,
+        animType: AnimType.SCALE,
+        dialogType: DialogType.NO_HEADER,
+        body: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              children: [
+                Text(
+                  'Report Suggestion',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Do you want to report on this suggestion?',
+                  style: TextStyle(fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [],
+                ),
+              ],
+            );
+          },
+        ),
+        btnOkOnPress: () async {
+          try {
+            String reportwhat = '';
+            if (_getTabType() == 'Flights') {
+              reportwhat = 'reportflight';
+            } else if (_getTabType() == 'Eateries') {
+              reportwhat = 'reporteatery';
+            } else if (_getTabType() == 'Activities') {
+              reportwhat = 'reportactivity';
+            } else if (_getTabType() == 'Stays') {
+              reportwhat = 'reportstay';
+            }
+            final response = await http.post(
+              Uri.parse('http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+              headers: {
+                'Content-Length': '0', // Add any other required headers
+              },
+            );
+            if (response.statusCode == 200) {
+              print('reported sugg successfully');
+            }
+          } catch (error) {
+            print('Error reporting: $error');
+          }
+
+          /* setState(() {
+            if (reportsMap[cardId] == false || reportsMap[cardId] == null) {
+              reportsMap[cardId] = true;
+              reports += 1;
+              reportsCount[cardId] = reports;
+              print('Card $cardId was reported.');
+              print('Total reports for card $cardId: ${reportsCount[cardId]}');
+            } else {
+              print('Card $cardId was already reported.');
+            }
+          });*/
+        },
+        btnCancelOnPress: () {},
+        btnCancelColor: Colors.grey,
+        btnOkColor: Color.fromARGB(255, 39, 26, 99),
+        btnOkText: 'Report')
+      ..show();
   }
 
   void _showPollDialog(BuildContext context, String name, double latitude,

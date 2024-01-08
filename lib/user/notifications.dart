@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'package:masarna/globalstate.dart';
+import 'package:masarna/trip/planning.dart';
+import 'package:masarna/user/friends_list.dart';
 import 'package:provider/provider.dart';
 
 class NotificationModel {
@@ -27,7 +29,7 @@ class NotificationModel {
       id: json['_id'],
       text: json['title'],
       subtext: json['text'],
-      image: json['image'] ?? 'images/logo4.png',
+      image: json['image'] ?? '',
       userId:
           json['from'] ?? "", // Adjust this based on your actual JSON structure
       type: json['type'],
@@ -55,7 +57,7 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
   Future<void> fetchNotifications() async {
     String userId = Provider.of<GlobalState>(context, listen: false).id;
     print(userId);
-    final url = 'http://192.168.1.16:3000/api/notifications/$userId';
+    final url = 'http://192.168.1.4:3000/api/notifications/$userId';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -180,8 +182,15 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
       ),
       child: InkWell(
         onTap: () {
-          // Handle notification tap
-        },
+          if(notification.type=='newss'){
+            Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => FriendsListPage()));
+          }
+          if(notification.type=='plan'){
+            Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => Planning()));
+          }
+                  },
         child: Container(
           padding: EdgeInsets.all(16),
           child: Row(
@@ -195,7 +204,21 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: AssetImage(notification.image),
+                      image: NetworkImage('http://192.168.1.4:3000/' + notification.image.replaceAll('\\', '/')),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 16),
+              ],
+               if (notification.image == '') ...[
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: AssetImage('images/logo4.png'),
                     ),
                   ),
                 ),
@@ -280,9 +303,8 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
     try {
       String userId = Provider.of<GlobalState>(context, listen: false).id;
 
-      // Assuming your API endpoint for deleting a notification is something like this
       final deleteUrl =
-          'http://192.168.1.16:3000/api/notifications/$userId/${notification.id}';
+          'http://192.168.1.4:3000/api/notifications/$userId/${notification.id}';
 
       // Make the DELETE request
       final response = await http.delete(Uri.parse(deleteUrl));

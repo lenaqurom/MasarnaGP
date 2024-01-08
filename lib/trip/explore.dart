@@ -42,6 +42,9 @@ class _ExplorePageState extends State<ExplorePage>
   late TabController _tabController;
   late int _selectedTabIndex;
   Map<String, bool> favoritesMap = {};
+  Map<String, bool> reportsMap = {};
+  Map<String, int> reportsCount = {};
+  Map<String, int> favoritesCount = {};
 
   @override
   void initState() {
@@ -59,7 +62,7 @@ class _ExplorePageState extends State<ExplorePage>
   Future<List<Map<String, dynamic>>> fetchStaysData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/getstays'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/getstays'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -72,7 +75,7 @@ class _ExplorePageState extends State<ExplorePage>
   Future<List<Map<String, dynamic>>> fetchEateriesData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/geteateries'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/geteateries'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -85,7 +88,7 @@ class _ExplorePageState extends State<ExplorePage>
   Future<List<Map<String, dynamic>>> fetchFlightsData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/getflights'));
+        await http.get(Uri.parse('http://192.168.1.4:3000/api/getflights'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -96,8 +99,8 @@ class _ExplorePageState extends State<ExplorePage>
   }
 
   Future<List<Map<String, dynamic>>> fetchActivitiesData() async {
-    final response =
-        await http.get(Uri.parse('http://192.168.1.16:3000/api/getactivities'));
+    final response = await http
+        .get(Uri.parse('http://192.168.1.4:3000/api/getactivities'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -127,10 +130,11 @@ class _ExplorePageState extends State<ExplorePage>
     double parsedPrice = double.tryParse(price) ?? 0.0;
     // Format TimeOfDay to strings
     String formatTimeOfDay(TimeOfDay timeOfDay) {
-  String formattedHour = timeOfDay.hour.toString().padLeft(2, '0');
-  String formattedMinute = timeOfDay.minute.toString().padLeft(2, '0');
-  
-  return '$formattedHour:$formattedMinute';    }
+      String formattedHour = timeOfDay.hour.toString().padLeft(2, '0');
+      String formattedMinute = timeOfDay.minute.toString().padLeft(2, '0');
+
+      return '$formattedHour:$formattedMinute';
+    }
 
     String formattedStartTime =
         startTime != null ? formatTimeOfDay(startTime) : '';
@@ -140,7 +144,7 @@ class _ExplorePageState extends State<ExplorePage>
     String userId = Provider.of<GlobalState>(context, listen: false).id;
 
     final String apiUrl =
-        'http://192.168.1.16:3000/api/$planId/personalplan/$userId';
+        'http://192.168.1.4:3000/api/$planId/personalplan/$userId';
 
     final Map<String, dynamic> requestBody = {
       'date': formatDateForAPI(selectedDate),
@@ -345,6 +349,9 @@ class _ExplorePageState extends State<ExplorePage>
     required String cardId,
   }) {
     bool isFavorite = favoritesMap[cardId] ?? false;
+    bool isReport = reportsMap[cardId] ?? false;
+    //int? reports = 0;
+    //int? favorites = 0;
 
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -388,10 +395,42 @@ class _ExplorePageState extends State<ExplorePage>
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              favoritesMap[cardId] = !isFavorite;
-                            });
+                          onTap: () async {
+                            if (favoritesMap[cardId] = !isFavorite) {
+                              try {
+                                String reportwhat = '';
+                                if (_getTabType() == 'Flights') {
+                                  reportwhat = 'favflight';
+                                } else if (_getTabType() == 'Eateries') {
+                                  reportwhat = 'faveatery';
+                                } else if (_getTabType() == 'Activities') {
+                                  reportwhat = 'favactivity';
+                                } else if (_getTabType() == 'Stays') {
+                                  reportwhat = 'favstay';
+                                }
+                                final response = await http.post(
+                                  Uri.parse(
+                                      'http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+                                  headers: {
+                                    'Content-Length':
+                                        '0', // Add any other required headers
+                                  },
+                                );
+                                if (response.statusCode == 200) {
+                                  print('faved sugg successfully');
+                                  setState(() {
+                                    favoritesMap[cardId] = !isFavorite;
+                                  });
+                                }
+                              } catch (error) {
+                                print('Error reporting: $error');
+                              }
+                            } else {
+                              print('nah');
+                          setState(() {
+                                    favoritesMap[cardId] = !isFavorite;
+                                  });
+                            }
                           },
                           child: Icon(
                             isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -418,8 +457,23 @@ class _ExplorePageState extends State<ExplorePage>
                       ),
                     ),
                     child: Text(
-                      "\$${price}",
+                      "\$$price",
                       style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 147.0,
+                  right: 20.0,
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: IconButton(
+                      icon: Icon(Icons.report),
+                      color: Colors.white,
+                      onPressed: () {
+                        _showReportCardDialog(
+                            context, isReport, cardId /*, reports!*/);
+                      },
                     ),
                   ),
                 ),
@@ -508,14 +562,14 @@ class _ExplorePageState extends State<ExplorePage>
                         children: [
                           ElevatedButton.icon(
                             onPressed: () {
-                              _showPollDialog(
+                              _showAddDialog(
                                   context, title, latitude, longitude, price);
                             },
-                            icon: Icon(FlutterIcons.poll_mco),
-                            label: Text('Poll'),
+                            icon: Icon(FlutterIcons.add_mdi),
+                            label: Text('Add'),
                             style: ElevatedButton.styleFrom(
-                              primary: Color.fromARGB(255, 39, 26, 99),
-                              onPrimary: Colors.white,
+                              backgroundColor: Color.fromARGB(255, 39, 26, 99),
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12.0),
                               ),
@@ -549,7 +603,68 @@ class _ExplorePageState extends State<ExplorePage>
     }
   }
 
-  void _showPollDialog(BuildContext context, String name, double latitude,
+  void _showReportCardDialog(
+      BuildContext context, bool isReport, String cardId /*, int reports*/) {
+    AwesomeDialog(
+        context: context,
+        animType: AnimType.SCALE,
+        dialogType: DialogType.NO_HEADER,
+        body: StatefulBuilder(
+          builder: (context, setState) {
+            return Column(
+              children: [
+                Text(
+                  'Report Suggestion',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'Do you want to report on this suggestion?',
+                  style: TextStyle(fontSize: 18),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [],
+                ),
+              ],
+            );
+          },
+        ),
+        btnOkOnPress: () async {
+          try {
+            String reportwhat = '';
+            if (_getTabType() == 'Flights') {
+              reportwhat = 'reportflight';
+            } else if (_getTabType() == 'Eateries') {
+              reportwhat = 'reporteatery';
+            } else if (_getTabType() == 'Activities') {
+              reportwhat = 'reportactivity';
+            } else if (_getTabType() == 'Stays') {
+              reportwhat = 'reportstay';
+            }
+            final response = await http.post(
+              Uri.parse('http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+              headers: {
+                'Content-Length': '0', // Add any other required headers
+              },
+            );
+            if (response.statusCode == 200) {
+              print('reported sugg successfully');
+            }
+          } catch (error) {
+            print('Error reporting: $error');
+          }
+        },
+        btnCancelOnPress: () {},
+        btnCancelColor: Colors.grey,
+        btnOkColor: Color.fromARGB(255, 39, 26, 99),
+        btnOkText: 'Report')
+      ..show();
+  }
+
+  void _showAddDialog(BuildContext context, String name, double latitude,
       double longitude, String price) {
     TimeOfDay? _startTime;
     TimeOfDay? _endTime;
@@ -563,12 +678,12 @@ class _ExplorePageState extends State<ExplorePage>
             return Column(
               children: [
                 Text(
-                  'Poll Option',
+                  'Add Option',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 16),
                 Text(
-                  'Do you want to add this suggestion as a voting option?',
+                  'Do you want to add this suggestion to your schedule?',
                   style: TextStyle(fontSize: 18),
                   textAlign: TextAlign.center,
                 ),
@@ -592,8 +707,8 @@ class _ExplorePageState extends State<ExplorePage>
                       icon: Icon(FlutterIcons.calendar_clock_mco),
                       label: Text('Start Time'),
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(213, 226, 224, 243),
-                        onPrimary: Color.fromARGB(255, 39, 26, 99),
+                        backgroundColor: Color.fromARGB(213, 226, 224, 243),
+                        foregroundColor: Color.fromARGB(255, 39, 26, 99),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.0),
                         ),
@@ -615,8 +730,8 @@ class _ExplorePageState extends State<ExplorePage>
                       icon: Icon(FlutterIcons.calendar_clock_mco),
                       label: Text('End Time'),
                       style: ElevatedButton.styleFrom(
-                        primary: Color.fromARGB(213, 226, 224, 243),
-                        onPrimary: Color.fromARGB(255, 39, 26, 99),
+                        backgroundColor: Color.fromARGB(213, 226, 224, 243),
+                        foregroundColor: Color.fromARGB(255, 39, 26, 99),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.0),
                         ),
@@ -680,7 +795,7 @@ class _ExplorePageState extends State<ExplorePage>
                   longitude: flight['location'][1],
                   title: flight['airline'] ?? '',
                   address: 'Antalya',
-                  cardId: flight['id'].toString(),
+                  cardId: flight['_id'].toString(),
                   price: (flight['price'] * 1.41).ceil().toString(),
                   description: flight['description'] ?? '',
                   onTap: () {
@@ -688,6 +803,7 @@ class _ExplorePageState extends State<ExplorePage>
                   },
                   rating: flight['rating'] ?? '',
                   imageUrl: imageUrls[random.nextInt(imageUrls.length)],
+                  
                 ),
             ],
           );
@@ -722,7 +838,7 @@ class _ExplorePageState extends State<ExplorePage>
                 _buildExampleCard(
                   title: stay['name'] ?? '',
                   address: 'Antalya',
-                  cardId: stay['id'].toString(),
+                  cardId: stay['_id'].toString(),
                   price: (stay['price'] / 3.5).ceil().toString(),
                   description: stay['description'] ?? '',
                   onTap: () {
@@ -766,7 +882,7 @@ class _ExplorePageState extends State<ExplorePage>
                   longitude: eatery['location'][1],
                   title: eatery['name'] ?? '',
                   address: eatery['address'] ?? '',
-                  cardId: eatery['id'].toString(),
+                  cardId: eatery['_id'].toString(),
                   description: eatery['description'] ?? '',
                   onTap: () {
                     // Handle tap for the stay

@@ -3,11 +3,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/explore.dart';
+import 'package:masarna/trip/homesection.dart';
 import 'package:masarna/trip/planning.dart';
 import 'package:masarna/user/chatlist.dart';
+import 'package:masarna/user/friends_list.dart';
 import 'package:masarna/user/home.dart';
 import 'package:masarna/user/notifications.dart';
 import 'package:masarna/user/profile_page.dart';
+import 'package:masarna/user/profile_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -63,7 +66,7 @@ class _LoginState extends State<Login> {
       // print("Request body: email=$email, username=$username, password=$password");
 
       final response = await post(
-        Uri.parse('http://192.168.1.16:3000/api/login'),
+        Uri.parse('http://192.168.1.4:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -79,7 +82,7 @@ class _LoginState extends State<Login> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> userData = json.decode(response.body)["user"];
-       String id = userData["_id"];
+        String id = userData["_id"];
         if (email.isNotEmpty) {
           globalState.addToState(email: email, id: id);
         }
@@ -88,9 +91,10 @@ class _LoginState extends State<Login> {
         }
         print(
             "Request body: email=$email, username=$username, password=$password");
-       Navigator.pushReplacement(
-           context, MaterialPageRoute(builder: (context) => MyNotificationApp()));
-          // Navigator.pushNamed(context, '/addparticipants');
+      // DateTime selecteddate = '2023-12-05' as DateTime;
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => Planning()));
+        // Navigator.pushNamed(context, '/addparticipants');
         // Successful registration
         // You can navigate to a different screen or show a success message
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

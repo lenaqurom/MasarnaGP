@@ -630,7 +630,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           String planid =
               Provider.of<GlobalState>(context, listen: false).planid;
           final String apiUrl =
-              'http://192.168.1.16:3000/api/oneplan/$planid/groupdayplan';
+              'http://192.168.1.4:3000/api/oneplan/$planid/groupdayplan';
 
           final formattedDate =
               "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
@@ -820,7 +820,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
 
   Future<void> _fetchEventsFromBackend() async {
     final String baseUrl =
-        'http://192.168.1.16:3000/api'; // Replace with your actual API base URL
+        'http://192.168.1.4:3000/api'; // Replace with your actual API base URL
     final String planId =
         Provider.of<GlobalState>(context, listen: false).planid;
     final String userId = Provider.of<GlobalState>(context, listen: false).id;

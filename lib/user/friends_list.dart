@@ -3,6 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'package:masarna/globalstate.dart';
+import 'package:provider/provider.dart';
 
 class FriendsListPage extends StatefulWidget {
   @override
@@ -10,28 +15,67 @@ class FriendsListPage extends StatefulWidget {
 }
 
 class _FriendsListPageState extends State<FriendsListPage> {
-  final String userAccountFirstName = "Lina";
+  //final String userAccountFirstName = "Lina";
 
-  List<Friend> friends = [
-    Friend(name: 'John Doe', imageUrl: 'https://placekitten.com/100/100'),
-    Friend(name: 'Jane Smith', imageUrl: 'https://placekitten.com/101/101'),
-    Friend(name: 'Robert Johnson', imageUrl: 'https://placekitten.com/102/102'),
-    Friend(name: 'Emily Davis', imageUrl: 'https://placekitten.com/103/103'),
-    Friend(name: 'Michael Brown', imageUrl: 'https://placekitten.com/104/104'),
-    Friend(name: 'Amanda Miller', imageUrl: 'https://placekitten.com/105/105'),
-    Friend(name: 'David Wilson', imageUrl: 'https://placekitten.com/106/106'),
-    Friend(
-        name: 'Olivia Anderson', imageUrl: 'https://placekitten.com/107/107'),
-    Friend(
-        name: 'Christopher Taylor',
-        imageUrl: 'https://placekitten.com/108/108'),
-    Friend(name: 'Sophia White', imageUrl: 'https://placekitten.com/109/109'),
-  ];
+  List<Friend> friends = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Set the default tab to show all friends
+    filterFriends('');
+    fetchFriendsData();
+    fetchFriendreqsData();
+    // Listen for changes in the search input
+    searchControllerStream.stream.listen((query) {
+      filterFriends(query);
+    });
+        _onButtonPressed(true);
+  }
+
+  Future<void> fetchFriendsData() async {
+    String id = Provider.of<GlobalState>(context, listen: false).id;
+    final url = 'http://192.168.1.4:3000/api/friendslist/$id';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          friends =
+              data.map((friendData) => Friend.fromJson(friendData)).toList();
+        filteredFriendsList = List.from(friends); // Set filteredFriendsList here
+
+        });
+      } else {
+        print('Failed to load friends list');
+      }
+    } catch (error) {
+      print('Error fetching friends list: $error');
+    }
+  }
+
+   Future<void> fetchFriendreqsData() async {
+    String id = Provider.of<GlobalState>(context, listen: false).id;
+    final url = 'http://192.168.1.4:3000/api/requests/$id';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          friendRequests =
+              data.map((friendData) => Friend.fromJson(friendData)).toList();
+        });
+      } else {
+        print('Failed to load friends list');
+      }
+    } catch (error) {
+      print('Error fetching friends list: $error');
+    }
+  }
 
   List<Friend> friendRequests = [
-    Friend(name: 'Requester 1', imageUrl: 'https://placekitten.com/110/110'),
-    Friend(name: 'Requester 2', imageUrl: 'https://placekitten.com/111/111'),
-    Friend(name: 'Requester 3', imageUrl: 'https://placekitten.com/112/112'),
   ];
 
   List<Friend> filteredFriendsList = [];
@@ -52,19 +96,6 @@ class _FriendsListPageState extends State<FriendsListPage> {
       StreamController<String>.broadcast();
 
   @override
-  void initState() {
-    super.initState();
-
-    // Set the default tab to show all friends
-    filterFriends('');
-
-    // Listen for changes in the search input
-    searchControllerStream.stream.listen((query) {
-      filterFriends(query);
-    });
-  }
-
-  @override
   void dispose() {
     // Close the stream controller when the widget is disposed
     searchControllerStream.close();
@@ -76,7 +107,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "${userAccountFirstName}'s Friends",
+          'Friends',
           style: TextStyle(
             fontFamily: 'Montserrat',
             fontSize: 24,
@@ -168,68 +199,118 @@ class _FriendsListPageState extends State<FriendsListPage> {
     );
   }
 
-Widget _buildFriendsList(List<Friend> friendList) {
-  return ListView.builder(
-    itemCount: friendList.length,
-    itemBuilder: (context, index) {
-      if (unfriendedUsers.contains(friendList[index])) {
-        return Container();
+  Widget _buildFriendsList(List<Friend> friendList) {
+    return ListView.builder(
+      itemCount: friendList.length,
+      itemBuilder: (context, index) {
+        if (unfriendedUsers.contains(friendList[index])) {
+          return Container();
+        }
+
+        return FriendListItem(
+          friend: friendList[index],
+          onUnfriend: () {
+            showUnfriendConfirmationDialog(context, index, friendList);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildRequestsList(List<Friend> requestList) {
+    return ListView.builder(
+      itemCount: requestList.length,
+      itemBuilder: (context, index) {
+        return RequestListItem(
+          request: requestList[index],
+          onDelete: () async {
+             final id = Provider.of<GlobalState>(context, listen: false).id;
+    try {
+        print(id + '----' + requestList[index].id);
+        final response = await http.post(
+          Uri.parse('http://192.168.1.4:3000/api/deleterequest/senderId'),
+          headers: {
+            'Content-Type':
+                'application/json', // Add any other required headers
+          },
+          body: jsonEncode({
+            'userId': id,
+            'senderId': requestList[index].id,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print('deleted successfully');
+           setState(() {
+              friendRequests.remove(requestList[index]);
+              filteredRequestsList.remove(requestList[index]);
+            });
+          
+        } else {
+          // Handle other error cases
+          print('Error deleting friend request: ${response}');
+        }
+      } catch (error) {
+        print('Error deleting friend request: $error');
       }
+           
+          },
+          onAccept: (Friend friend) {
+            _acceptRequest(friend);
+          },
+        );
+      },
+    );
+  }
 
-      return FriendListItem(
-        friend: friendList[index],
-        onUnfriend: () {
-          showUnfriendConfirmationDialog(context, index, friendList);
-        },
-      );
-    },
-  );
-}
+  void showUnfriendConfirmationDialog(
+      BuildContext context, int index, List<Friend> friendList) {
+    AwesomeDialog(
+      context: context,
+      dialogType: DialogType.WARNING,
+      animType: AnimType.BOTTOMSLIDE,
+      title: 'Unfriend Confirmation',
+      desc: 'Are you sure you want to unfriend ${friendList[index].name}?',
+      descTextStyle: TextStyle(
+        color: Colors.black87,
+        fontSize: 16.0,
+        fontWeight: FontWeight.normal,
+        fontFamily: 'Montserrat',
+      ),
+      btnCancelColor: Colors.grey,
+      btnOkColor: Color.fromARGB(255, 39, 26, 99),
+      btnCancelOnPress: () {},
+      btnOkOnPress: () async {
+            final id = Provider.of<GlobalState>(context, listen: false).id;
 
-Widget _buildRequestsList(List<Friend> requestList) {
-  return ListView.builder(
-    itemCount: requestList.length,
-    itemBuilder: (context, index) {
-      return RequestListItem(
-        request: requestList[index],
-        onDelete: () {
+        try {
+        print(id + '----' + friendList[index].id);
+        final response = await http.post(
+          Uri.parse('http://192.168.1.4:3000/api/unfriend'),
+          headers: {
+            'Content-Type':
+                'application/json', // Add any other required headers
+          },
+          body: jsonEncode({
+            'userId': id,
+            'friendId': friendList[index].id,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print('unfriended successfully');
           setState(() {
-            friendRequests.remove(requestList[index]);
-            filteredRequestsList.remove(requestList[index]);
-          });
-        },
-        onAccept: (Friend friend) {
-          _acceptRequest(friend);
-        },
-      );
-    },
-  );
-}
-void showUnfriendConfirmationDialog(
-    BuildContext context, int index, List<Friend> friendList) {
-  AwesomeDialog(
-    context: context,
-    dialogType: DialogType.WARNING,
-    animType: AnimType.BOTTOMSLIDE,
-    title: 'Unfriend Confirmation',
-    desc: 'Are you sure you want to unfriend ${friendList[index].name}?',
-    descTextStyle: TextStyle(
-      color: Colors.black87,
-      fontSize: 16.0,
-      fontWeight: FontWeight.normal,
-      fontFamily: 'Montserrat',
-    ),
-    btnCancelColor: Colors.grey,
-    btnOkColor: Color.fromARGB(255, 39, 26, 99),
-    btnCancelOnPress: () {},
-    btnOkOnPress: () {
-      // Mark the user as unfriended without removing them immediately
-      setState(() {
-        unfriendedUsers.add(friendList[index]);
-      });
-    },
-  )..show();
-}
+          unfriendedUsers.add(friendList[index]);
+        });
+        } else {
+          // Handle other error cases
+          print('Error unfriending: ${response.statusCode}');
+        }
+      } catch (error) {
+        print('Error unfriending: $error');
+      }
+        
+      },
+    )..show();
+  }
 
   void _onButtonPressed(bool showAll) {
     setState(() {
@@ -251,8 +332,25 @@ void showUnfriendConfirmationDialog(
     });
   }
 
-  void _acceptRequest(Friend request) {
-    ScaffoldMessenger.of(context).showSnackBar(
+  void _acceptRequest(Friend request) async {
+        final id = Provider.of<GlobalState>(context, listen: false).id;
+
+    try {
+        print('in friend');
+        final response = await http.post(
+          Uri.parse('http://192.168.1.4:3000/api/friend'),
+          headers: {
+            'Content-Type':
+                'application/json', // Add any other required headers
+          },
+          body: jsonEncode({
+            'userId': id,
+            'senderId': request.id,
+          }),
+        );
+        if (response.statusCode == 200) {
+          print('friend request accepted successfully');
+          ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text("Request accepted"),
         duration: Duration(seconds: 2),
@@ -263,23 +361,35 @@ void showUnfriendConfirmationDialog(
       acceptedFriendRequests.add(request);
       friends.add(request);
       friendRequests.remove(request);
-    });
+      filteredRequestsList.remove(request);
 
-    // Delay the removal from the request list
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        // Remove the accepted friend from the filteredRequestsList
-        filteredRequestsList.remove(request);
-      });
     });
+          
+        } else {
+          // Handle other error cases
+          print('Error accepting friend request: ${response}');
+        }
+      } catch (error) {
+        print('Error accepting friend request: $error');
+      }
+    
   }
 }
 
 class Friend {
+  final String id;
   final String name;
   final String imageUrl;
 
-  Friend({required this.name, required this.imageUrl});
+  Friend({required this.id, required this.name, required this.imageUrl});
+
+  factory Friend.fromJson(Map<String, dynamic> json) {
+    return Friend(
+      id: json['_id'],
+      name: json['username'],
+      imageUrl: json['profilepicture'],
+    );
+  }
 }
 
 class FriendListItem extends StatelessWidget {
@@ -301,7 +411,8 @@ class FriendListItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 40.0,
-              backgroundImage: NetworkImage(friend.imageUrl),
+              backgroundImage: NetworkImage('http://192.168.1.4:3000/' +
+                  friend.imageUrl.replaceAll('\\', '/')),
             ),
             SizedBox(width: 16.0),
             Text(
@@ -334,6 +445,9 @@ class FriendListItem extends StatelessWidget {
               onSelected: (String value) {
                 if (value == 'unfriend') {
                   onUnfriend();
+                }
+                if (value == 'message') {
+                 Navigator.of(context).pushNamed('/chatlist');
                 }
               },
             ),
@@ -372,8 +486,9 @@ class _RequestListItemState extends State<RequestListItem> {
           children: [
             CircleAvatar(
               radius: 40.0,
-              backgroundImage: NetworkImage(widget.request.imageUrl),
-            ),
+              backgroundImage: NetworkImage('http://192.168.1.4:3000/' +
+                   widget.request.imageUrl.replaceAll('\\', '/')),),
+            
             SizedBox(width: 16.0),
             Expanded(
               child: Column(
@@ -450,7 +565,7 @@ class _RequestListItemState extends State<RequestListItem> {
     });
 
     Future.delayed(Duration(seconds: 2), () {
-      widget.onDelete();
+     // widget.onDelete();
 
       if (requestAccepted) {
         widget.onAccept(widget.request);
