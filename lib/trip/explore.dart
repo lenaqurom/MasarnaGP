@@ -802,7 +802,8 @@ class _ExplorePageState extends State<ExplorePage>
                     // Handle tap for the stay
                   },
                   rating: flight['rating'] ?? '',
-                  imageUrl: imageUrls[random.nextInt(imageUrls.length)],
+                  imageUrl: flight['image'] ?? '',
+                  //imageUrls[random.nextInt(imageUrls.length)],
                   
                 ),
             ],

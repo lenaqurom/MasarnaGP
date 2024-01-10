@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:masarna/admin/rating.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/navbar/animatedbar.dart';
 import 'package:masarna/navbar/rive_asset.dart';
@@ -293,8 +295,8 @@ Navigator.pushReplacement(
                       SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
-                          // print(email);
-                        },
+Navigator.pushReplacement(
+           context, MaterialPageRoute(builder: (context) => RatingPage()));                         },
                         style: ElevatedButton.styleFrom(
                           primary: Color.fromARGB(213, 226, 224,
                               243), // Set your desired button color
@@ -311,10 +313,10 @@ Navigator.pushReplacement(
                           mainAxisSize: MainAxisSize
                               .min, // Adjust the mainAxisSize as needed
                           children: [
-                            Icon(Icons.favorite_border),
+                            Icon(Icons.star),
                             SizedBox(
                                 width: 8), // Add space between icon and text
-                            Text('Favorites'),
+                            Text('Add Rating'),
                           ],
                         ),
                       ),

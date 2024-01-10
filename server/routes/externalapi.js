@@ -13,14 +13,15 @@ router.get('/flights', async (req, res) => {
     console.log('Page Content:', pageContent);
 
     try {
-      await page.goto('https://www.google.com/travel/flights/search?tfs=CBwQAhokEgoyMDI0LTAxLTAxagcIARIDQU1Ncg0IAhIJL20vMDFfaGhwGiQSCjIwMjQtMDEtMzFqDQgCEgkvbS8wMV9oaHByBwgBEgNBTU1AAUABSAFwAYIBCwj___________8BmAEBsgELEgkvbS8wMV9oaHA&hl=en-US&curr=JOD', {
+      await Flight.deleteMany();
+      await page.goto('https://www.google.com/travel/flights/search?tfs=CBwQAhokEgoyMDI0LTAyLTEwagcIARIDQU1Ncg0IAhIJL20vMDFfaGhwGiQSCjIwMjQtMDItMjlqDQgCEgkvbS8wMV9oaHByBwgBEgNBTU1AAUABSAFwAYIBCwj___________8BmAEBsgELEgkvbS8wMV9oaHA&hl=en-US&curr=JOD', {
         waitUntil: 'domcontentloaded',
       });
 
       await page.waitForFunction(() => {
         const flights = document.querySelectorAll('.Rk10dc li.pIav2d');
         return flights && flights.length >= 2; 
-      }, { timeout: 10000 }); 
+      }, { timeout: 50000 }); 
 
       const flightData = await page.evaluate(() => {
         const flights = [];
@@ -31,7 +32,7 @@ router.get('/flights', async (req, res) => {
           const price = parseFloat(priceElement?.getAttribute('aria-label').replace('JOD', '').trim()) || (priceElement?.getAttribute('aria-label').replace('Jordanian dinars', '').trim()) || 0;
           const description = element.querySelector('.gvkrdb.AdWm1c.tPgKwe.ogfYpf').textContent + '. AMM-AYT. ' + element.querySelector('.BbR8Ec').textContent;
           const location= [36.9123, 30.8024];
-          const image='';
+          const image='https://images.unsplash.com/photo-1556388158-158ea5ccacbd?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8ZmxpZ2h0fGVufDB8fDB8fHww';
           
           const startTimeText = element.querySelector('span[aria-label*="Departure time"]').textContent;
           const endTimeText = element.querySelector('span[aria-label*="Arrival time"]').textContent;
@@ -86,6 +87,7 @@ router.get('/flights', async (req, res) => {
 
 router.get('/hotels', async (req, res) => {
   try {
+    await Stay.deleteMany();
     const externalAPIInstance = new ExternalAPI();
     const browser = await puppeteer.launch({ headless: 'new' });
     const page = await browser.newPage();
@@ -141,6 +143,7 @@ router.get('/hotels', async (req, res) => {
 
 router.get('/nightlifeactivities', async (req, res) => {
   try {
+    await Activity.deleteMany();
     const externalAPIInstance = new ExternalAPI();
     const browser = await puppeteer.launch({ headless: 'new', args: ['--disable-http2'] });
     const page = await browser.newPage();
@@ -327,6 +330,7 @@ router.get('/shoppingactivities', async (req, res) => {
 
 router.get('/eateries', async (req, res) => {
   try {
+    await Eatery.deleteMany();
     const externalAPIInstance = new ExternalAPI();
     const browser = await puppeteer.launch({ headless: 'new', args: ['--disable-http2'] });
     const page = await browser.newPage();
