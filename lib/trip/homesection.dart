@@ -971,7 +971,7 @@ class _SectionsPageState extends State<SectionsPage>
                     // Handle tap for the stay
                   },
                   rating: flight['rating'] ?? '',
-                  imageUrl: imageUrls[random.nextInt(imageUrls.length)],
+                  imageUrl: flight['image'] ?? '',
                 ),
             ],
           );

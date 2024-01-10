@@ -1,5 +1,8 @@
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:masarna/admin/adminNotifs.dart';
+import 'package:masarna/admin/rating.dart';
+import 'package:masarna/admin/usersManage.dart';
 import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/stays/staycomment.dart';
@@ -140,6 +143,9 @@ class MyApp extends StatelessWidget {
         "/staycomment": (context) => StayCommentPage(),
         "/addparticipants":(context) => AddParticipantsPage(), 
         "/calendar":(context) => MyCalendarPage(),  
+        "/rating":(context) => RatingPage(), 
+        "/usersmanage":(context) => UsersManage(),
+        "adminnotifs" :(context) => AdminNotifs(selectedIndex: 2,),
         //"/explore":(context) => ExplorePage(), 
          
       },

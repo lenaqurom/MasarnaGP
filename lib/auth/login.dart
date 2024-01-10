@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:masarna/admin/adminNotifs.dart';
+import 'package:masarna/admin/externalManage.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/explore.dart';
@@ -14,6 +16,7 @@ import 'package:masarna/user/profile_view.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:masarna/admin/usersManage.dart';
 import '../api/apiservice.dart'; // Import the API service
 //import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
@@ -63,10 +66,8 @@ class _LoginState extends State<Login> {
         username = _usernameOrEmailController.text;
       }
 
-      // print("Request body: email=$email, username=$username, password=$password");
-
       final response = await post(
-        Uri.parse('http://192.168.1.4:3000/api/login'),
+        Uri.parse('http://192.168.1.6:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -76,50 +77,46 @@ class _LoginState extends State<Login> {
           'password': password,
         }),
       );
-      print(
-          "=======================================================================");
-      print("Response status code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         Map<String, dynamic> userData = json.decode(response.body)["user"];
         String id = userData["_id"];
+         
         if (email.isNotEmpty) {
           globalState.addToState(email: email, id: id);
         }
         if (email.isEmpty) {
           globalState.addToState(username: username, id: id);
         }
-        print(
-            "Request body: email=$email, username=$username, password=$password");
-      // DateTime selecteddate = '2023-12-05' as DateTime;
+
+        if(id=='65941707201100b4af08d8ea'){
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => Planning()));
-        // Navigator.pushNamed(context, '/addparticipants');
-        // Successful registration
-        // You can navigate to a different screen or show a success message
+            context, MaterialPageRoute(builder: (context) => AdminNotifs(selectedIndex: 2,)));
+            }
+            else{
+         Navigator.pushNamed(context, '/planning');}
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login successful'),
         ));
         yalafirebase = true;
-      } else if (response.statusCode == 401) {
-        // Registration failed due to validation errors
+        
+      } 
+      else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login failed: Incorrect data'),
         ));
       } else {
-        // Registration failed for other reasons
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login failed. Please try again later.'),
         ));
       }
     } catch (error) {
-      // Handle API request error
-      // Show an error message or perform error handling
+     
       print("Error: $error");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
       ));
-      print("PROBLEMMMMMMMMMMMMMMMMM");
+     
     }
   }
 
@@ -145,19 +142,9 @@ class _LoginState extends State<Login> {
 
       // Sign in with the credential
       await FirebaseAuth.instance.signInWithCredential(credential);
-      print("logged in");
-      // Navigate to the next screen after successful login
-      // Replace the 'HomeScreen' with the screen you want to navigate to after login
-      // Navigator.pushReplacement(
-      //   context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+     
     } catch (e) {
-      // Handle login errors (e.g., wrong password, user not found)
       print("Error during login: $e");
-      // Display an error message to the user
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            "Login failed. Please check your username/email and password."),
-      ));
     }
   }
 

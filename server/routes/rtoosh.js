@@ -52,8 +52,8 @@ router.post('/faveatery/:id', async (req, res) => {
        
        const notification = {
         title: `${eatery.name}`,
-        text: `was reported`,
-        type: 'news', 
+        text: `suggestion was reported`,
+        type: 'sug', 
         image: `${eatery.image}`,
     };
 
@@ -121,8 +121,8 @@ router.post('/faveatery/:id', async (req, res) => {
 
       const notification = {
         title: `${stay.name}`,
-        text: `was reported`,
-        type: 'news', 
+        text: `suggestion was reported`,
+        type: 'sug', 
         image: `${stay.image}`,
     };
 
@@ -189,8 +189,9 @@ router.post('/faveatery/:id', async (req, res) => {
 
       const notification = {
         title: `${flight.airline}`,
-        text: `was reported`,
-        type: 'news', 
+        image: `${flight.image}`,
+        text: `suggestion was reported`,
+        type: 'sug', 
     };
 
     const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
@@ -257,8 +258,8 @@ router.post('/faveatery/:id', async (req, res) => {
 
       const notification = {
         title: `${activity.name}`,
-        text: `was reported`,
-        type: 'news', 
+        text: `suggestion was reported`,
+        type: 'sug', 
         image: `${activity.image}`,
     };
     console.log(notification);
@@ -299,7 +300,7 @@ router.post('/faveatery/:id', async (req, res) => {
       const notification = {
         title: `${user.username}`,
         text: `was reported`,
-        type: 'news', 
+        type: 'user', 
         image: `${user.profilepicture}`,
     };
 
@@ -343,7 +344,7 @@ router.post('/faveatery/:id', async (req, res) => {
         const notification = {
             title: `${user.username}`,
             text: `submitted a new rating`,
-            type: 'news',
+            type: 'rating',
             image: `${user.profilepicture}`,
         };
 
@@ -414,7 +415,7 @@ router.post('/faveatery/:id', async (req, res) => {
     }
   });
 
-  router.delete('/flight/:id', async (req, res) => {
+  router.delete('/flights/:id', async (req, res) => {
     const flightId = req.params.id;
   
     try {
@@ -435,7 +436,7 @@ router.post('/faveatery/:id', async (req, res) => {
     }
   });
 
-  router.delete('/eatery/:id', async (req, res) => {
+  router.delete('/eateries/:id', async (req, res) => {
     const eateryId = req.params.id;
   
     try {
@@ -456,7 +457,7 @@ router.post('/faveatery/:id', async (req, res) => {
     }
   });
   
-  router.delete('/stay/:id', async (req, res) => {
+  router.delete('/stays/:id', async (req, res) => {
     const stayId = req.params.id;
   
     try {
@@ -477,7 +478,7 @@ router.post('/faveatery/:id', async (req, res) => {
     }
   });
 
-  router.delete('/activity/:id', async (req, res) => {
+  router.delete('/activities/:id', async (req, res) => {
     const activityId = req.params.id;
   
     try {
