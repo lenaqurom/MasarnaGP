@@ -175,7 +175,7 @@ Navigator.of(context).pushReplacement(
       final String gdpId =
           Provider.of<GlobalState>(context, listen: false).gdpid;
       String apiUrl =
-          'http://192.168.1.4:3000/api/$planId/$userId/calendarevents/${formatDateForAPI(widget.selectedDate)}';
+          'http://192.168.1.11:3000/api/$planId/$userId/calendarevents/${formatDateForAPI(widget.selectedDate)}';
 
       final response = await http.get(Uri.parse(apiUrl));
 
@@ -232,7 +232,7 @@ Navigator.of(context).pushReplacement(
     final String planId =
         Provider.of<GlobalState>(context, listen: false).planid;
     final String userId = Provider.of<GlobalState>(context, listen: false).id;
-    String apiUrl = 'http://192.168.1.16:3000/api/$planId/personalplan/$userId';
+    String apiUrl = 'http://192.168.1.11:3000/api/$planId/personalplan/$userId';
 
     try {
       final response = await http.post(
@@ -277,7 +277,7 @@ Navigator.of(context).pushReplacement(
       print('put request');
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.16:3000/api/$planId/${event.notes}/calendarevents/${event.id}'),
+            'http://192.168.1.11:3000/api/$planId/${event.notes}/calendarevents/${event.id}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -311,7 +311,7 @@ Navigator.of(context).pushReplacement(
       final String userId = Provider.of<GlobalState>(context, listen: false).id;
       final response = await http.delete(
         Uri.parse(
-            'http://192.168.1.16:3000/api/$planId/$userId/calendarevents/${event.id.toString()}'),
+            'http://192.168.1.11:3000/api/$planId/$userId/calendarevents/${event.id.toString()}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -319,6 +319,9 @@ Navigator.of(context).pushReplacement(
 
       if (response.statusCode == 200) {
         print('Event deleted successfully');
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Event deleted successfully'),
+      ));
         // Handle success if needed
         setState(() {
           widget.events.remove(event);

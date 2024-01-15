@@ -53,7 +53,7 @@ class _UsersManageState extends State<UsersManage> {
   Future<void> fetchUsers() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.1.6:3000/api/users'));
+          await http.get(Uri.parse('http://192.168.1.11:3000/api/users'));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -114,7 +114,7 @@ class _UsersManageState extends State<UsersManage> {
   height: double.infinity,
   child: CircleAvatar(
     backgroundImage: user.imageUrl.isNotEmpty
-        ? NetworkImage('http://192.168.1.6:3000/' + user.imageUrl.replaceAll('\\', '/'))
+        ? NetworkImage('http://192.168.1.11:3000/' + user.imageUrl.replaceAll('\\', '/'))
         : Image.asset('images/logo4.png', fit: BoxFit.fill).image,
   ),
 ),
@@ -201,7 +201,7 @@ class _UsersManageState extends State<UsersManage> {
           print(users[index].id);
           final response = await http.delete(
             Uri.parse(
-                'http://192.168.1.6:3000/api/user/$id'),
+                'http://192.168.1.11:3000/api/user/$id'),
           );
 
           if (response.statusCode == 200) {

@@ -8,24 +8,18 @@ router.post('/faveatery/:id', async (req, res) => {
     const eateryId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const eatery = await Eatery.findById(eateryId);
   
-      // If the Eatery is not found, return a 404 status
       if (!eatery) {
-        return res.status(404).json({ error: 'Eatery not found' });
+        return res.status(404).json({ error: 'eatery not found' });
       }
   
-      // Increment the favs property by one
       eatery.favs += 1;
   
-      // Save the updated Eatery
       await eatery.save();
   
-      // Return the updated Eatery with the incremented favs
       res.json(eatery);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -35,18 +29,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const eateryId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const eatery = await Eatery.findById(eateryId);
   
-      // If the Eatery is not found, return a 404 status
       if (!eatery) {
-        return res.status(404).json({ error: 'Eatery not found' });
+        return res.status(404).json({ error: 'eatery not found' });
       }
   
-      // Increment the favs property by one
       eatery.reports += 1;
   
-      // Save the updated Eatery
       await eatery.save();
 
        
@@ -57,7 +47,7 @@ router.post('/faveatery/:id', async (req, res) => {
         image: `${eatery.image}`,
     };
 
-    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const adminId = '65941707201100b4af08d8ea'; 
     const admin = await User.findById(adminId);
     if (admin) {
         admin.notifications.push(notification);
@@ -67,7 +57,6 @@ router.post('/faveatery/:id', async (req, res) => {
       
       res.json(eatery);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -78,24 +67,18 @@ router.post('/faveatery/:id', async (req, res) => {
     const stayId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const stay = await Stay.findById(stayId);
   
-      // If the Eatery is not found, return a 404 status
       if (!stay) {
-        return res.status(404).json({ error: 'Stay not found' });
+        return res.status(404).json({ error: 'stay not found' });
       }
   
-      // Increment the favs property by one
       stay.favs += 1;
   
-      // Save the updated Eatery
       await stay.save();
   
-      // Return the updated Eatery with the incremented favs
       res.json(stay);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -105,18 +88,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const stayId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const stay = await Stay.findById(stayId);
   
-      // If the Eatery is not found, return a 404 status
       if (!stay) {
-        return res.status(404).json({ error: 'Stay not found' });
+        return res.status(404).json({ error: 'stay not found' });
       }
   
-      // Increment the favs property by one
       stay.reports += 1;
   
-      // Save the updated Eatery
       await stay.save();
 
       const notification = {
@@ -126,17 +105,15 @@ router.post('/faveatery/:id', async (req, res) => {
         image: `${stay.image}`,
     };
 
-    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const adminId = '65941707201100b4af08d8ea'; 
     const admin = await User.findById(adminId);
     if (admin) {
         admin.notifications.push(notification);
         await admin.save();
     }
   
-      // Return the updated Eatery with the incremented favs
       res.json(stay);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -146,24 +123,18 @@ router.post('/faveatery/:id', async (req, res) => {
     const flightId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const flight = await Flight.findById(flightId);
   
-      // If the Eatery is not found, return a 404 status
       if (!flight) {
-        return res.status(404).json({ error: 'Flight not found' });
+        return res.status(404).json({ error: 'flight not found' });
       }
   
-      // Increment the favs property by one
       flight.favs += 1;
   
-      // Save the updated Eatery
       await flight.save();
   
-      // Return the updated Eatery with the incremented favs
       res.json(flight);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -173,18 +144,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const flightId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const flight = await Flight.findById(flightId);
   
-      // If the Eatery is not found, return a 404 status
       if (!flight) {
-        return res.status(404).json({ error: 'Flight not found' });
+        return res.status(404).json({ error: 'flight not found' });
       }
   
-      // Increment the favs property by one
       flight.reports += 1;
   
-      // Save the updated Eatery
       await flight.save();
 
       const notification = {
@@ -194,17 +161,15 @@ router.post('/faveatery/:id', async (req, res) => {
         type: 'sug', 
     };
 
-    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const adminId = '65941707201100b4af08d8ea'; 
     const admin = await User.findById(adminId);
     if (admin) {
         admin.notifications.push(notification);
         await admin.save();
     }
   
-      // Return the updated Eatery with the incremented favs
       res.json(flight);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -214,24 +179,17 @@ router.post('/faveatery/:id', async (req, res) => {
     const activityId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const activity = await Activity.findById(activityId);
   
-      // If the Eatery is not found, return a 404 status
       if (!activity) {
-        return res.status(404).json({ error: 'Activity not found' });
+        return res.status(404).json({ error: 'activity not found' });
       }
   
-      // Increment the favs property by one
       activity.favs += 1;
+        await activity.save();
   
-      // Save the updated Eatery
-      await activity.save();
-  
-      // Return the updated Eatery with the incremented favs
       res.json(activity);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -241,19 +199,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const activityId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const activity = await Activity.findById(activityId);
   
-      // If the Eatery is not found, return a 404 status
       if (!activity) {
-        return res.status(404).json({ error: 'Activity not found' });
+        return res.status(404).json({ error: 'activity not found' });
       }
   
-      // Increment the favs property by one
       activity.reports += 1;
-  
-      // Save the updated Eatery
-      await activity.save();
+        await activity.save();
       console.log(activity);
 
       const notification = {
@@ -263,17 +216,15 @@ router.post('/faveatery/:id', async (req, res) => {
         image: `${activity.image}`,
     };
     console.log(notification);
-    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const adminId = '65941707201100b4af08d8ea'; 
     const admin = await User.findById(adminId);
     if (admin) {
         admin.notifications.push(notification);
         await admin.save();
     }
   
-      // Return the updated Eatery with the incremented favs
       res.json(activity);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -283,19 +234,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const userId = req.params.id;
   
     try {
-      // Find the Eatery by ID
       const user = await User.findById(userId);
   
-      // If the Eatery is not found, return a 404 status
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'user not found' });
       }
   
-      // Increment the favs property by one
       user.reports += 1;
-  
-      // Save the updated Eatery
-      await user.save();
+        await user.save();
 
       const notification = {
         title: `${user.username}`,
@@ -304,17 +250,15 @@ router.post('/faveatery/:id', async (req, res) => {
         image: `${user.profilepicture}`,
     };
 
-    const adminId = '65941707201100b4af08d8ea'; // Replace with the actual admin user ID
+    const adminId = '65941707201100b4af08d8ea'; 
     const admin = await User.findById(adminId);
     if (admin) {
         admin.notifications.push(notification);
         await admin.save();
     }
   
-      // Return the updated Eatery with the incremented favs
       res.json(user);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -324,23 +268,20 @@ router.post('/faveatery/:id', async (req, res) => {
     const { userId, stars, comment } = req.body;
   
     try {
-      // Create a new Rating instance
       const newRating = new Rating({
         user: userId,
         stars,
         comment,
       });
   
-      // Save the Rating to the database
       await newRating.save();
 
       const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error: 'user not found' });
         }
 
-        // Create a notification for the rating
         const notification = {
             title: `${user.username}`,
             text: `submitted a new rating`,
@@ -348,7 +289,6 @@ router.post('/faveatery/:id', async (req, res) => {
             image: `${user.profilepicture}`,
         };
 
-        // Notify the admin (replace '65941707201100b4af08d8ea' with the actual admin user ID)
         const adminId = '65941707201100b4af08d8ea';
         const admin = await User.findById(adminId);
 
@@ -357,10 +297,8 @@ router.post('/faveatery/:id', async (req, res) => {
             await admin.save();
         }
   
-      // Return the new Rating
       res.json(newRating);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -368,13 +306,10 @@ router.post('/faveatery/:id', async (req, res) => {
 
   router.get('/ratings', async (req, res) => {
     try {
-        // Fetch all ratings from the database and populate the 'user' field
         const ratings = await Rating.find().populate('user', 'username profilepicture');
 
-        // Return the fetched ratings in the response
         res.json(ratings);
     } catch (error) {
-        // Handle errors, such as database errors
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -382,13 +317,10 @@ router.post('/faveatery/:id', async (req, res) => {
 
   router.get('/users', async (req, res) => {
     try {
-      // Fetch all ratings from the database
       const users = await User.find();
   
-      // Return the fetched ratings in the response
       res.json(users);
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -398,18 +330,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const userId = req.params.id;
   
     try {
-      // Find the user by ID and delete it
       const deletedUser = await User.findByIdAndDelete(userId);
   
-      // If the user is not found, return a 404 status
       if (!deletedUser) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'user not found' });
       }
   
-      // Return the deleted user in the response
-      res.json({ message: 'User deleted successfully', deletedUser });
+      res.json({ message: 'user deleted successfully', deletedUser });
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -419,18 +347,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const flightId = req.params.id;
   
     try {
-      // Find the user by ID and delete it
       const deletedFlight = await Flight.findByIdAndDelete(flightId);
   
-      // If the user is not found, return a 404 status
       if (!deletedFlight) {
-        return res.status(404).json({ error: 'Flight not found' });
+        return res.status(404).json({ error: 'flight not found' });
       }
   
-      // Return the deleted user in the response
-      res.json({ message: 'Flight deleted successfully', deletedFlight });
+      res.json({ message: 'flight deleted successfully', deletedFlight });
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -440,18 +364,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const eateryId = req.params.id;
   
     try {
-      // Find the user by ID and delete it
       const deletedEatery = await Eatery.findByIdAndDelete(eateryId);
   
-      // If the user is not found, return a 404 status
       if (!deletedEatery) {
-        return res.status(404).json({ error: 'Eatery not found' });
+        return res.status(404).json({ error: 'eatery not found' });
       }
   
-      // Return the deleted user in the response
-      res.json({ message: 'Eatery deleted successfully', deletedEatery });
+      res.json({ message: 'eatery deleted successfully', deletedEatery });
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -461,18 +381,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const stayId = req.params.id;
   
     try {
-      // Find the user by ID and delete it
       const deletedStay = await Stay.findByIdAndDelete(stayId);
   
-      // If the user is not found, return a 404 status
       if (!deletedStay) {
-        return res.status(404).json({ error: 'Stay not found' });
+        return res.status(404).json({ error: 'stay not found' });
       }
   
-      // Return the deleted user in the response
-      res.json({ message: 'Stay deleted successfully', deletedStay });
+      res.json({ message: 'stay deleted successfully', deletedStay });
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
@@ -482,18 +398,14 @@ router.post('/faveatery/:id', async (req, res) => {
     const activityId = req.params.id;
   
     try {
-      // Find the user by ID and delete it
       const deletedActivity = await Activity.findByIdAndDelete(activityId);
   
-      // If the user is not found, return a 404 status
       if (!deletedActivity) {
-        return res.status(404).json({ error: 'Activity not found' });
+        return res.status(404).json({ error: 'activity not found' });
       }
   
-      // Return the deleted user in the response
-      res.json({ message: 'Activity deleted successfully', deletedActivity });
+      res.json({ message: 'activity deleted successfully', deletedActivity });
     } catch (error) {
-      // Handle errors, such as database errors
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
     }

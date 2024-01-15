@@ -59,10 +59,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _email = userData["email"];
           _name = userData["name"];
           String profilePicturePath = userData["profilepicture"];
-        profilePicturePath = profilePicturePath.replaceAll('\\', '/');
-        // Combine the base URL with the local path to create a complete URL
-        _profilePicture = 'http://192.168.1.11:3000/$profilePicturePath';
-        print("Constructed profile picture URL: $_profilePicture");
+          if (profilePicturePath != '') {
+            _profilePicture = 'http://192.168.1.11:3000/' +
+                userData["profilepicture"].replaceAll('\\', '/');
+          } else {
+            _profilePicture = '';
+          }
+
+          print("Constructed profile picture URL: $_profilePicture");
         });
       } else {
         print("Failed to load user profile: ${response.statusCode}");

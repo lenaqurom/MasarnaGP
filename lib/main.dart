@@ -6,6 +6,7 @@ import 'package:masarna/admin/usersManage.dart';
 import 'package:masarna/trip/calender/calendar.dart';
 import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/stays/staycomment.dart';
+import 'package:masarna/user/notifications.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:masarna/globalstate.dart';
@@ -145,7 +146,9 @@ class MyApp extends StatelessWidget {
         "/calendar":(context) => MyCalendarPage(),  
         "/rating":(context) => RatingPage(), 
         "/usersmanage":(context) => UsersManage(),
-        "adminnotifs" :(context) => AdminNotifs(selectedIndex: 2,),
+        "/adminnotifs" :(context) => AdminNotifs(selectedIndex: 2,),
+        "/notifications" :(context) => MyNotificationApp(),
+
         //"/explore":(context) => ExplorePage(), 
          
       },

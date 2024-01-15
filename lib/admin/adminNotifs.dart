@@ -32,7 +32,7 @@ class NotificationModel {
     String? imageUrl = json['image']?.toString();
 
     if (imageUrl != null && imageUrl.contains('uploads')) {
-      imageUrl = 'http://192.168.1.6:3000/' + imageUrl.replaceAll('\\', '/');
+      imageUrl = 'http://192.168.1.11:3000/' + imageUrl.replaceAll('\\', '/');
     }
 
     return NotificationModel(
@@ -74,7 +74,7 @@ class _AdminNotifsState extends State<AdminNotifs> {
     String userId = '65941707201100b4af08d8ea';
     //Provider.of<GlobalState>(context, listen: false).id;
     print(userId);
-    final url = 'http://192.168.1.6:3000/api/notifications/$userId';
+    final url = 'http://192.168.1.11:3000/api/notifications/$userId';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -331,7 +331,7 @@ class _AdminNotifsState extends State<AdminNotifs> {
       String userId = Provider.of<GlobalState>(context, listen: false).id;
 
       final deleteUrl =
-          'http://192.168.1.6:3000/api/notifications/$userId/${notification.id}';
+          'http://192.168.1.11:3000/api/notifications/$userId/${notification.id}';
 
       // Make the DELETE request
       final response = await http.delete(Uri.parse(deleteUrl));

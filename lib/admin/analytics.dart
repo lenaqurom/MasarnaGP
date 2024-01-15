@@ -22,7 +22,7 @@ class _AdminReviewPageState extends State<AdminReviewPage> {
   }
 
    Future<void> fetchReviews() async {
-     final response = await http.get(Uri.parse('http://192.168.1.6:3000/api/ratings'));
+     final response = await http.get(Uri.parse('http://192.168.1.11:3000/api/ratings'));
 
      if (response.statusCode == 200) {
        final List<dynamic> data = json.decode(response.body);
@@ -146,7 +146,7 @@ class _AdminReviewPageState extends State<AdminReviewPage> {
                 child: ClipOval(
                   child: review.profileImage.isNotEmpty
                 ?  Image.network(
-                   'http://192.168.1.6:3000/' + review.profileImage.replaceAll('\\', '/'),
+                   'http://192.168.1.11:3000/' + review.profileImage.replaceAll('\\', '/'),
                     fit: BoxFit.cover,
                     width: 60.0,
                     height: 60.0,

@@ -35,7 +35,7 @@ class _BudgetPageState extends State<BudgetPage> {
       final String userId = Provider.of<GlobalState>(context, listen: false).id;
       final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
     final Uri uri =
-          Uri.parse('http://192.168.1.16:3000/api/$planId/$userId/calendarevents');
+          Uri.parse('http://192.168.1.11:3000/api/$planId/$userId/calendarevents');
       final response = await http.get(
           uri);
 

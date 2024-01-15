@@ -36,7 +36,7 @@ class _PlanningState extends State<Planning> {
   int? selectedPlanIndex;
   String planid = '';
 
-  final apiService = ApiService('http://192.168.1.4:3000/api');
+  final apiService = ApiService('http://192.168.1.11:3000/api');
 
   @override
   void initState() {
@@ -60,7 +60,7 @@ class _PlanningState extends State<Planning> {
     try {
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://192.168.1.16:3000/api/oneplan'),
+        Uri.parse('http://192.168.1.11:3000/api/oneplan'),
       );
 
       request.fields['name'] = name;
@@ -102,7 +102,7 @@ class _PlanningState extends State<Planning> {
   Future<void> viewPlans(String userid) async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.4:3000/api/userplans/$userid'),
+        Uri.parse('http://192.168.1.11:3000/api/userplans/$userid'),
       );
 
       if (response.statusCode == 200) {
@@ -112,14 +112,17 @@ class _PlanningState extends State<Planning> {
           List<dynamic> userPlansData = responseData['plans'];
 
           List<Plan> fetchedPlans = userPlansData
-              .map((planData) => Plan(
-                    id: planData['_id'],
-                    title: planData['name'],
-                    description: planData['description'],
-                    image: 'http://192.168.1.16:3000/' +
-                        planData['image'].replaceAll('\\', '/'),
-                  ))
-              .toList();
+    .map((planData) => Plan(
+          id: planData['_id'],
+          title: planData['name'],
+          description: planData['description'],
+          image: planData['image'] != null && planData['image'].isNotEmpty
+              ? 'http://192.168.1.11:3000/' +
+                  planData['image'].replaceAll('\\', '/')
+              : '',
+        ))
+    .toList();
+
 
           setState(() {
             plans = fetchedPlans;
@@ -156,13 +159,15 @@ class _PlanningState extends State<Planning> {
   Future<void> deletePlanapi(String planid) async {
     try {
       var response = await http.delete(
-        Uri.parse('http://192.168.1.16:3000/api/oneplan/$planid'),
+        Uri.parse('http://192.168.1.11:3000/api/oneplan/$planid'),
       );
 
       if (response.statusCode == 200) {
         // Handle successful deletion
         print('Plan deleted successfully');
-
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Plan deleted successfully'),
+      ));
         // Remove the deleted plan from the local list
         setState(() {
           plans.removeWhere((plan) => plan.id == planid);
@@ -187,7 +192,7 @@ class _PlanningState extends State<Planning> {
     try {
       var request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://192.168.1.13:3000/api/oneplan/$planid'),
+        Uri.parse('http://192.168.1.11:3000/api/oneplan/$planid'),
       );
 
       request.fields['name'] = name;
@@ -503,7 +508,10 @@ class _PlanningState extends State<Planning> {
                                       image: NetworkImage(plans[index].image!),
                                       fit: BoxFit.cover,
                                     )
-                                  : null,
+                                  : DecorationImage(
+                                      image: AssetImage('images/logo4.png'),
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
                           ),
                           Padding(

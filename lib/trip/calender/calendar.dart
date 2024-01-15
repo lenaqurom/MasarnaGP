@@ -5,6 +5,7 @@ import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/datetime.dart';
 import 'package:masarna/trip/calender/dayview.dart';
 import 'package:masarna/trip/drawer/calculatebudget.dart';
+import 'package:masarna/trip/drawer/map.dart';
 import 'package:masarna/trip/explore.dart';
 import 'package:masarna/trip/homesection.dart';
 import 'package:masarna/trip/planning.dart';
@@ -99,7 +100,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                   Navigator.pushNamed(context, '/addparticipants');
                 },
               ),
-              ListTile(
+            /*  ListTile(
                 leading: Icon(AntDesign.team),
                 title: Text('See members',
                     style: TextStyle(
@@ -110,7 +111,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-              ),
+              ),*/
               ListTile(
                 leading: Icon(AntDesign.calculator),
                 title: Text('Calculate budget',
@@ -133,8 +134,8 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                         fontSize: 18,
                         fontWeight: FontWeight.w600)),
                 onTap: () {
-                  Navigator.pop(context);
-                },
+Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => MapPage()));                },
               ),
               ListTile(
                 leading: Icon(Icons.photo_album),
@@ -148,7 +149,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
+            /*  ListTile(
                 leading: Icon(Icons.explore_sharp),
                 title: Text('Explore',
                     style: TextStyle(
@@ -169,7 +170,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
                 onTap: () {
                   Navigator.pop(context);
                 },
-              ),
+              ),*/
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               ),
@@ -630,7 +631,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
           String planid =
               Provider.of<GlobalState>(context, listen: false).planid;
           final String apiUrl =
-              'http://192.168.1.4:3000/api/oneplan/$planid/groupdayplan';
+              'http://192.168.1.11:3000/api/oneplan/$planid/groupdayplan';
 
           final formattedDate =
               "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
@@ -661,6 +662,9 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
             // Handle errors
             print(
                 'Failed to add group event. Status code: ${response.statusCode}');
+                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to add group event.'),
+      ));
           }
         } catch (error) {
           // Handle network errors
@@ -688,7 +692,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
 
     String planid = Provider.of<GlobalState>(context, listen: false).planid;
     String userid = Provider.of<GlobalState>(context, listen: false).id;
-    String apiUrl = 'http://192.168.1.16:3000/api/$planid/personalplan/$userid';
+    String apiUrl = 'http://192.168.1.11:3000/api/$planid/personalplan/$userid';
 
     try {
       print(userid + '  .  ' + planid + 'in personal');
@@ -708,7 +712,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
       );
 
       if (response.statusCode == 201) {
-        print('Personal event added successfully');
+        print('Personal event added successfully to'+planid);
         // Refresh the calendar events after adding a new event
         _fetchEventsFromBackend();
       } else {
@@ -820,7 +824,7 @@ class _MyCalendarPageState extends State<MyCalendarPage> {
 
   Future<void> _fetchEventsFromBackend() async {
     final String baseUrl =
-        'http://192.168.1.4:3000/api'; // Replace with your actual API base URL
+        'http://192.168.1.11:3000/api'; // Replace with your actual API base URL
     final String planId =
         Provider.of<GlobalState>(context, listen: false).planid;
     final String userId = Provider.of<GlobalState>(context, listen: false).id;

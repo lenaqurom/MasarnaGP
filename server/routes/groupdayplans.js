@@ -8,15 +8,11 @@ const mongoose = require('mongoose');
 router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
   try {
     const planId = req.params.planId;
-
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
       console.log('plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      return res.status(404).json({ error: 'plan not found' });
     }
-
-    // Extract the date from the request body
     const { date } = req.body;
 
     const existingGroupDayPlan = existingPlan.groupdayplans.find(
@@ -24,12 +20,11 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
     );
 
     if (existingGroupDayPlan) {
-      return res.status(400).json({ error: 'Group day plan already exists for this date' });
+      return res.status(400).json({ error: 'group day plan already exists for this date' });
     }
 
-    // Create a new group day plan with the provided date and empty sections
     const groupDayPlan = {
-      date: new Date(date), // Store as a Date object
+      date: new Date(date), 
       sections: [
         { name: 'eateries', poll: { options: [] }, comments: [] },
         { name: 'flights', poll: { options: [] }, comments: [] },
@@ -38,11 +33,9 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
       ],
     };
 
-    // Add the new group day plan to the existing plan
     existingPlan.groupdayplans.push(groupDayPlan);
     await existingPlan.save();
 
-   // const currentTime = new Date();
     const newEvent = {
       type: 'group',
       sectionname: '',
@@ -55,33 +48,28 @@ router.post('/oneplan/:planId/groupdayplan', async (req, res) => {
       endtime: groupDayPlan.date,
     };
 
-    // Iterate through each member's calendar and add the new event
     existingPlan.members.forEach((member) => {
       const memberCalendar = existingPlan.calendars.find(
         (cal) => cal.user.toString() === member.user.toString()
       );
 
       if (!memberCalendar) {
-        // If the member's calendar doesn't exist, create it
         existingPlan.calendars.push({
           user: member.user,
           calendarevents: [],
         });
       }
 
-      // Find the user's calendar again (either existing or newly created)
       const updatedMemberCalendar = existingPlan.calendars.find(
         (cal) => cal.user.toString() === member.user.toString()
       );
 
-      // Add the new event to the member's calendar
       updatedMemberCalendar.calendarevents.push(newEvent);
     });
 
-    // Save the updated plan
     await existingPlan.save();
 
-    res.status(201).json({ message: 'Group day plan added successfully', plan: groupDayPlan });
+    res.status(201).json({ message: 'group day plan added successfully', plan: groupDayPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -98,31 +86,27 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     const { name, starttime, endtime, price, date } = req.body;
     const { longitude, latitude } = req.body.location;
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
       console.log('plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
       console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
-    // Parse starttime and endtime to Date objects
     const parsedStartTime = new Date(`${date}T${starttime}:00.000Z`);
     const parsedEndTime = new Date(`${date}T${endtime}:00.000Z`);
 
-    // Add the poll option
     targetSection.poll.options.push({
       name: name,
       date: new Date(date),
@@ -135,7 +119,7 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
 
     await existingPlan.save();
 
-    res.status(201).json({ message: 'Poll option added successfully', plan: existingPlan });
+    res.status(201).json({ message: 'poll option added successfully', plan: existingPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -150,34 +134,30 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
   //  const optionId = req.params.optionId;
  //   const { newOptionName } = req.body;
 
-    // Check if the plan exists
    // const existingPlan = await Plan.findById(planId);
   //  if (!existingPlan) {
-    //  console.log('Plan not found');
-     // return res.status(404).json({ error: 'Plan not found' });
+    //  console.log('plan not found');
+     // return res.status(404).json({ error: 'plan not found' });
    // }
 
-    // Find the section within the plan
    // const targetSection = existingPlan.sections.find((section) => section.name === sectionName);
    // if (!targetSection) {
- //     console.log('Section not found');
-   //   return res.status(404).json({ error: 'Section not found' });
+ //     console.log('section not found');
+   //   return res.status(404).json({ error: 'section not found' });
     //}
 
-    // Find the poll option within the section
    // const targetOption = targetSection.poll.options.id(optionId);
    // if (!targetOption) {
-     // console.log('Poll option not found');
-    //  return res.status(404).json({ error: 'Poll option not found' });
+     // console.log('poll option not found');
+    //  return res.status(404).json({ error: 'poll option not found' });
    // }
 
-    // Edit the poll option name
    // targetOption.name = newOptionName;
 
    // await existingPlan.save();
    // const updatedPlan = await Plan.findById(planId);
 
-   // res.status(200).json({ message: 'Poll option edited successfully', plan: updatedPlan });
+   // res.status(200).json({ message: 'poll option edited successfully', plan: updatedPlan });
  // } catch (error) {
    // console.error(error);
    // res.status(500).json({ error: 'Server error' });
@@ -190,11 +170,10 @@ router.get('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/p
     const sectionName = req.params.sectionName;
     const groupDayPlanId = req.params.groupDayPlanId;
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
@@ -203,7 +182,6 @@ router.get('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/p
       return res.status(404).json({ error: 'Group day plan not found' });
     }
  
-     // Find the section within the group day plan
      const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
      if (!targetSection) {
        console.log('Section not found');
@@ -227,7 +205,7 @@ router.get('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/p
       };
     });
 
-    // Find the winner (option with the most votes, no winner if all votes are equal)
+    // find the winner (option with the most votes, no winner if all votes are equal)
     //this should be moved to the vote request to check before adding to calendar events
    // const sortedPollOptions = [...pollOptions].sort((a, b) => b.votes - a.votes);
    // const winner = sortedPollOptions[0].votes === sortedPollOptions[1].votes ? null : sortedPollOptions[0];
@@ -247,34 +225,30 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
     const optionId = req.params.optionId;
     const groupDayPlanId = req.params.groupDayPlanId;
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
-    // Find the poll option within the section
     const targetOption = targetSection.poll.options.id(optionId);
     if (!targetOption) {
-      console.log('Poll option not found');
-      return res.status(404).json({ error: 'Poll option not found' });
+      console.log('poll option not found');
+      return res.status(404).json({ error: 'poll option not found' });
     }
 
-     // Remove the poll option from members' personal calendars
      existingPlan.members.forEach((member) => {
       const memberCalendar = existingPlan.calendars.find((cal) => cal.user.toString() === member.user.toString());
 
@@ -284,32 +258,29 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
             !(event.type === 'group' &&
             event.sectionname === targetSection.name &&
             event.date.toISOString() === targetGroupDayPlan.date.toISOString() &&
-            event.name === targetOption.name) // Adjust the condition based on your data structure
+            event.name === targetOption.name) 
         );
       }
     });
 
-    // Remove the poll option
     targetSection.poll.options.pull(targetOption);
 
     await existingPlan.save();
     const updatedPlan = await Plan.findById(planId);
 
-    res.status(200).json({ message: 'Poll option deleted successfully', plan: updatedPlan });
+    res.status(200).json({ message: 'poll option deleted successfully', plan: updatedPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Function to check for date conflicts between events
 function hasConflict(event1, event2) {
   const start1 = new Date(event1.starttime);
   const end1 = new Date(event1.endtime);
   const start2 = new Date(event2.starttime);
   const end2 = new Date(event2.endtime);
 
-  // Check if the events overlap
   return (
     (start1 <= start2 && end1 >= start2) || (start2 <= start1 && end2 >= start1)
   );
@@ -323,48 +294,40 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     const optionId = req.params.optionId;
     const groupDayPlanId = req.params.groupDayPlanId;
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
-    // Find the poll option within the section
     const targetOption = targetSection.poll.options.id(optionId);
     if (!targetOption) {
-      console.log('Poll option not found');
-      return res.status(404).json({ error: 'Poll option not found' });
+      console.log('poll option not found');
+      return res.status(404).json({ error: 'poll option not found' });
     }
 
-    // Increase the number of votes by one
     targetOption.votes += 1;
 
     await existingPlan.save();
 
 
-// Check which poll option is the winner
 const winningOption = targetSection.poll.options.reduce((winner, option) => (option.votes > winner.votes ? option : winner), targetSection.poll.options[0]);
 
-// Check if there's a clear winner (no tie)
 const isClearWinner = targetSection.poll.options.filter(option => option.votes === winningOption.votes).length === 1;
 
-// Proceed only if there's a clear winner
 if (isClearWinner) {
-      // Remove the previously winning poll option from all members' calendars if it exists for the same sectionname and date
       existingPlan.members.forEach((member) => {
         const memberCalendar = existingPlan.calendars.find((cal) => cal.user.toString() === member.user.toString());
 
@@ -379,14 +342,13 @@ if (isClearWinner) {
                 console.log('Date comparison:', event.date.toISOString(), targetGroupDayPlan.date.toISOString());
                 console.log('Section comparison:', event.sectionname, targetSection.name);
               }
-              return !shouldRemove; // Return true for items that should not be removed
+              return !shouldRemove; 
             });
         }
       });
 
       
 
-  // Create a calendarevent based on the winning option and add it to everyone's calendars
   const newEvent = {
     type: 'group',
     user: 1, // replace with actual user id
@@ -396,38 +358,33 @@ if (isClearWinner) {
     endtime: winningOption.endtime,
     location: winningOption.location,
     price: winningOption.price,
-    sectionname: targetSection.name, // Add the sectionname to the calendarevent
+    sectionname: targetSection.name, 
   };
- // Remove conflicting events and add the new event
  existingPlan.members.forEach((member) => {
   const memberCalendar = existingPlan.calendars.find((cal) => cal.user.toString() === member.user.toString());
 
   if (memberCalendar) {
-    // Remove conflicting events
     memberCalendar.calendarevents = memberCalendar.calendarevents.filter(
       (event) => !(event.type === 'group' && hasConflict(event, newEvent))
     );
 
-    // Add the new event
     memberCalendar.calendarevents.push(newEvent);
   }
 });
-  // Save the updated plan with the new calendarevent
   await existingPlan.save();
  const title=`${existingPlan.name}`;
  const text = `has new updates`;
 
-    // Iterate through all members of the plan
     existingPlan.members.forEach(async (member) => {
       const user = await User.findById(member.user);
 
       if (user) {
-        // Add the notification to the user's notifications array
-        user.notifications.push({
+        const notification = {
           title: title,
           text: text,
-          type: 'cal',
-        });
+          type: 'plan',
+        }
+                user.notifications.push(notification);
 
         if (existingPlan.image) {
           notification.image = existingPlan.image;
@@ -441,8 +398,8 @@ if (isClearWinner) {
 
 res.status(200).json({
   message: 'Vote recorded successfully',
-  votedOption: targetOption, // Include information about the voted option
-  winningOption: winningOption, // Include information about the winning option
+  votedOption: targetOption, 
+  winningOption: winningOption, 
 });
 } catch (error) {
 console.error(error);
@@ -460,36 +417,33 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
       const { text } = req.body;
       const groupDayPlanId = req.params.groupDayPlanId;
   
-      // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
   
       const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
 
       const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'user not found' });
     }
   
-      // Add the comment
       const newComment = {
         user: user._id,
-        username: user.username,  // Include the username
+        username: user.username,  
         profilepicture: user.profilepicture,
         text: text,
         replies: [],
@@ -499,7 +453,7 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
   
       await existingPlan.save();
   
-      res.status(201).json({ message: 'Comment added successfully', comments: targetSection.comments });
+      res.status(201).json({ message: 'comment added successfully', comments: targetSection.comments });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
@@ -514,42 +468,38 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     const { text, userId } = req.body;
     const groupDayPlanId = req.params.groupDayPlanId;
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
-    // Find the comment within the section
     const targetComment = targetSection.comments.id(commentId);
     if (!targetComment) {
-      console.log('Comment not found');
-      return res.status(404).json({ error: 'Comment not found' });
+      console.log('comment not found');
+      return res.status(404).json({ error: 'comment not found' });
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: 'user not found' });
     }
 
-    // Add the reply
     const newReply = {
       user: user._id,
-      username: user.username,  // Include the username
+      username: user.username,  
       profilepicture: user.profilepicture,
       text: text,
     };
@@ -559,7 +509,7 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
     await existingPlan.save();
     const updatedPlan = await Plan.findById(planId);
 
-    res.status(201).json({ message: 'Comment reply added successfully', comments: targetSection.comments });
+    res.status(201).json({ message: 'comment reply added successfully', comments: targetSection.comments });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -574,33 +524,28 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
     const groupDayPlanId = req.params.groupDayPlanId;
 
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
-    // Find the comment in the comments array
     const targetComment = targetSection.comments.id(commentId);
     if (targetComment) {
-      // Remove the comment from the comments array
       targetSection.comments.pull(commentId);
     } else {
-      // Check if the comment is a reply in any of the comments
       targetSection.comments.forEach((comment) => {
         comment.replies.pull(commentId);
       });
@@ -609,7 +554,7 @@ router.delete('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionNam
     await existingPlan.save();
     const updatedPlan = await Plan.findById(planId);
 
-    res.status(200).json({ message: 'Comment deleted successfully', plan: updatedPlan });
+    res.status(200).json({ message: 'comment deleted successfully', plan: updatedPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -625,37 +570,31 @@ router.put('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/:
     const groupDayPlanId = req.params.groupDayPlanId;
 
 
-    // Check if the plan exists
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
-      console.log('Plan not found');
-      return res.status(404).json({ error: 'Plan not found' });
+      console.log('plan not found');
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
-    // Find the section within the group day plan
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
-    // Find the comment in the comments array
     const targetComment = targetSection.comments.id(commentId);
     if (targetComment) {
-      // Edit the comment text
       targetComment.text = newText;
     } else {
-      // Check if the comment is a reply in any of the comments
       for (const comment of targetSection.comments) {
         const targetReply = comment.replies.id(commentId);
         if (targetReply) {
-          // Edit the reply text
           targetReply.text = newText;
           break;
         }
@@ -665,7 +604,7 @@ router.put('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/:
     await existingPlan.save();
     const updatedPlan = await Plan.findById(planId);
 
-    res.status(200).json({ message: 'Comment edited successfully', plan: updatedPlan });
+    res.status(200).json({ message: 'comment edited successfully', plan: updatedPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -681,19 +620,19 @@ router.get('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/c
     const existingPlan = await Plan.findById(planId);
 
     if (!existingPlan) {
-      return res.status(404).json({ error: 'Plan not found' });
+      return res.status(404).json({ error: 'plan not found' });
     }
 
     const targetGroupDayPlan = existingPlan.groupdayplans.find((groupDayPlan) => groupDayPlan._id.toString() === groupDayPlanId);
     if (!targetGroupDayPlan) {
-      console.log('Group day plan not found');
-      return res.status(404).json({ error: 'Group day plan not found' });
+      console.log('group day plan not found');
+      return res.status(404).json({ error: 'group day plan not found' });
     }
 
     const targetSection = targetGroupDayPlan.sections.find((section) => section.name === sectionName);
     if (!targetSection) {
-      console.log('Section not found');
-      return res.status(404).json({ error: 'Section not found' });
+      console.log('section not found');
+      return res.status(404).json({ error: 'section not found' });
     }
 
     const commentsWithUserDetails = await populateComments(targetSection.comments);
@@ -729,11 +668,6 @@ async function populateUserDetails(doc) {
   }
   return doc;
 }
-
-
-
-
-
 
 
 module.exports = router;

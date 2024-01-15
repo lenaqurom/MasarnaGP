@@ -27,6 +27,7 @@ class _SignupState extends State<Signup> {
     super.initState();
     Firebase.initializeApp();
   }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -35,93 +36,111 @@ class _SignupState extends State<Signup> {
     super.dispose();
   }
 
-Future<void> signUp() async {
-  final email = _emailController.text;
-  final username = _usernameController.text;
-  final password = _passwordController.text;
+  bool isGood = false;
+  bool isGood1 = false;
+  Future<void> signUp() async {
+    final email = _emailController.text;
+    final username = _usernameController.text;
+    final password = _passwordController.text;
 
-  if (_formKey.currentState!.validate()) {
-    try {
-      final response = await post(
-        Uri.parse('http://192.168.1.13:3000/api/signup'), // Replace with your backend URL
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode({
-          'email': email,
-          'username': username,
-          'password': password,
-        }),
-      );
+    if (_formKey.currentState!.validate()) {
+      try {
+        final response = await post(
+          Uri.parse(
+              'http://192.168.1.11:3000/api/signup'), // Replace with your backend URL
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode({
+            'email': email,
+            'username': username,
+            'password': password,
+          }),
+        );
 
-      if (response.statusCode == 201) {
-        // Successful registration
-        // You can navigate to a different screen or show a success message
+        if (response.statusCode == 201) {
+          isGood = true;
+          registerUser(username, email, password);
+          // Successful registration
+          // You can navigate to a different screen or show a success message
+        } else if (response.statusCode == 400) {
+          // Registration failed due to validation errors
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Registration failed: Invalid data'),
+          ));
+        } else {
+          // Registration failed for other reasons
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Registration failed. Please try again later.'),
+          ));
+        }
+      } catch (error) {
+        // Handle API request error
+        // Show an error message or perform error handling
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Registration successful'),
-        ));
-      } else if (response.statusCode == 400) {
-        // Registration failed due to validation errors
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Registration failed: Invalid data'),
-        ));
-      } else {
-        // Registration failed for other reasons
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Registration failed. Please try again later.'),
+          content: Text('An error occurred. Please try again later.'),
         ));
       }
-    } catch (error) {
-      // Handle API request error
-      // Show an error message or perform error handling
+    }
+  }
+
+  Future<void> registerUser(
+      String username, String email, String password) async {
+    try {
+      // Check if the username contains the word 'admin'
+      if (username.toLowerCase().contains('admin')) {
+        print('Username cannot contain the word "admin".');
+        // Handle accordingly, e.g., show an error message to the user.
+        return;
+      }
+
+      // Check if the email is already in use
+      final existingUser = await FirebaseAuth.instance
+          .fetchSignInMethodsForEmail(email)
+          .then((providers) => providers.isNotEmpty);
+
+      if (existingUser) {
+        print('Email is already in use.');
+        // Handle accordingly, e.g., show an error message to the user.
+        return;
+      }
+      if (password.length < 6) {
+        print('has to be 6');
+        return;
+      }
+
+      // Create user in Firebase Authentication
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // After creating the user, update their display name with the username
+      await userCredential.user?.updateProfile(displayName: username);
+
+      // Create user document in Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user?.uid)
+          .set({
+        'userId': userCredential.user?.uid,
+        'username': username,
+        'email': email,
+      });
+      isGood1 = true;
+      //
+    } catch (e) {
+      print('Error during registration: $e');
+      // Handle registration failure, e.g., show an error message to the user.
+    }
+    if (isGood && isGood1) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('An error occurred. Please try again later.'),
+        content: Text('Registration successful'),
       ));
+      Navigator.of(context).pushNamed("/login");
     }
   }
-}
-Future<void> registerUser(String username, String email, String password) async {
-  try {
-    // Check if the username contains the word 'admin'
-    if (username.toLowerCase().contains('admin')) {
-      print('Username cannot contain the word "admin".');
-      // Handle accordingly, e.g., show an error message to the user.
-      return;
-    }
-
-    // Check if the email is already in use
-    final existingUser = await FirebaseAuth.instance
-        .fetchSignInMethodsForEmail(email)
-        .then((providers) => providers.isNotEmpty);
-
-    if (existingUser) {
-      print('Email is already in use.');
-      // Handle accordingly, e.g., show an error message to the user.
-      return;
-    }
-
-    // Create user in Firebase Authentication
-    final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    // After creating the user, update their display name with the username
-    await userCredential.user?.updateProfile(displayName: username);
-
-    // Create user document in Firestore
-    await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).set({
-      'userId': userCredential.user?.uid,
-      'username': username,
-      'email': email,
-    });
-   // Navigator.of(context).pushNamed("/login");
-  } catch (e) {
-    print('Error during registration: $e');
-    // Handle registration failure, e.g., show an error message to the user.
-  }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +194,7 @@ Future<void> registerUser(String username, String email, String password) async 
                             children: [
                               InkWell(
                                 onTap: () {
-                                  Navigator.of(context).pushNamed("login");
+                                  Navigator.of(context).pushNamed("/login");
                                   setState(() {
                                     currentPageIsSignup = true;
                                   });
@@ -184,8 +203,8 @@ Future<void> registerUser(String username, String email, String password) async 
                                   "Login",
                                   style: TextStyle(
                                     color: currentPageIsSignup
-                                        ? Color.fromARGB(255, 39, 26, 99) 
-                                        : Color.fromARGB(255, 184, 13, 152), 
+                                        ? Color.fromARGB(255, 39, 26, 99)
+                                        : Color.fromARGB(255, 184, 13, 152),
                                     fontSize: 25,
                                   ),
                                 ),
@@ -204,8 +223,8 @@ Future<void> registerUser(String username, String email, String password) async 
                                   "Sign Up",
                                   style: TextStyle(
                                     color: currentPageIsSignup
-                                        ? Color.fromARGB(255, 184, 13, 152) 
-                                        : Color.fromARGB(255, 39, 26, 99), 
+                                        ? Color.fromARGB(255, 184, 13, 152)
+                                        : Color.fromARGB(255, 39, 26, 99),
                                     fontSize: 25,
                                   ),
                                 ),
@@ -242,7 +261,8 @@ Future<void> registerUser(String username, String email, String password) async 
                           child: TextFormField(
                             controller: _emailController,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
                               filled: true,
                               fillColor: Color.fromARGB(128, 255, 255, 255),
                               labelText: 'Email',
@@ -288,7 +308,8 @@ Future<void> registerUser(String username, String email, String password) async 
                           child: TextFormField(
                             controller: _usernameController,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
                               filled: true,
                               fillColor: Color.fromARGB(128, 255, 255, 255),
                               labelText: 'Username',
@@ -342,7 +363,8 @@ Future<void> registerUser(String username, String email, String password) async 
                             controller: _passwordController,
                             obscureText: !_isPasswordVisible,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 16.0),
                               filled: true,
                               fillColor: Color.fromARGB(128, 255, 255, 255),
                               labelText: 'Password',
@@ -356,7 +378,9 @@ Future<void> registerUser(String username, String email, String password) async 
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                                  _isPasswordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
                                   color: Color.fromARGB(255, 39, 26, 99),
                                 ),
                                 onPressed: () {
@@ -384,11 +408,11 @@ Future<void> registerUser(String username, String email, String password) async 
                                 ),
                                 borderRadius: BorderRadius.circular(40),
                               ),
-                              
                             ),
                             validator: (value) {
                               final minLength = 6;
-                              final hasLetter = RegExp(r'[a-zA-Z]').hasMatch(value!);
+                              final hasLetter =
+                                  RegExp(r'[a-zA-Z]').hasMatch(value!);
                               final hasDigit = RegExp(r'[0-9]').hasMatch(value);
 
                               if (value.isEmpty) {
@@ -407,44 +431,40 @@ Future<void> registerUser(String username, String email, String password) async 
                         SizedBox(
                           height: 20,
                         ),
-      Container(
-        height: 50,
-        child: ElevatedButton(
-          onPressed: () {
-                              registerUser(
-                                _usernameController.text.trim(),
-                                _emailController.text.trim(),
-                                _passwordController.text,
-                              );
-                              signUp(); 
-                            },  // Call the signUp method when the button is pressed
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: EdgeInsets.zero,
-            primary: Colors.transparent,
-          ),
-          child: Ink(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Color(0xFF004aad),
-                  Color(0xFFcb6ce6),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Container(
-              alignment: Alignment.center,
-              child: Text(
-                "Sign Up",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  letterSpacing: 1.5,
+                        Container(
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              
+                              signUp();
+                            }, // Call the signUp method when the button is pressed
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: EdgeInsets.zero,
+                              primary: Colors.transparent,
+                            ),
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xFF004aad),
+                                    Color(0xFFcb6ce6),
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: Text(
+                                  "Sign Up",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    letterSpacing: 1.5,
                                   ),
                                 ),
                               ),
@@ -463,4 +483,3 @@ Future<void> registerUser(String username, String email, String password) async 
     );
   }
 }
-

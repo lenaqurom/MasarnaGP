@@ -63,7 +63,7 @@ class _StayVotingPageState extends State<StayVotingPage> {
         Provider.of<GlobalState>(context, listen: false).planid;
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-options'; // Update with your specific API endpoint
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-options'; // Update with your specific API endpoint
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -107,11 +107,7 @@ class _StayVotingPageState extends State<StayVotingPage> {
       }
     } catch (error) {
       print('Exception during HTTP request: $error');
-      _showAwesomeDialog(
-        'Error',
-        'An unexpected error occurred. Please try again.',
-        DialogType.ERROR,
-      );
+      
     }
   }
 
@@ -127,7 +123,7 @@ class _StayVotingPageState extends State<StayVotingPage> {
         Provider.of<GlobalState>(context, listen: false).planid;
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option/$optionId/vote';
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option/$optionId/vote';
 
     try {
       final response = await http.post(Uri.parse(apiUrl));
@@ -192,7 +188,7 @@ class _StayVotingPageState extends State<StayVotingPage> {
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     // API endpoint details
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option'; // Your full URL
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option'; // Your full URL
 
     // Your backend API expects a JSON body
     final Map<String, dynamic> requestBody = {
@@ -214,8 +210,9 @@ class _StayVotingPageState extends State<StayVotingPage> {
       );
 
       if (response.statusCode == 201) {
-        // Successfully added poll option, you may want to update UI or handle success
-        setState(() {
+ Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => StayVotingPage()),
+        );        setState(() {
           votes.add(votingOption);
         });
       } else {
@@ -573,7 +570,7 @@ class _StayVotingPageState extends State<StayVotingPage> {
         Provider.of<GlobalState>(context, listen: false).planid;
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option/$optionId';
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/stays/poll-option/$optionId';
 
     try {
       final response = await http.delete(Uri.parse(apiUrl));
@@ -581,7 +578,9 @@ class _StayVotingPageState extends State<StayVotingPage> {
       if (response.statusCode == 200) {
         // Poll option deleted successfully, you may want to update UI or handle success
         print('Poll option deleted successfully');
-
+ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Poll option deleted successfully'),
+      ));
         setState(() {
           votes.removeWhere((v) => v.id == optionId);
         });

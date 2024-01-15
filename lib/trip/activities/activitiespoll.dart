@@ -105,11 +105,7 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
       }
     } catch (error) {
       print('Exception during HTTP request: $error');
-      _showAwesomeDialog(
-        'Error',
-        'An unexpected error occurred. Please try again.',
-        DialogType.ERROR,
-      );
+      
     }
   }
 
@@ -215,8 +211,9 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
       );
 
       if (response.statusCode == 201) {
-        // Successfully added poll option, you may want to update UI or handle success
-        setState(() {
+ Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => ActivitiesVotingPage()),
+        );        setState(() {
           votes.add(votingOption);
         });
         
@@ -586,7 +583,9 @@ Widget getVoteLine(int numvotes) {
     if (response.statusCode == 200) {
       // Poll option deleted successfully, you may want to update UI or handle success
       print('Poll option deleted successfully');
-
+ ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Poll option deleted successfully'),
+      ));
       setState(() {
         votes.removeWhere((v) => v.id == optionId);
       });
