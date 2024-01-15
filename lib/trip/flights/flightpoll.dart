@@ -63,7 +63,7 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
         Provider.of<GlobalState>(context, listen: false).planid;
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-options'; // Update with your specific API endpoint
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-options'; // Update with your specific API endpoint
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -107,11 +107,7 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
       }
     } catch (error) {
       print('Exception during HTTP request: $error');
-      _showAwesomeDialog(
-        'Error',
-        'An unexpected error occurred. Please try again.',
-        DialogType.ERROR,
-      );
+      
     }
   }
 
@@ -127,7 +123,7 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
         Provider.of<GlobalState>(context, listen: false).planid;
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-option/$optionId/vote';
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-option/$optionId/vote';
 
     try {
       final response = await http.post(Uri.parse(apiUrl));
@@ -192,7 +188,7 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     // API endpoint details
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-option'; // Your full URL
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-option'; // Your full URL
 
     // Your backend API expects a JSON body
     final Map<String, dynamic> requestBody = {
@@ -214,7 +210,9 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
       );
 
       if (response.statusCode == 201) {
-        // Successfully added poll option, you may want to update UI or handle success
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => FlightVotingPage()),
+        );
         setState(() {
           votes.add(votingOption);
         });
@@ -573,7 +571,7 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
         Provider.of<GlobalState>(context, listen: false).planid;
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid;
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-option/$optionId';
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/flights/poll-option/$optionId';
 
     try {
       final response = await http.delete(Uri.parse(apiUrl));
@@ -581,6 +579,9 @@ class _FlightVotingPageState extends State<FlightVotingPage> {
       if (response.statusCode == 200) {
         // Poll option deleted successfully, you may want to update UI or handle success
         print('Poll option deleted successfully');
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Poll option deleted successfully'),
+      ));
 
         setState(() {
           votes.removeWhere((v) => v.id == optionId);

@@ -35,7 +35,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
 
   Future<void> fetchFriendsData() async {
     String id = Provider.of<GlobalState>(context, listen: false).id;
-    final url = 'http://192.168.1.4:3000/api/friendslist/$id';
+    final url = 'http://192.168.1.11:3000/api/friendslist/$id';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -57,7 +57,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
 
    Future<void> fetchFriendreqsData() async {
     String id = Provider.of<GlobalState>(context, listen: false).id;
-    final url = 'http://192.168.1.4:3000/api/requests/$id';
+    final url = 'http://192.168.1.11:3000/api/requests/$id';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -228,7 +228,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
     try {
         print(id + '----' + requestList[index].id);
         final response = await http.post(
-          Uri.parse('http://192.168.1.4:3000/api/deleterequest/senderId'),
+          Uri.parse('http://192.168.1.11:3000/api/deleterequest/senderId'),
           headers: {
             'Content-Type':
                 'application/json', // Add any other required headers
@@ -240,6 +240,9 @@ class _FriendsListPageState extends State<FriendsListPage> {
         );
         if (response.statusCode == 200) {
           print('deleted successfully');
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Deleted successfully'),
+        ));
            setState(() {
               friendRequests.remove(requestList[index]);
               filteredRequestsList.remove(requestList[index]);
@@ -285,7 +288,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
         try {
         print(id + '----' + friendList[index].id);
         final response = await http.post(
-          Uri.parse('http://192.168.1.4:3000/api/unfriend'),
+          Uri.parse('http://192.168.1.11:3000/api/unfriend'),
           headers: {
             'Content-Type':
                 'application/json', // Add any other required headers
@@ -297,6 +300,9 @@ class _FriendsListPageState extends State<FriendsListPage> {
         );
         if (response.statusCode == 200) {
           print('unfriended successfully');
+           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Unfriended successfully'),
+        ));
           setState(() {
           unfriendedUsers.add(friendList[index]);
         });
@@ -338,7 +344,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
     try {
         print('in friend');
         final response = await http.post(
-          Uri.parse('http://192.168.1.4:3000/api/friend'),
+          Uri.parse('http://192.168.1.11:3000/api/friend'),
           headers: {
             'Content-Type':
                 'application/json', // Add any other required headers
@@ -411,7 +417,7 @@ class FriendListItem extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 40.0,
-              backgroundImage: NetworkImage('http://192.168.1.4:3000/' +
+              backgroundImage: NetworkImage('http://192.168.1.11:3000/' +
                   friend.imageUrl.replaceAll('\\', '/')),
             ),
             SizedBox(width: 16.0),
@@ -486,7 +492,7 @@ class _RequestListItemState extends State<RequestListItem> {
           children: [
             CircleAvatar(
               radius: 40.0,
-              backgroundImage: NetworkImage('http://192.168.1.4:3000/' +
+              backgroundImage: NetworkImage('http://192.168.1.11:3000/' +
                    widget.request.imageUrl.replaceAll('\\', '/')),),
             
             SizedBox(width: 16.0),
@@ -553,19 +559,13 @@ class _RequestListItemState extends State<RequestListItem> {
   }
 
   void _acceptRequest() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text("Request accepted"),
-        duration: Duration(seconds: 2),
-      ),
-    );
+   
 
     setState(() {
       requestAccepted = true;
     });
 
-    Future.delayed(Duration(seconds: 2), () {
-     // widget.onDelete();
+   // Future.delayed(Duration(seconds: 1), () {
 
       if (requestAccepted) {
         widget.onAccept(widget.request);
@@ -574,6 +574,6 @@ class _RequestListItemState extends State<RequestListItem> {
           requestAccepted = false;
         });
       }
-    });
+   // });
   }
 }

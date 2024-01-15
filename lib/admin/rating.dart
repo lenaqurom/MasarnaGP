@@ -34,7 +34,7 @@ class _RatingPageState extends State<RatingPage> {
     final String id = //'655e701ae784f2d47cd02151';
      Provider.of<GlobalState>(context, listen: false).id;
 
-    String apiUrl = 'http://172.19.46.78:3000/api/rate';
+    String apiUrl = 'http://192.168.1.11:3000/api/rate';
     print(
         'rating is:' + _appRating.toString() + '' + 'comment is:' + _comments);
     try {

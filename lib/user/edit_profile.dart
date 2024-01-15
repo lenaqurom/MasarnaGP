@@ -63,6 +63,8 @@ class _EditProfileState extends State<EditProfile> {
       // Print the response for debugging
       print('Response: ${response.statusCode}');
       print('Response Body: ${await response.stream.bytesToString()}');
+      Navigator.pushReplacementNamed(context, "/profilescreen");
+
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
@@ -281,7 +283,6 @@ class _EditProfileState extends State<EditProfile> {
                 child: ElevatedButton(
                   onPressed: () {
                     updateProfile();
-                    Navigator.pushReplacementNamed(context, "/profilescreen");
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(

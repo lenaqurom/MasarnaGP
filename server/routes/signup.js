@@ -3,36 +3,34 @@ const router = express.Router();
 const User = require('../models/user');
 const FriendsList = require('../models/friendslist');
 
-// Route for user signup
 
 
 router.post('/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Validation: Check if the username, email, or password are null or empty
     if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Username, email, and password are required' });
+      return res.status(400).json({ error: 'username, email, and password are required' });
     }
-
-    // Validation: Check if the username contains 'admin'
     if (username.toLowerCase().includes('admin')) {
-      return res.status(400).json({ error: 'Username cannot contain the word "admin"' });
+      return res.status(400).json({ error: 'username cannot contain the word "admin"' });
     }
 
-    // Validation: Check if the username or email already exists
+    if (password.length<6) {
+      return res.status(400).json({ error: 'password must be at least 6 characters' });
+    }
+
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
     if (existingUser) {
-      return res.status(400).json({ error: 'Username or email already in use' });
+      return res.status(400).json({ error: 'username or email already in use' });
     }
 
-    // Create a new user in the database
     const newUser = new User({
       username,
       email,
       password,
-      name: '', // Set to an empty string by default
-      profilepicture: '', // Set to an empty string by default
+      name: '', 
+      profilepicture: '', 
     });
     await newUser.save();
 
@@ -42,10 +40,8 @@ router.post('/signup', async (req, res) => {
     });
     await usersfl.save();
 
-    // Respond with a success message or user information
-    res.status(201).json({ message: 'User registered successfully', user: newUser, list: usersfl });
+    res.status(201).json({ message: 'user registered successfully', user: newUser, list: usersfl });
   } catch (error) {
-    // Handle any errors, such as database errors
     res.status(500).json({ error: 'Server error' });
   }
 });

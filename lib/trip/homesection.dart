@@ -66,7 +66,7 @@ class _SectionsPageState extends State<SectionsPage>
   Future<List<Map<String, dynamic>>> fetchStaysData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/getstays'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getstays'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -79,7 +79,7 @@ class _SectionsPageState extends State<SectionsPage>
   Future<List<Map<String, dynamic>>> fetchEateriesData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/geteateries'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/geteateries'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -92,7 +92,7 @@ class _SectionsPageState extends State<SectionsPage>
   Future<List<Map<String, dynamic>>> fetchFlightsData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/getflights'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getflights'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -104,7 +104,7 @@ class _SectionsPageState extends State<SectionsPage>
 
   Future<List<Map<String, dynamic>>> fetchActivitiesData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/getactivities'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getactivities'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -150,7 +150,7 @@ class _SectionsPageState extends State<SectionsPage>
         Provider.of<GlobalState>(context, listen: false).selectedFormattedDate;
     print('glo: $daTe');
     final String apiUrl =
-        'http://192.168.1.4:3000/api/oneplan/$planId/groupdayplan/$groupdayplanId/section/$sectionNamee/poll-option';
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$groupdayplanId/section/$sectionNamee/poll-option';
 
     final Map<String, dynamic> requestBody = {
       'date': daTe,
@@ -535,7 +535,7 @@ class _SectionsPageState extends State<SectionsPage>
                                 }
                                 final response = await http.post(
                                   Uri.parse(
-                                      'http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+                                      'http://192.168.1.11:3000/api/$reportwhat/$cardId'),
                                   headers: {
                                     'Content-Length':
                                         '0', // Add any other required headers
@@ -801,13 +801,16 @@ class _SectionsPageState extends State<SectionsPage>
               reportwhat = 'reportstay';
             }
             final response = await http.post(
-              Uri.parse('http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+              Uri.parse('http://192.168.1.11:3000/api/$reportwhat/$cardId'),
               headers: {
                 'Content-Length': '0', // Add any other required headers
               },
             );
             if (response.statusCode == 200) {
               print('reported sugg successfully');
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Reported successfully'),
+        ));
             }
           } catch (error) {
             print('Error reporting: $error');
@@ -941,7 +944,7 @@ class _SectionsPageState extends State<SectionsPage>
       future: fetchFlightsData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -986,7 +989,7 @@ class _SectionsPageState extends State<SectionsPage>
       future: fetchStaysData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -1028,7 +1031,7 @@ class _SectionsPageState extends State<SectionsPage>
       future: fetchEateriesData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -1070,8 +1073,8 @@ class _SectionsPageState extends State<SectionsPage>
         title: activity['name'] ?? '',
         cardId: activity['_id'].toString() ?? '',
         description: activity['description'] ?? '',
-        latitude: activity['location'][0] ?? 0.0,
-        longitude: activity['location'][1] ?? 0.0,
+        latitude: activity['location'][0].toDouble() ?? 0.0,
+        longitude: activity['location'][1].toDouble() ?? 0.0,
         address: activity['address'] ?? 'Antalya',
         onTap: () {
           // Handle tap for the activity
@@ -1087,7 +1090,7 @@ class _SectionsPageState extends State<SectionsPage>
         future: fetchActivitiesData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

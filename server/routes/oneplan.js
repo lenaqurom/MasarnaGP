@@ -20,11 +20,10 @@ router.post('/oneplan', upload.single('image'), async (req, res) => {
       imagePath = req.file.path.replace(/\\/g, '/');
     }
 
-    // Fetch user details from the User model
     const user = await User.findById(userid);
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: 'user not found' });
     }
 
     const newPlan = new Plan({
@@ -49,7 +48,7 @@ router.post('/oneplan', upload.single('image'), async (req, res) => {
       })
       .exec();
 
-    res.status(201).json({ message: 'Plan added successfully', plan: populatedPlan });
+    res.status(201).json({ message: 'plan added successfully', plan: populatedPlan });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
@@ -65,12 +64,12 @@ router.delete('/oneplan/:planid', async (req, res) => {
   
       const existingPlan = await Plan.findById(planid);
       if (!existingPlan) {
-        return res.status(404).json({ error: 'Plan not found' });
+        return res.status(404).json({ error: 'plan not found' });
       }
   
       await Plan.findByIdAndDelete(planid);
   
-      res.status(200).json({ message: 'Plan deleted successfully' });
+      res.status(200).json({ message: 'plan deleted successfully' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
@@ -85,7 +84,7 @@ router.delete('/oneplan/:planid', async (req, res) => {
   
       const existingPlan = await Plan.findById(planid);
       if (!existingPlan) {
-        return res.status(404).json({ error: 'Plan not found' });
+        return res.status(404).json({ error: 'plan not found' });
       }
   
       existingPlan.name = name;
@@ -99,7 +98,7 @@ router.delete('/oneplan/:planid', async (req, res) => {
   
       await existingPlan.save();
   
-      res.status(200).json({ message: 'Plan updated successfully', plan: existingPlan });
+      res.status(200).json({ message: 'plan updated successfully', plan: existingPlan });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
@@ -110,14 +109,11 @@ router.delete('/oneplan/:planid', async (req, res) => {
   router.get('/userplans/:userid', async (req, res) => {
     try {
       const userid = req.params.userid;
-  
-      // Check if the user exists
-      const user = await User.findById(userid);
+        const user = await User.findById(userid);
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: 'user not found' });
       }
   
-      // Fetch all plans associated with the user
       const userPlans = await Plan.find({ 'members.user': userid });
   
       res.status(200).json({ plans: userPlans });
@@ -127,7 +123,4 @@ router.delete('/oneplan/:planid', async (req, res) => {
     }
   });
   
-  
-  
-
 module.exports = router;

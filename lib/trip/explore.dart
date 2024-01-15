@@ -62,7 +62,7 @@ class _ExplorePageState extends State<ExplorePage>
   Future<List<Map<String, dynamic>>> fetchStaysData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/getstays'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getstays'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -75,7 +75,7 @@ class _ExplorePageState extends State<ExplorePage>
   Future<List<Map<String, dynamic>>> fetchEateriesData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/geteateries'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/geteateries'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -88,7 +88,7 @@ class _ExplorePageState extends State<ExplorePage>
   Future<List<Map<String, dynamic>>> fetchFlightsData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.4:3000/api/getflights'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getflights'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -100,7 +100,7 @@ class _ExplorePageState extends State<ExplorePage>
 
   Future<List<Map<String, dynamic>>> fetchActivitiesData() async {
     final response = await http
-        .get(Uri.parse('http://192.168.1.4:3000/api/getactivities'));
+        .get(Uri.parse('http://192.168.1.11:3000/api/getactivities'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -144,7 +144,7 @@ class _ExplorePageState extends State<ExplorePage>
     String userId = Provider.of<GlobalState>(context, listen: false).id;
 
     final String apiUrl =
-        'http://192.168.1.4:3000/api/$planId/personalplan/$userId';
+        'http://192.168.1.11:3000/api/$planId/personalplan/$userId';
 
     final Map<String, dynamic> requestBody = {
       'date': formatDateForAPI(selectedDate),
@@ -166,6 +166,9 @@ class _ExplorePageState extends State<ExplorePage>
 
       if (response.statusCode == 201) {
         print('bravo in explore');
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Personal event addded successfully'),
+      ));
       } else {
         // Handle error, maybe show an error dialog or log the error
         print('Error response: ${response.statusCode}');
@@ -247,7 +250,9 @@ class _ExplorePageState extends State<ExplorePage>
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                    Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => MyCalendarPage()));
+           
                     },
                     icon: Icon(
                       Icons.arrow_back_ios_new,
@@ -410,7 +415,7 @@ class _ExplorePageState extends State<ExplorePage>
                                 }
                                 final response = await http.post(
                                   Uri.parse(
-                                      'http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+                                      'http://192.168.1.11:3000/api/$reportwhat/$cardId'),
                                   headers: {
                                     'Content-Length':
                                         '0', // Add any other required headers
@@ -645,13 +650,16 @@ class _ExplorePageState extends State<ExplorePage>
               reportwhat = 'reportstay';
             }
             final response = await http.post(
-              Uri.parse('http://192.168.1.4:3000/api/$reportwhat/$cardId'),
+              Uri.parse('http://192.168.1.11:3000/api/$reportwhat/$cardId'),
               headers: {
                 'Content-Length': '0', // Add any other required headers
               },
             );
             if (response.statusCode == 200) {
               print('reported sugg successfully');
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('reported suggestion successfully'),
+      ));
             }
           } catch (error) {
             print('Error reporting: $error');
@@ -772,7 +780,7 @@ class _ExplorePageState extends State<ExplorePage>
       future: fetchFlightsData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -819,7 +827,7 @@ class _ExplorePageState extends State<ExplorePage>
       future: fetchStaysData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -861,7 +869,7 @@ class _ExplorePageState extends State<ExplorePage>
       future: fetchEateriesData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -903,8 +911,8 @@ class _ExplorePageState extends State<ExplorePage>
         title: activity['name'] ?? '',
         cardId: activity['_id'].toString() ?? '',
         description: activity['description'] ?? '',
-        latitude: activity['location'][0] ?? 0.0,
-        longitude: activity['location'][1] ?? 0.0,
+        latitude: activity['location'][0].toDouble() ?? 0.0,
+        longitude: activity['location'][1].toDouble() ?? 0.0,
         address: activity['address'] ?? 'Antalya',
         onTap: () {
           // Handle tap for the activity
@@ -920,7 +928,7 @@ class _ExplorePageState extends State<ExplorePage>
         future: fetchActivitiesData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

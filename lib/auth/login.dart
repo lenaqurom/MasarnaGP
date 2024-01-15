@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:masarna/admin/adminNotifs.dart';
+import 'package:masarna/admin/analytics.dart';
 import 'package:masarna/admin/externalManage.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/calender/calendar.dart';
@@ -36,7 +37,7 @@ class _LoginState extends State<Login> {
   final TextEditingController _usernameOrEmailController =
       TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final apiService = ApiService('http://192.168.1.16:3000/api');
+  final apiService = ApiService('http://192.168.1.13:3000/api');
 
   @override
   void initState() {
@@ -67,7 +68,7 @@ class _LoginState extends State<Login> {
       }
 
       final response = await post(
-        Uri.parse('http://192.168.1.6:3000/api/login'),
+        Uri.parse('http://192.168.1.11:3000/api/login'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -81,7 +82,7 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         Map<String, dynamic> userData = json.decode(response.body)["user"];
         String id = userData["_id"];
-         
+
         if (email.isNotEmpty) {
           globalState.addToState(email: email, id: id);
         }
@@ -89,19 +90,21 @@ class _LoginState extends State<Login> {
           globalState.addToState(username: username, id: id);
         }
 
-        if(id=='65941707201100b4af08d8ea'){
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => AdminNotifs(selectedIndex: 2,)));
-            }
-            else{
-         Navigator.pushNamed(context, '/planning');}
+        if (username == 'admin') {
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AdminNotifs(selectedIndex: 2,
+                        
+                      )));
+        } else {
+          Navigator.pushNamed(context, '/home');
+        }
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login successful'),
         ));
         yalafirebase = true;
-        
-      } 
-      else if (response.statusCode == 401) {
+      } else if (response.statusCode == 401) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login failed: Incorrect data'),
         ));
@@ -111,12 +114,10 @@ class _LoginState extends State<Login> {
         ));
       }
     } catch (error) {
-     
       print("Error: $error");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('An error occurred. Please try again later.'),
       ));
-     
     }
   }
 
@@ -142,7 +143,6 @@ class _LoginState extends State<Login> {
 
       // Sign in with the credential
       await FirebaseAuth.instance.signInWithCredential(credential);
-     
     } catch (e) {
       print("Error during login: $e");
     }
@@ -243,7 +243,7 @@ class _LoginState extends State<Login> {
                               ),
                               InkWell(
                                 onTap: () {
-                                  Navigator.of(context).pushNamed("signup");
+                                  Navigator.of(context).pushNamed("/signup");
                                   setState(() {
                                     currentPageIsLogin = false;
                                   });

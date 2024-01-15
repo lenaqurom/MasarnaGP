@@ -5,7 +5,6 @@ const puppeteer = require('puppeteer');
 
 router.get('/flights', async (req, res) => {
   try {
-    
     const externalAPIInstance = new ExternalAPI();
     const browser = await puppeteer.launch({ headless: 'new' });
     const page = await browser.newPage();
@@ -75,7 +74,7 @@ router.get('/flights', async (req, res) => {
       externalAPIInstance.flights = savedFlights;
       await externalAPIInstance.save();
 
-      res.json({ message: 'Flight information scraped and saved successfully!', savedFlights });
+      res.json({ message: 'flight information scraped and saved successfully!', savedFlights });
     } finally {
       await browser.close();
     }
@@ -130,7 +129,7 @@ router.get('/hotels', async (req, res) => {
       externalAPIInstance.stays = savedHotels;
       await externalAPIInstance.save();
 
-      res.json({ message: 'Hotel information scraped and saved successfully!', savedHotels });
+      res.json({ message: 'hotel information scraped and saved successfully!', savedHotels });
     } finally {
       await browser.close();
     }
@@ -178,8 +177,6 @@ router.get('/nightlifeactivities', async (req, res) => {
           const imageElement = element.querySelector('.resp-image');
           const image = imageElement ? imageElement.getAttribute('data-src-mobile') : null;
 
-
-
           const addElement = element.querySelector('.info-bullet-wrap p strong');
 
 if (addElement && addElement.textContent.includes('Location:')) {
@@ -201,7 +198,7 @@ else{
       externalAPIInstance.activities = savedActivities;
       await externalAPIInstance.save();
 
-      res.json({ message: 'Activity information scraped and saved successfully!', savedActivities });
+      res.json({ message: 'activity information scraped and saved successfully!', savedActivities });
     } finally {
       await browser.close();
     }
@@ -260,7 +257,7 @@ router.get('/sightseeingactivities', async (req, res) => {
       externalAPIInstance.activities = savedActivities;
       await externalAPIInstance.save();
 
-      res.json({ message: 'Activity information scraped and saved successfully!', savedActivities });
+      res.json({ message: 'activity information scraped and saved successfully!', savedActivities });
     } finally {
       await browser.close();
     }
@@ -318,7 +315,7 @@ router.get('/shoppingactivities', async (req, res) => {
       externalAPIInstance.activities = savedActivities;
       await externalAPIInstance.save();
 
-      res.json({ message: 'Activity information scraped and saved successfully!', savedActivities });
+      res.json({ message: 'activity information scraped and saved successfully!', savedActivities });
     } finally {
       await browser.close();
     }
@@ -376,7 +373,7 @@ router.get('/eateries', async (req, res) => {
       externalAPIInstance.eateries = savedEateries;
       await externalAPIInstance.save();
 
-      res.json({ message: 'Eatery information scraped and saved successfully!', savedEateries });
+      res.json({ message: 'eatery information scraped and saved successfully!', savedEateries });
     } finally {
       await browser.close();
     }
@@ -393,7 +390,7 @@ router.get('/getflights', async (req, res) => {
     const flights = await Flight.find();
     res.json(flights);
   } catch (error) {
-    console.error('Error fetching flights:', error);
+    console.error('error fetching flights:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -403,7 +400,7 @@ router.get('/getstays', async (req, res) => {
     const stays = await Stay.find();
     res.json(stays);
   } catch (error) {
-    console.error('Error fetching stays:', error);
+    console.error('error fetching stays:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -413,7 +410,7 @@ router.get('/geteateries', async (req, res) => {
     const eateries = await Eatery.find();
     res.json(eateries);
   } catch (error) {
-    console.error('Error fetching eateries:', error);
+    console.error('error fetching eateries:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
@@ -423,7 +420,7 @@ router.get('/getactivities', async (req, res) => {
     const activities = await Activity.find();
     res.json(activities);
   } catch (error) {
-    console.error('Error fetching activities:', error);
+    console.error('error fetching activities:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });

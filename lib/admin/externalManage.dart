@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:masarna/admin/adminNotifs.dart';
 import 'package:masarna/globalstate.dart';
 import 'package:masarna/trip/activities/activitiescomment.dart';
 import 'package:masarna/trip/activities/activitiespoll.dart';
@@ -19,6 +20,8 @@ import 'dart:math';
 import 'package:provider/provider.dart';
 
 class ExternalManage extends StatefulWidget {
+   // const ExternalManage({super.key, required int selectedIndex});
+
   @override
   _ExternalManageState createState() => _ExternalManageState();
 }
@@ -56,7 +59,7 @@ class _ExternalManageState extends State<ExternalManage>
   Future<List<Map<String, dynamic>>> fetchStaysData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.6:3000/api/getstays'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getstays'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -69,7 +72,7 @@ class _ExternalManageState extends State<ExternalManage>
   Future<List<Map<String, dynamic>>> fetchEateriesData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.6:3000/api/geteateries'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/geteateries'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -82,7 +85,7 @@ class _ExternalManageState extends State<ExternalManage>
   Future<List<Map<String, dynamic>>> fetchFlightsData() async {
     // Replace this with your actual backend API call to fetch stays data
     final response =
-        await http.get(Uri.parse('http://192.168.1.6:3000/api/getflights'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getflights'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -94,7 +97,7 @@ class _ExternalManageState extends State<ExternalManage>
 
   Future<List<Map<String, dynamic>>> fetchActivitiesData() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.6:3000/api/getactivities'));
+        await http.get(Uri.parse('http://192.168.1.11:3000/api/getactivities'));
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(response.body);
@@ -138,7 +141,7 @@ class _ExternalManageState extends State<ExternalManage>
     String userId = Provider.of<GlobalState>(context, listen: false).id;
 
     final String apiUrl =
-        'http://192.168.1.6:3000/api/$planId/personalplan/$userId';
+        'http://192.168.1.11:3000/api/$planId/personalplan/$userId';
 
     final Map<String, dynamic> requestBody = {
       'date': formatDateForAPI(selectedDate),
@@ -241,8 +244,9 @@ class _ExternalManageState extends State<ExternalManage>
                 children: [
                   IconButton(
                     onPressed: () {
-                      Navigator.pop(context);
-                    },
+ Navigator.of(context).push(
+              MaterialPageRoute(builder: (context) => AdminNotifs(selectedIndex: 2,)),
+            );                    },
                     icon: Icon(
                       Icons.arrow_back_ios_new,
                       color: Color.fromARGB(255, 39, 26, 99),
@@ -295,17 +299,17 @@ class _ExternalManageState extends State<ExternalManage>
                       print('um');
                       try {
                         await http.get(
-                            Uri.parse('http://192.168.1.6:3000/api/flights'));
+                            Uri.parse('http://192.168.1.11:3000/api/flights'));
                         await http.get(
-                            Uri.parse('http://192.168.1.6:3000/api/hotels'));
+                            Uri.parse('http://192.168.1.11:3000/api/hotels'));
                         await http.get(Uri.parse(
-                            'http://192.168.1.6:3000/api/nightlifeactivities'));
+                            'http://192.168.1.11:3000/api/nightlifeactivities'));
                         await http.get(Uri.parse(
-                            'http://192.168.1.6:3000/api/sightseeingactivities'));
+                            'http://192.168.1.11:3000/api/sightseeingactivities'));
                         await http.get(Uri.parse(
-                            'http://192.168.1.6:3000/api/shoppingactivities'));
+                            'http://192.168.1.11:3000/api/shoppingactivities'));
                         await http.get(
-                            Uri.parse('http://192.168.1.6:3000/api/eateries'));
+                            Uri.parse('http://192.168.1.11:3000/api/eateries'));
 
                         print('API calls triggered successfully');
                         fetchActivitiesData();
@@ -313,6 +317,9 @@ class _ExternalManageState extends State<ExternalManage>
                         fetchFlightsData();
                         fetchStaysData();
                         print('fetched new ones');
+                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Refresh successful'),
+        ));
                       } catch (error) {
                         print('Error triggering API calls: $error');
                       }
@@ -645,7 +652,7 @@ class _ExternalManageState extends State<ExternalManage>
       print(cardId);
 
       final response = await http.delete(
-        Uri.parse('http://192.168.1.6:3000/api/$deletewhat/$cardId'),
+        Uri.parse('http://192.168.1.11:3000/api/$deletewhat/$cardId'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -653,6 +660,9 @@ class _ExternalManageState extends State<ExternalManage>
 
       if (response.statusCode == 200) {
         print('Card deleted successfully');
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Card deleted successfully'),
+        ));
         setState(() {
           // Update the state if necessary
         });
@@ -679,7 +689,7 @@ class _ExternalManageState extends State<ExternalManage>
       future: fetchFlightsData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -731,7 +741,7 @@ class _ExternalManageState extends State<ExternalManage>
       future: fetchStaysData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -780,7 +790,7 @@ class _ExternalManageState extends State<ExternalManage>
       future: fetchEateriesData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -855,7 +865,7 @@ class _ExternalManageState extends State<ExternalManage>
         future: fetchActivitiesData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return CircularProgressIndicator(); // Loading indicator while fetching data
+          return Text(''); // Loading indicator while fetching data
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

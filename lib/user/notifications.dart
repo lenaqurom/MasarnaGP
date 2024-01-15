@@ -57,7 +57,7 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
   Future<void> fetchNotifications() async {
     String userId = Provider.of<GlobalState>(context, listen: false).id;
     print(userId);
-    final url = 'http://192.168.1.4:3000/api/notifications/$userId';
+    final url = 'http://192.168.1.11:3000/api/notifications/$userId';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -204,7 +204,7 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
                     shape: BoxShape.circle,
                     image: DecorationImage(
                       fit: BoxFit.cover,
-                      image: NetworkImage('http://192.168.1.4:3000/' + notification.image.replaceAll('\\', '/')),
+                      image: NetworkImage('http://192.168.1.11:3000/' + notification.image.replaceAll('\\', '/')),
                     ),
                   ),
                 ),
@@ -304,7 +304,7 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
       String userId = Provider.of<GlobalState>(context, listen: false).id;
 
       final deleteUrl =
-          'http://192.168.1.4:3000/api/notifications/$userId/${notification.id}';
+          'http://192.168.1.11:3000/api/notifications/$userId/${notification.id}';
 
       // Make the DELETE request
       final response = await http.delete(Uri.parse(deleteUrl));
