@@ -57,6 +57,8 @@ class _HomeState extends State<Home> {
         return data
             .map((json) =>
                 User(id: json['_id'].toString(), username: json['username']))
+                          .where((user) => user.username != 'admin')
+
             .toList();
       } else {
         throw Exception('Failed to load users');

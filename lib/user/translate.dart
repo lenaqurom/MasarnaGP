@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:translator/translator.dart';
 
-void main() {
-  runApp(const MaterialApp(
-    home: MainPage(),
-  ));
-}
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -48,7 +43,7 @@ class _MainPageState extends State<MainPage> {
   void updateTranslation(String text) async {
     if (text.isEmpty) {
       setState(() {
-        translated = ''; // Set translation to empty if the input text is empty
+        translated = ''; 
       });
     } else {
       final translation =

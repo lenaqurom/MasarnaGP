@@ -25,6 +25,27 @@ router.post('/faveatery/:id', async (req, res) => {
     }
   });
 
+  router.post('/unfaveatery/:id', async (req, res) => {
+    const eateryId = req.params.id;
+  
+    try {
+      const eatery = await Eatery.findById(eateryId);
+  
+      if (!eatery) {
+        return res.status(404).json({ error: 'eatery not found' });
+      }
+  
+      eatery.favs -= 1;
+  
+      await eatery.save();
+  
+      res.json(eatery);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
   router.post('/reporteatery/:id', async (req, res) => {
     const eateryId = req.params.id;
   
@@ -74,6 +95,27 @@ router.post('/faveatery/:id', async (req, res) => {
       }
   
       stay.favs += 1;
+  
+      await stay.save();
+  
+      res.json(stay);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  router.post('/unfavstay/:id', async (req, res) => {
+    const stayId = req.params.id;
+  
+    try {
+      const stay = await Stay.findById(stayId);
+  
+      if (!stay) {
+        return res.status(404).json({ error: 'stay not found' });
+      }
+  
+      stay.favs -= 1;
   
       await stay.save();
   
@@ -140,6 +182,27 @@ router.post('/faveatery/:id', async (req, res) => {
     }
   });
 
+  router.post('/unfavflight/:id', async (req, res) => {
+    const flightId = req.params.id;
+  
+    try {
+      const flight = await Flight.findById(flightId);
+  
+      if (!flight) {
+        return res.status(404).json({ error: 'flight not found' });
+      }
+  
+      flight.favs -= 1;
+  
+      await flight.save();
+  
+      res.json(flight);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
   router.post('/reportflight/:id', async (req, res) => {
     const flightId = req.params.id;
   
@@ -186,6 +249,26 @@ router.post('/faveatery/:id', async (req, res) => {
       }
   
       activity.favs += 1;
+        await activity.save();
+  
+      res.json(activity);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+  router.post('/unfavactivity/:id', async (req, res) => {
+    const activityId = req.params.id;
+  
+    try {
+      const activity = await Activity.findById(activityId);
+  
+      if (!activity) {
+        return res.status(404).json({ error: 'activity not found' });
+      }
+  
+      activity.favs -= 1;
         await activity.save();
   
       res.json(activity);

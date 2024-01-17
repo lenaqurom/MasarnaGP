@@ -131,7 +131,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
           Uri.parse('http://192.168.1.11:3000/api/request'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json', 
           },
           body: jsonEncode({
             'userId': widget.myuserId,
@@ -144,11 +144,10 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             friendshipStatus = FriendshipStatus.requested;
           });
         } else if (response.statusCode == 400) {
-          // Friend request already sent
-          // You can handle this case as per your application's requirement
+          
           print('Friend request already sent');
         } else {
-          // Handle other error cases
+        
           print('Error sending friend request: ${response.statusCode}');
         }
       } catch (error) {
@@ -160,7 +159,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
           Uri.parse('http://192.168.1.11:3000/api/unrequest'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json', 
           },
           body: jsonEncode({
             'userId': widget.myuserId,
@@ -186,7 +185,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
           Uri.parse('http://192.168.1.11:3000/api/unfriend'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json', 
           },
           body: jsonEncode({
             'userId': widget.myuserId,
@@ -199,7 +198,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             friendshipStatus = FriendshipStatus.notFriends;
           });
         } else {
-          // Handle other error cases
+         
           print('Error sending friend request: ${response.statusCode}');
         }
       } catch (error) {
@@ -213,7 +212,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
           Uri.parse('http://192.168.1.11:3000/api/friend'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json', 
           },
           body: jsonEncode({
             'userId': widget.myuserId,
@@ -226,7 +225,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             friendshipStatus = FriendshipStatus.friends;
           });
         } else {
-          // Handle other error cases
+         
           print('Error accepting friend request: ${response}');
         }
       } catch (error) {
@@ -412,7 +411,7 @@ class _ProfileViewPageState extends State<ProfileViewPage> {
             Uri.parse('http://192.168.1.11:3000/api/reportuser/$id'),
             headers: {
             'Content-Length':
-                '0', // Add any other required headers
+                '0', 
           },
           );
           if (response.statusCode == 200) {

@@ -18,7 +18,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:masarna/admin/usersManage.dart';
-import '../api/apiservice.dart'; // Import the API service
+import '../api/apiservice.dart'; 
 //import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -98,7 +98,13 @@ class _LoginState extends State<Login> {
                         
                       )));
         } else {
-          Navigator.pushNamed(context, '/home');
+         // Navigator.pushNamed(context, '/section');
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => Planning(
+                        
+                      )));
         }
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Login successful'),
@@ -126,22 +132,18 @@ class _LoginState extends State<Login> {
     String password = _passwordController.text.trim();
 
     try {
-      // Check if the provided input is an email or username
       bool isEmail = usernameOrEmail.contains('@');
       AuthCredential credential;
 
       if (isEmail) {
-        // Login with email
         credential = EmailAuthProvider.credential(
             email: usernameOrEmail, password: password);
       } else {
-        // Login with username
         String email = await getUsernameEmail(usernameOrEmail);
         credential =
             EmailAuthProvider.credential(email: email, password: password);
       }
 
-      // Sign in with the credential
       await FirebaseAuth.instance.signInWithCredential(credential);
     } catch (e) {
       print("Error during login: $e");
@@ -150,15 +152,12 @@ class _LoginState extends State<Login> {
 
   Future<String> getUsernameEmail(String username) async {
     try {
-      // Assuming you have a Firestore collection named 'users'
       CollectionReference users =
           FirebaseFirestore.instance.collection('users');
 
-      // Query for the document with the given username
       QuerySnapshot querySnapshot =
           await users.where('username', isEqualTo: username).get();
 
-      // If a user with the provided username exists, return their email
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.get('email').toString();
       } else {
@@ -193,7 +192,6 @@ class _LoginState extends State<Login> {
       body: SingleChildScrollView(
         child: Stack(
           children: [
-            // Background Image
             Container(
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 255, 255, 255),

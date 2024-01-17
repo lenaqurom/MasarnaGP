@@ -62,7 +62,7 @@ class _ActivitiesVotingPageState extends State<ActivitiesVotingPage> {
     final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-options'; // Update with your specific API endpoint
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-options'; // Update with your specific API endpoint
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -121,8 +121,10 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
   Future<void> voteForOption(String optionId) async {
     final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
+    final String userid = Provider.of<GlobalState>(context, listen: false).id;
+
   final String apiUrl =
-      'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option/$optionId/vote';
+      'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option/$optionId/vote/$userid';
 
   try {
     final response = await http.post(Uri.parse(apiUrl));
@@ -145,8 +147,14 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
       // Handle error, maybe show an error dialog or log the error
       print('Error response: ${response.statusCode}');
       print('Error body: ${response.body}');
-      // Add your error handling logic here
-    }
+ if(response.statusCode==400){
+      _showAwesomeDialog(
+          'Error',
+          'You can only vote once per option.',
+          DialogType.ERROR,
+        );
+
+     }    }
   } catch (error) {
     // Handle exception, maybe show an error dialog or log the error
     print('Exception during HTTP request: $error');
@@ -189,7 +197,7 @@ TimeOfDay? _parseTimeOfDay(String? timeString) {
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
     // API endpoint details
     final String apiUrl =
-        'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option'; // Your full URL
+        'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option'; // Your full URL
 
     // Your backend API expects a JSON body
     final Map<String, dynamic> requestBody = {
@@ -575,7 +583,7 @@ Widget getVoteLine(int numvotes) {
     final String planId = Provider.of<GlobalState>(context, listen: false).planid; 
     final String gdpId = Provider.of<GlobalState>(context, listen: false).gdpid; 
   final String apiUrl =
-      'http://192.168.1.16:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option/$optionId';
+      'http://192.168.1.11:3000/api/oneplan/$planId/groupdayplan/$gdpId/section/activities/poll-option/$optionId';
 
   try {
     final response = await http.delete(Uri.parse(apiUrl));

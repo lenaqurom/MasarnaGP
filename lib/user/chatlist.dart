@@ -51,7 +51,7 @@ class _ChatListState extends State<ChatList> {
               await FirebaseAuth.instance.signOut();
               Navigator.of(context).pushReplacementNamed('/login');
               print(
-                  'logged out'); // Replace '/login' with your login page route
+                  'logged out'); 
             },
             child: Container(
               margin: EdgeInsets.only(left: 100.0, bottom: 7.0),
@@ -106,7 +106,6 @@ class _ChatListState extends State<ChatList> {
                 return _chatCard(
                   name: user['username'] ?? '',
                   userId: user.id,
-                  // Add other fields based on your Firestore structure
                 );
               }).toList(),
             );
@@ -118,12 +117,10 @@ class _ChatListState extends State<ChatList> {
 
   Future<List<QueryDocumentSnapshot>> _getChatUsers() async {
     try {
-      // Assuming you have a Firestore collection named 'users'
       QuerySnapshot querySnapshot =
           await FirebaseFirestore.instance.collection('users').get();
 
-      // You can filter the users based on your logic
-      // For now, let's assume you want all users except the current user
+     
       List<QueryDocumentSnapshot> users = querySnapshot.docs
           .where((user) => user.id != currentUser.uid)
           .toList();
@@ -141,8 +138,7 @@ class _ChatListState extends State<ChatList> {
       required String userId}) {
     return GestureDetector(
       onTap: () {
-        // Handle the tap event
-        // You can navigate to the chat screen or do other actions
+        
         Navigator.of(context)
             .pushNamed('/singlechat', arguments: {'userId': userId});
       },
@@ -155,7 +151,6 @@ class _ChatListState extends State<ChatList> {
               imagePath: 'images/logo4.png',
               margin: EdgeInsets.only(right: 20),
               size: 60,
-              // Add user image URL or other relevant information
             ),
             Expanded(
               child: Column(

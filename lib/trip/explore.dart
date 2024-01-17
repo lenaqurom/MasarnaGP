@@ -431,10 +431,34 @@ class _ExplorePageState extends State<ExplorePage>
                                 print('Error reporting: $error');
                               }
                             } else {
-                              print('nah');
-                          setState(() {
+                              try {
+                                String reportwhat = '';
+                                if (_getTabType() == 'Flights') {
+                                  reportwhat = 'unfavflight';
+                                } else if (_getTabType() == 'Eateries') {
+                                  reportwhat = 'unfaveatery';
+                                } else if (_getTabType() == 'Activities') {
+                                  reportwhat = 'unfavactivity';
+                                } else if (_getTabType() == 'Stays') {
+                                  reportwhat = 'unfavstay';
+                                }
+                                final response = await http.post(
+                                  Uri.parse(
+                                      'http://192.168.1.11:3000/api/$reportwhat/$cardId'),
+                                  headers: {
+                                    'Content-Length':
+                                        '0', // Add any other required headers
+                                  },
+                                );
+                                if (response.statusCode == 200) {
+                                print('nah');
+                               setState(() {
                                     favoritesMap[cardId] = !isFavorite;
                                   });
+                                }
+                              } catch (error) {
+                                print('Error reporting: $error');
+                              }
                             }
                           },
                           child: Icon(

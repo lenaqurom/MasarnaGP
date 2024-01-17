@@ -287,12 +287,13 @@ function hasConflict(event1, event2) {
 }
 
 ///here auto adding winning option done after every vote
-router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/poll-option/:optionId/vote', async (req, res) => {
+router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/poll-option/:optionId/vote/:userid', async (req, res) => {
   try {
     const planId = req.params.planId;
     const sectionName = req.params.sectionName;
     const optionId = req.params.optionId;
     const groupDayPlanId = req.params.groupDayPlanId;
+    const userid = req.params.userid;
 
     const existingPlan = await Plan.findById(planId);
     if (!existingPlan) {
@@ -318,7 +319,13 @@ router.post('/oneplan/:planId/groupdayplan/:groupDayPlanId/section/:sectionName/
       return res.status(404).json({ error: 'poll option not found' });
     }
 
-    targetOption.votes += 1;
+   if (targetOption.voters.includes(userid)) {
+    console.log('user has already voted for this option');
+    return res.status(400).json({ error: 'user has already voted for this option' });
+  }
+
+  targetOption.votes += 1;
+  targetOption.voters.push(userid);
 
     await existingPlan.save();
 

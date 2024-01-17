@@ -31,7 +31,7 @@ class NotificationModel {
       subtext: json['text'],
       image: json['image'] ?? '',
       userId:
-          json['from'] ?? "", // Adjust this based on your actual JSON structure
+          json['from'] ?? "", 
       type: json['type'],
     );
   }
@@ -50,7 +50,6 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
   void initState() {
     super.initState();
     _listKey = GlobalKey<AnimatedListState>();
-    // Fetch notifications when the page is loaded
     fetchNotifications();
   }
 
@@ -69,12 +68,10 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
             .map((item) => NotificationModel.fromJson(item))
             .toList();
 
-        // Clear existing notifications
         setState(() {
           notifications.clear();
         });
 
-        // Add new notifications with proper animation
         for (var i = 0; i < newNotifications.length; i++) {
           await Future.delayed(Duration(milliseconds: 50));
           setState(() {
@@ -241,9 +238,9 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
                     Text(
                       notification.subtext,
                       style: TextStyle(
-                        fontSize: 15, // Adjust the font size as needed
+                        fontSize: 15, 
                         color: Color.fromARGB(
-                            255, 128, 127, 127), // Adjust the color as needed
+                            255, 128, 127, 127), 
                       ),
                     ),
                     SizedBox(height: 8),
@@ -306,26 +303,21 @@ class _MyNotificationAppState extends State<MyNotificationApp> {
       final deleteUrl =
           'http://192.168.1.11:3000/api/notifications/$userId/${notification.id}';
 
-      // Make the DELETE request
+      
       final response = await http.delete(Uri.parse(deleteUrl));
 
       if (response.statusCode == 200) {
         print('Notification deleted successfully from the backend.');
 
         setState(() {
-          // Remove the notification from the local list
           notifications.remove(notification);
         });
       } else {
-        // Handle API error
         print(
             'Failed to delete notification. Status code: ${response.statusCode}');
-        // You might want to show a snackbar or some feedback to the user
       }
     } catch (e) {
-      // Handle other errors
       print('Error deleting notification: $e');
-      // You might want to show a snackbar or some feedback to the user
     }
   }
 }

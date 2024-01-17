@@ -27,6 +27,7 @@ const pollOptionSchema = new mongoose.Schema({
   },
   price: Number,
   votes: { type: Number, default: 0 },
+  voters: [String]
 });
 
 const sectionSchema = new mongoose.Schema({

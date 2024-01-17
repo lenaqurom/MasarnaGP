@@ -10,7 +10,6 @@ import 'package:masarna/user/notifications.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:masarna/globalstate.dart';
-//import 'package:masarna/trip/tripplan.dart';
 import 'package:masarna/welcome.dart';
 import 'package:masarna/auth/login.dart';
 import 'package:masarna/auth/signup.dart';
@@ -43,14 +42,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       // home: Welcome(),
       theme: ThemeData(
           primaryColor: Colors.red,
-          hintColor: Color.fromARGB(255, 255, 255, 255), // Background color
-          fontFamily: 'Dosis', // Specify your custom font
+          hintColor: Color.fromARGB(255, 255, 255, 255), 
+          fontFamily: 'Dosis', 
           buttonTheme: ButtonThemeData(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
@@ -67,19 +65,16 @@ class MyApp extends StatelessWidget {
       home: Welcome(),
       onGenerateRoute: (settings) {
         if (settings.name == '/singlechat') {
-          // Extract the userId from the arguments
           final Map<String, dynamic>? arguments =
               settings.arguments as Map<String, dynamic>?;
 
-          // Check if arguments contain userId
           final userId = arguments?['userId'] as String?;
           if (userId != null) {
             return MaterialPageRoute(
               builder: (context) => SingleChat(userId: userId),
             );
           } else {
-            // Handle error or navigate to a default screen
-            // For now, navigating to Welcome() as an example
+            
             return MaterialPageRoute(
               builder: (context) => Welcome(),
             );
@@ -87,11 +82,9 @@ class MyApp extends StatelessWidget {
         }
 
         else if (settings.name == '/profileview') {
-          // Extract the userId from the arguments
           final Map<String, dynamic>? arguments =
               settings.arguments as Map<String, dynamic>?;
 
-          // Check if arguments contain userId
           final userId = arguments?['userId'] as String?;
           final myuserId = arguments?['userId'] as String?;
           if (userId != null && myuserId != null ) {
@@ -99,8 +92,7 @@ class MyApp extends StatelessWidget {
               builder: (context) => ProfileViewPage(userId: userId, myuserId: myuserId),
             );
           } else {
-            // Handle error or navigate to a default screen
-            // For now, navigating to Welcome() as an example
+           
             return MaterialPageRoute(
               builder: (context) => Welcome(),
             );
@@ -123,12 +115,9 @@ class MyApp extends StatelessWidget {
             );
           }
         }
-
-        
-
         return MaterialPageRoute(
           builder: (context) =>
-              Welcome(), // Placeholder, replace with your actual routes
+              Welcome(), 
         );
       },
       routes: {
@@ -149,7 +138,7 @@ class MyApp extends StatelessWidget {
         "/adminnotifs" :(context) => AdminNotifs(selectedIndex: 2,),
         "/notifications" :(context) => MyNotificationApp(),
 
-        //"/explore":(context) => ExplorePage(), 
+     
          
       },
     );

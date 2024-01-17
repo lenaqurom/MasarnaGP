@@ -1,7 +1,7 @@
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  final String baseUrl; // Your backend API base URL
+  final String baseUrl;
 
   ApiService(this.baseUrl);
 
