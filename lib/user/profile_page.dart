@@ -49,7 +49,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
       final response = await ApiService('http://192.168.1.11:3000/api').getProfile(
         email, username);
-     // print("Constructed profile picture URL: $_profilePicture");
      // final globalState = Provider.of<GlobalState>(context, listen: false);
       if (response.statusCode == 200) {
         Map<String, dynamic> userData = json.decode(response.body)["user"];
@@ -66,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _profilePicture = '';
           }
 
-          print("Constructed profile picture URL: $_profilePicture");
+          print("profile picture URL: $_profilePicture");
         });
       } else {
         print("Failed to load user profile: ${response.statusCode}");
@@ -275,23 +274,23 @@ Navigator.pushReplacement(
            context, MaterialPageRoute(builder: (context) => FriendsListPage()));                        },
                         style: ElevatedButton.styleFrom(
                           primary: Color.fromARGB(213, 226, 224,
-                              243), // Set your desired button color
+                              243), 
                           onPrimary: Color.fromARGB(
-                              255, 39, 26, 99), // Set your desired text color
+                              255, 39, 26, 99),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                           padding: EdgeInsets.symmetric(
                               horizontal: 115,
-                              vertical: 16), // Adjust the padding
+                              vertical: 16), 
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize
-                              .max, // Adjust the mainAxisSize as needed
+                              .max, 
                           children: [
                             Icon(Icons.people_alt_outlined),
                             SizedBox(
-                                width: 8), // Add space between icon and text
+                                width: 8), 
                             Text('Friends'),
                           ],
                         ),
@@ -303,23 +302,23 @@ Navigator.pushReplacement(
            context, MaterialPageRoute(builder: (context) => RatingPage()));                         },
                         style: ElevatedButton.styleFrom(
                           primary: Color.fromARGB(213, 226, 224,
-                              243), // Set your desired button color
+                              243), 
                           onPrimary: Color.fromARGB(
-                              255, 39, 26, 99), // Set your desired text color
+                              255, 39, 26, 99), 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                           padding: EdgeInsets.symmetric(
                               horizontal: 115,
-                              vertical: 16), // Adjust the padding
+                              vertical: 16), 
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize
-                              .min, // Adjust the mainAxisSize as needed
+                              .min, 
                           children: [
                             Icon(Icons.star),
                             SizedBox(
-                                width: 8), // Add space between icon and text
+                                width: 8),
                             Text('Add Rating'),
                           ],
                         ),
@@ -328,7 +327,7 @@ Navigator.pushReplacement(
                       ElevatedButton(
                         onPressed: () async {
                           await FirebaseAuth.instance.signOut();
-                          // Clear the global state upon logging out
+                         
                           Provider.of<GlobalState>(context, listen: false)
                               .addToState();
                           Navigator.of(context).pushReplacementNamed('/login');
@@ -336,23 +335,23 @@ Navigator.pushReplacement(
                         },
                         style: ElevatedButton.styleFrom(
                           primary: Color.fromARGB(213, 226, 224,
-                              243), // Set your desired button color
+                              243), 
                           onPrimary: Color.fromARGB(
-                              255, 39, 26, 99), // Set your desired text color
+                              255, 39, 26, 99), 
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                           padding: EdgeInsets.symmetric(
                               horizontal: 115,
-                              vertical: 16), // Adjust the padding
+                              vertical: 16), 
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize
-                              .max, // Adjust the mainAxisSize as needed
+                              .max, 
                           children: [
                             Icon(AntDesign.logout),
                             SizedBox(
-                                width: 8), // Add space between icon and text
+                                width: 8), 
                             Text('Logout'),
                           ],
                         ),

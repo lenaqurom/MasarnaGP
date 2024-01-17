@@ -22,11 +22,9 @@ class _FriendsListPageState extends State<FriendsListPage> {
   @override
   void initState() {
     super.initState();
-    // Set the default tab to show all friends
     filterFriends('');
     fetchFriendsData();
     fetchFriendreqsData();
-    // Listen for changes in the search input
     searchControllerStream.stream.listen((query) {
       filterFriends(query);
     });
@@ -44,7 +42,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
         setState(() {
           friends =
               data.map((friendData) => Friend.fromJson(friendData)).toList();
-        filteredFriendsList = List.from(friends); // Set filteredFriendsList here
+        filteredFriendsList = List.from(friends); 
 
         });
       } else {
@@ -68,7 +66,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
               data.map((friendData) => Friend.fromJson(friendData)).toList();
         });
       } else {
-        print('Failed to load friends list');
+        print('Failed to load friend requests list');
       }
     } catch (error) {
       print('Error fetching friends list: $error');
@@ -97,7 +95,6 @@ class _FriendsListPageState extends State<FriendsListPage> {
 
   @override
   void dispose() {
-    // Close the stream controller when the widget is disposed
     searchControllerStream.close();
     super.dispose();
   }
@@ -192,7 +189,6 @@ class _FriendsListPageState extends State<FriendsListPage> {
           border: InputBorder.none,
         ),
         onChanged: (value) {
-          // Add the search input to the stream for real-time updates
           searchControllerStream.add(value);
         },
       ),
@@ -231,7 +227,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
           Uri.parse('http://192.168.1.11:3000/api/deleterequest/senderId'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json', 
           },
           body: jsonEncode({
             'userId': id,
@@ -249,7 +245,6 @@ class _FriendsListPageState extends State<FriendsListPage> {
             });
           
         } else {
-          // Handle other error cases
           print('Error deleting friend request: ${response}');
         }
       } catch (error) {
@@ -291,7 +286,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
           Uri.parse('http://192.168.1.11:3000/api/unfriend'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json',
           },
           body: jsonEncode({
             'userId': id,
@@ -307,7 +302,6 @@ class _FriendsListPageState extends State<FriendsListPage> {
           unfriendedUsers.add(friendList[index]);
         });
         } else {
-          // Handle other error cases
           print('Error unfriending: ${response.statusCode}');
         }
       } catch (error) {
@@ -321,9 +315,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
   void _onButtonPressed(bool showAll) {
     setState(() {
       showAllFriends = showAll;
-      // Clear the search field when switching between tabs
       searchController.clear();
-      // Reset the friends list based on the current tab
       filterFriends('');
     });
   }
@@ -347,7 +339,7 @@ class _FriendsListPageState extends State<FriendsListPage> {
           Uri.parse('http://192.168.1.11:3000/api/friend'),
           headers: {
             'Content-Type':
-                'application/json', // Add any other required headers
+                'application/json', 
           },
           body: jsonEncode({
             'userId': id,
@@ -372,7 +364,6 @@ class _FriendsListPageState extends State<FriendsListPage> {
     });
           
         } else {
-          // Handle other error cases
           print('Error accepting friend request: ${response}');
         }
       } catch (error) {
@@ -408,7 +399,6 @@ class FriendListItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Add logic for when the entire item is tapped
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -428,7 +418,7 @@ class FriendListItem extends StatelessWidget {
                   fontFamily: 'Montserrat',
                   fontSize: 20),
             ),
-            Spacer(), // Add Spacer widget to push PopupMenuButton to the end
+            Spacer(), 
             PopupMenuButton<String>(
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
@@ -483,7 +473,6 @@ class _RequestListItemState extends State<RequestListItem> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Add logic for when the entire item is tapped
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -507,7 +496,7 @@ class _RequestListItemState extends State<RequestListItem> {
                         fontFamily: 'Montserrat',
                         fontSize: 20),
                   ),
-                  SizedBox(height: 8.0), // Add some vertical spacing
+                  SizedBox(height: 8.0),
                   if (!requestAccepted)
                     Row(
                       children: [
@@ -526,7 +515,7 @@ class _RequestListItemState extends State<RequestListItem> {
                           ),
                         ),
                         SizedBox(
-                            width: 8.0), // Add some spacing between buttons
+                            width: 8.0), 
                         Expanded(
                           child: ElevatedButton(
                             onPressed: () {

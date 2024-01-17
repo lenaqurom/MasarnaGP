@@ -5,7 +5,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
-import '../api/apiservice.dart'; // Import the API service
+import '../api/apiservice.dart'; 
 
 class Signup extends StatefulWidget {
   const Signup({Key? key}) : super(key: key);
@@ -47,7 +47,7 @@ class _SignupState extends State<Signup> {
       try {
         final response = await post(
           Uri.parse(
-              'http://192.168.1.11:3000/api/signup'), // Replace with your backend URL
+              'http://192.168.1.11:3000/api/signup'), 
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
           },
@@ -61,22 +61,18 @@ class _SignupState extends State<Signup> {
         if (response.statusCode == 201) {
           isGood = true;
           registerUser(username, email, password);
-          // Successful registration
-          // You can navigate to a different screen or show a success message
+         
         } else if (response.statusCode == 400) {
-          // Registration failed due to validation errors
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Registration failed: Invalid data'),
           ));
         } else {
-          // Registration failed for other reasons
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Registration failed. Please try again later.'),
           ));
         }
       } catch (error) {
-        // Handle API request error
-        // Show an error message or perform error handling
+        
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('An error occurred. Please try again later.'),
         ));
@@ -87,21 +83,17 @@ class _SignupState extends State<Signup> {
   Future<void> registerUser(
       String username, String email, String password) async {
     try {
-      // Check if the username contains the word 'admin'
       if (username.toLowerCase().contains('admin')) {
         print('Username cannot contain the word "admin".');
-        // Handle accordingly, e.g., show an error message to the user.
         return;
       }
 
-      // Check if the email is already in use
       final existingUser = await FirebaseAuth.instance
           .fetchSignInMethodsForEmail(email)
           .then((providers) => providers.isNotEmpty);
 
       if (existingUser) {
         print('Email is already in use.');
-        // Handle accordingly, e.g., show an error message to the user.
         return;
       }
       if (password.length < 6) {
@@ -109,17 +101,14 @@ class _SignupState extends State<Signup> {
         return;
       }
 
-      // Create user in Firebase Authentication
       final userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // After creating the user, update their display name with the username
       await userCredential.user?.updateProfile(displayName: username);
 
-      // Create user document in Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user?.uid)
@@ -132,7 +121,6 @@ class _SignupState extends State<Signup> {
       //
     } catch (e) {
       print('Error during registration: $e');
-      // Handle registration failure, e.g., show an error message to the user.
     }
     if (isGood && isGood1) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -345,7 +333,6 @@ class _SignupState extends State<Signup> {
                               if (value!.isEmpty) {
                                 return 'Username is required';
                               }
-                              // Customize this pattern to your username validation requirements.
                               final usernamePattern = r'^[\w-]+$';
                               if (!RegExp(usernamePattern).hasMatch(value!)) {
                                 return 'Enter a valid username';
@@ -437,7 +424,7 @@ class _SignupState extends State<Signup> {
                             onPressed: () {
                               
                               signUp();
-                            }, // Call the signUp method when the button is pressed
+                            }, 
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),

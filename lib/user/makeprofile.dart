@@ -29,7 +29,6 @@ class ProfileApp extends StatelessWidget {
         '/': (context) => AdvertisingScreen(),
         '/step1': (context) => ProfileStep1(),
         '/step2':(context) => ProfileStep2()
-        // Add more steps/routes here
       },
     );
   }
@@ -470,7 +469,7 @@ class _AdvertisingScreenState extends State<AdvertisingScreen> {
       children: <Widget>[
         Expanded(
           child: Container(
-            width: 400, // Set a fixed height for the background container
+            width: 400, 
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -486,7 +485,7 @@ class _AdvertisingScreenState extends State<AdvertisingScreen> {
                 AnimatedText(
                   text: 'Continue to make your profile!',
                   fontSize: 33,
-                  fontFamily: 'DancingScript', // Use your custom font
+                  fontFamily: 'DancingScript', 
                 ),
                 SizedBox(height: 40),
                 Container(
@@ -504,7 +503,7 @@ class _AdvertisingScreenState extends State<AdvertisingScreen> {
                   ),
                   child: Center(
                     child: Image.asset(
-                      'images/logo.png', // Replace with your advertising image
+                      'images/logo.png', 
                       width: 120,
                       height: 120,
                     ),
@@ -611,7 +610,7 @@ class AnimatedText extends StatefulWidget {
   AnimatedText({
     required this.text,
     this.fontSize = 28,
-    this.fontFamily = 'Raleway', // Use your custom font
+    this.fontFamily = 'Raleway', 
   });
 
   @override
@@ -690,8 +689,8 @@ class _AnimatedButtonState extends State<AnimatedButton> {
                 fontSize: 25.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Montserrat', // Use your custom font
-                decoration: TextDecoration.none, // Remove underline
+                fontFamily: 'Montserrat', 
+                decoration: TextDecoration.none, 
               ),
             ),
           ),

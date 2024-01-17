@@ -54,13 +54,10 @@ class _EditProfileState extends State<EditProfile> {
         request.files.add(file);
         
       }
-
-      // Print the request body for debugging
       print('Request Body: ${request.fields}');
 
       var response = await request.send();
 
-      // Print the response for debugging
       print('Response: ${response.statusCode}');
       print('Response Body: ${await response.stream.bytesToString()}');
       Navigator.pushReplacementNamed(context, "/profilescreen");
@@ -107,7 +104,7 @@ class _EditProfileState extends State<EditProfile> {
     double height = MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false, // Remove back arrow button
+        automaticallyImplyLeading: false, 
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Row(
@@ -167,7 +164,7 @@ class _EditProfileState extends State<EditProfile> {
                                 ),
                                 Padding(
                                   padding: EdgeInsets.only(
-                                      right: 200), // Add padding to the left
+                                      right: 200), 
                                   child: Text(
                                     'Full Name',
                                     style: TextStyle(

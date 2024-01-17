@@ -115,7 +115,7 @@ class _SingleChatState extends State<SingleChat> {
                   color: Colors.white,
                 ),
               ),
-              if (chatUsername != null) // Check if chatUsername is not null
+              if (chatUsername != null) 
               Text(
                 '$chatUsername',
                 style: TextStyle(
@@ -124,8 +124,8 @@ class _SingleChatState extends State<SingleChat> {
                   color: Colors.white,
                 ),
               ),
-            if (chatUsername == null) // Show a loading indicator or default value
-              CircularProgressIndicator(), // Replace this with your loading indicator or default text
+            if (chatUsername == null) 
+              CircularProgressIndicator(), 
           ],
         ),
       ],
@@ -185,7 +185,7 @@ class _SingleChatState extends State<SingleChat> {
           child: Text('$message'),
         ),
       ),
-      SizedBox(width: 5), // Adjust the spacing between message and timestamp
+      SizedBox(width: 5), 
       chat == 0 || chat == 1
           ? Text(
               '$formattedTime',
