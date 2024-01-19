@@ -18,6 +18,7 @@ const calendareventsRoutes = require('./routes/calendarevents');
 const externalapiRoutes = require('./routes/externalapi');
 const notificationsRoutes = require('./routes/notifications');
 const rtooshRoutes = require('./routes/rtoosh');
+const weatherRoutes = require('./routes/weather');
 
 app.use(bodyParser.json());
 
@@ -40,6 +41,7 @@ app.use('/api', calendareventsRoutes);
 app.use('/api', externalapiRoutes);
 app.use('/api', notificationsRoutes);
 app.use('/api', rtooshRoutes);
+app.use('/api', weatherRoutes);
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`server is running on port ${port}`);
