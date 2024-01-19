@@ -18,6 +18,7 @@ import 'dart:math';
 
 import 'package:provider/provider.dart';
 
+
 class SectionsPage extends StatefulWidget {
   @override
   _SectionsPageState createState() => _SectionsPageState();
@@ -571,7 +572,7 @@ class _SectionsPageState extends State<SectionsPage>
                                   },
                                 );
                                 if (response.statusCode == 200) {
-                                print('nah');
+                                print('unfaved successfully');
                                setState(() {
                                     favoritesMap[cardId] = !isFavorite;
                                   });
